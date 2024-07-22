@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scrapeWebsite } from "@/scripts";
-import { uploadImageToCloudinary } from "@/utils/cloudinary";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { uploadImageToCloudinary } from "@/lib/cloudinary";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY as string);
 
@@ -51,7 +51,7 @@ export const POST = async (req: NextRequest) => {
           success: false,
           message: "Failed to scrape website",
         },
-        { status: 500 },
+        { status: 500 }
       );
     }
 
@@ -70,7 +70,7 @@ export const POST = async (req: NextRequest) => {
         text: imageInfo?.text,
         url: uploadResult?.secure_url,
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error: any) {
     console.error(error);
@@ -79,7 +79,7 @@ export const POST = async (req: NextRequest) => {
         success: false,
         message: error.message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 };
