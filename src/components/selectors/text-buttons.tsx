@@ -10,41 +10,52 @@ import {
 import type { SelectorItem } from "./node-selector";
 import { Button } from "../ui/button";
 
+// @ts-ignore
 export const TextButtons = () => {
   const { editor } = useEditor();
   if (!editor) return null;
   const items: SelectorItem[] = [
     {
       name: "bold",
+      // @ts-ignore
       isActive: (editor: EditorInstance) => editor.isActive("bold"),
+      // @ts-ignore
       command: (editor: EditorInstance) =>
         editor.chain().focus().toggleBold().run(),
       icon: BoldIcon,
     },
     {
       name: "italic",
+      // @ts-ignore
       isActive: (editor: EditorInstance) => editor.isActive("italic"),
+      // @ts-ignore
       command: (editor: EditorInstance) =>
         editor.chain().focus().toggleItalic().run(),
       icon: ItalicIcon,
     },
     {
       name: "underline",
+      // @ts-ignore
       isActive: (editor: EditorInstance) => editor.isActive("underline"),
+      // @ts-ignore
       command: (editor: EditorInstance) =>
         editor.chain().focus().toggleUnderline().run(),
       icon: UnderlineIcon,
     },
     {
       name: "strike",
+      // @ts-ignore
       isActive: (editor: EditorInstance) => editor.isActive("strike"),
+      // @ts-ignore
       command: (editor: EditorInstance) =>
         editor.chain().focus().toggleStrike().run(),
       icon: StrikethroughIcon,
     },
     {
       name: "code",
+      // @ts-ignore
       isActive: (editor: EditorInstance) => editor.isActive("code"),
+      // @ts-ignore
       command: (editor: EditorInstance) =>
         editor.chain().focus().toggleCode().run(),
       icon: CodeIcon,

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { scrapeWebsite } from "@/scripts";
-import { uploadImageToCloudinary } from "@/utils/cloudinary";
 
 export const POST = async (req: NextRequest) => {
   const requestBody = await req.json();
@@ -14,7 +13,7 @@ export const POST = async (req: NextRequest) => {
           success: false,
           message: "Failed to scrape website",
         },
-        { status: 500 },
+        { status: 500 }
       );
     }
     // const uploadResult = await uploadImageToCloudinary(scrapedData.buffer);
@@ -27,7 +26,7 @@ export const POST = async (req: NextRequest) => {
         buffer: scrapedData.buffer,
         base64: scrapedData.base64,
       },
-      { status: 200 },
+      { status: 200 }
     );
   } catch (error: any) {
     console.error(error);
@@ -36,7 +35,7 @@ export const POST = async (req: NextRequest) => {
         success: false,
         message: error.message,
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 };

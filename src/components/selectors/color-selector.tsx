@@ -96,7 +96,7 @@ interface ColorSelectorProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
+// @ts-ignore
 export const ColorSelector = ({ open, onOpenChange }) => {
   const { editor } = useEditor();
 

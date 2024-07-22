@@ -40,6 +40,7 @@ export const POST = async (req: NextRequest) => {
       chatId: string;
       messagesId: string;
     } = await req.json();
+    // @ts-ignore
     const text = knowledgeBaseNodes?.map((node) => node.data.text).join("\n");
     console.log("text", text);
     const lastMessage = messages[messages?.length - 1];
@@ -55,7 +56,7 @@ export const POST = async (req: NextRequest) => {
 
     const formatCoreMessage = (messages: Message[]) =>
       messages.map(
-        (msg) => ({ role: msg.role, content: msg.content }) as CoreMessage,
+        (msg) => ({ role: msg.role, content: msg.content } as CoreMessage)
       );
 
     const result = await streamText({

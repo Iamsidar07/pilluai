@@ -5,6 +5,7 @@ import React from "react";
 import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Link from "next/link";
+import { nanoid } from "nanoid";
 
 const MarkdownRenderer = ({ content }: { content: string }) => {
   return (
@@ -17,6 +18,7 @@ const MarkdownRenderer = ({ content }: { content: string }) => {
           const match = /language-(\w+)/.exec(className || "");
           console.log("match", match);
           return match ? (
+            // @ts-ignore
             <SyntaxHighlighter
               {...rest}
               PreTag="div"

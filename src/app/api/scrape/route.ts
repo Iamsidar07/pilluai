@@ -14,7 +14,7 @@ const model = genAI.getGenerativeModel({
   model: "gemini-1.5-flash-latest",
 });
 
-export const extractText = async ({
+const extractText = async ({
   base64String,
   mimeType,
 }: {
