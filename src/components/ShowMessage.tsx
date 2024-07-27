@@ -3,13 +3,13 @@ import { Message } from "ai";
 import Image from "next/image";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { Copy } from "lucide-react";
-import { useUserStore } from "@/store/userStore";
 import { useMemo } from "react";
-import { useToast } from "./ui/use-toast";
+import { toast } from "sonner";
+import useCurrentUser from "@/context/currentUser";
+
 const ShowMessage = ({ role, content }: Message) => {
-  const { user } = useUserStore();
-  const {toast} = useToast()
-  
+  const { user } = useCurrentUser();
+
   const MemoizedMarkdownRenderer = useMemo(() => {
     return <MarkdownRenderer content={content} />;
   }, [content]);
@@ -35,14 +35,12 @@ const ShowMessage = ({ role, content }: Message) => {
         )}
       </div>
       <div className="w-full pr-10 relative">
-      {MemoizedMarkdownRenderer}
+        {MemoizedMarkdownRenderer}
         <Copy
           className="absolute top-2 right-2 w-3 h-3 cursor-pointer"
           onClick={() => {
             navigator.clipboard.writeText(content);
-            toast({
-              title: "Successfully copied to clipboard"
-            })
+            toast.success("Successfully copied to clipboard");
           }}
         />
       </div>

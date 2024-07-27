@@ -1,11 +1,12 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useTransition } from "react";
 import AuthForm from "@/components/AuthForm";
-import { loginAccount } from "@/actions";
 import { useRouter } from "next/navigation";
-import { User, useUserStore } from "@/store/userStore";
-import { useMutation } from "@tanstack/react-query";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
+import useCurrentUser from "@/context/currentUser";
+import { User } from "../../../typing";
+import loginAccount from "@/actions/loginAccount";
+import loginSchema from "@/schemas/loginSchema";
 
 const fields = [
   {
@@ -21,30 +22,29 @@ const fields = [
 ];
 
 const Login = () => {
-
   const router = useRouter();
-  const { setUser, user } = useUserStore();
-  const { toast } = useToast();
+  const { setUser, user } = useCurrentUser();
+  const [isPending, startTransition] = useTransition();
 
-  const action = useMutation({
-    mutationFn: (formData: FormData) => loginAccount(formData),
-    onSuccess: ({ user }) => {
-      setUser(user as User);
-      toast({
-        title: "Successfully logged in",
-        description: "You will be redirected soon",
-      });
-      router.push("/");
-    },
-    onError: (error) => {
-      console.log("Failed to login", error);
-      toast({
-        title: "Failed to login",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  const handleLogin = (formData: FormData) => {
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const { success, error } = loginSchema.safeParse({ email, password });
+    if (!success && error) {
+      toast.error(error.message ?? "Invalid email or password");
+      return;
+    }
+    startTransition(async () => {
+      const { success, user } = await loginAccount({ email, password });
+      if (success) {
+        setUser(user as User);
+        toast.success("Successfully logged in");
+        router.push("/");
+      } else {
+        toast.error("Failed to login");
+      }
+    });
+  };
 
   useEffect(() => {
     if (user && user.uid) {
@@ -59,9 +59,9 @@ const Login = () => {
       actionText="Sign in"
       alternateText="Sign in to your account"
       alternateLink="/signup"
-      handleSubmit={action.mutate}
+      handleSubmit={handleLogin}
       googleText="Continue with Google"
-      isLoading={action.isPending}
+      isLoading={isPending}
     />
   );
 };

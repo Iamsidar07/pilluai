@@ -5,7 +5,7 @@ import { NodeProps } from "@xyflow/react";
 import ChatForm from "./ChatForm";
 import ChatMessagesList from "./ChatMessagesList";
 import DisplayChats from "./DisplayChats";
-import useChat from "./useChat";
+import useChat from "@/hooks/useChat";
 
 const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
   const {
@@ -20,13 +20,13 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
     currentChat,
     chats,
     setMessages,
-    messagesEndRef
+    messagesEndRef,
   } = useChat({
     nodeId,
   });
 
   return (
-    <div className="bg-white shadow-sm border overflow-hidden flex h-full w-full">
+    <div className="bg-white shadow-lg rounded border overflow-hidden flex h-full w-full">
       <CustomResizer color={selected ? "violet" : "transparent"} />
       <CustomHandle type="target" />
       <DisplayChats

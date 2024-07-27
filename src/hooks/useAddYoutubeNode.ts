@@ -1,18 +1,17 @@
 "use client";
 import React, { useState } from "react";
-import { useToast } from "../ui/use-toast";
 import { nanoid } from "nanoid";
-import { AppNode } from "../nodes";
 import { usePanel } from "@/context/panel";
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { isValidYoutubeUrl } from "@/lib/utils";
+import { toast } from "sonner";
+import { AppNode } from "@/components/nodes";
 
 interface Props {
   youtubeVideoUrl: string;
 }
 const useAddYoutubeNode = ({ youtubeVideoUrl }: Props) => {
-  const { toast } = useToast();
   const { addNode, updateNode } = usePanel();
   const [isYoutubeNodeLoading, setIsYoutubeNodeLoading] = useState(false);
 
@@ -34,9 +33,7 @@ const useAddYoutubeNode = ({ youtubeVideoUrl }: Props) => {
   const handleYoutubeVideoUrlSubmit = async () => {
     setIsYoutubeNodeLoading(true);
     if (!isValidYoutubeUrl(youtubeVideoUrl)) {
-      toast({
-        title: "Invalid youtube URL",
-      });
+      toast.error("Invalid youtube video URL.");
       return;
     }
     const id = nanoid();
@@ -86,11 +83,7 @@ const useAddYoutubeNode = ({ youtubeVideoUrl }: Props) => {
       updateNode({ id, type: "youtubeNode", data: { namespace } });
     } catch (error: any) {
       console.log("Something went wrong!", error);
-      toast({
-        title: "Something went wrong",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error("Something went wrong");
     } finally {
       setIsYoutubeNodeLoading(false);
     }

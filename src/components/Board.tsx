@@ -20,18 +20,36 @@ import {
 import "@xyflow/react/dist/style.css";
 import { doc, updateDoc } from "firebase/firestore";
 import { useCallback } from "react";
+import { toast } from "sonner";
 
 // Ensure that the save functions are properly debounced
 const debouncedSaveNodes = debounce(async (boardId: string, nodes: Node[]) => {
   console.log("saveNodes");
-  const boardRef = doc(db, "boards", boardId);
-  await updateDoc(boardRef, { nodes });
+  if (!boardId || !nodes || nodes.length === 0) return;
+  try {
+    const boardRef = doc(db, "boards", boardId);
+    console.log("boardRef", boardRef, nodes, boardId);
+    await updateDoc(boardRef, { nodes });
+  } catch (e) {
+    console.log(e);
+    toast.error("Failed to save nodes");
+    return;
+  }
 }, 1000);
 
 const debouncedSaveEdges = debounce(async (boardId: string, edges: Edge[]) => {
   console.log("saveEdges");
+
+  if (!boardId || !edges || edges.length === 0) return;
   const boardRef = doc(db, "boards", boardId);
-  await updateDoc(boardRef, { edges });
+  try {
+    console.log("boardRef", boardRef, edges);
+    await updateDoc(boardRef, { edges });
+  } catch (e) {
+    console.log(e);
+    toast.error("Failed to save edges");
+    return;
+  }
 }, 1000);
 
 interface BoardProps {

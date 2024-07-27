@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import React from "react";
 import { IoCreateOutline } from "react-icons/io5";
 import { Message } from "ai/react";
-import { Chat } from "./useChat";
+import { Chat } from "../../../../typing";
 
 interface DisplayChatsProps {
   handleNewChat: (title?: string) => Promise<undefined | Chat>;
@@ -41,7 +41,7 @@ const DisplayChats = ({
                 "truncate text-sm cursor-pointer text-zinc-600 hover:text-zinc-900 transition-all",
                 {
                   "font-bold": currentChat?.id === chat.id,
-                },
+                }
               )}
               onClick={() => {
                 setCurrentChat(chat);

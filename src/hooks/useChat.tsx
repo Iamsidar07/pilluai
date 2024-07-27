@@ -1,34 +1,32 @@
 "use client";
+import useCurrentUser from "@/context/currentUser";
 import { usePanel } from "@/context/panel";
 import { db } from "@/firebase";
-import { useUserStore } from "@/store/userStore";
 import { Message, useChat as useChatAI } from "ai/react";
 import {
-    addDoc,
-    arrayUnion,
-    collection,
-    doc,
-    onSnapshot,
-    query,
-    setDoc,
-    Timestamp,
-    updateDoc,
-    where,
+  addDoc,
+  arrayUnion,
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  setDoc,
+  Timestamp,
+  updateDoc,
+  where,
 } from "firebase/firestore";
 import { nanoid } from "nanoid";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-export interface Chat {
-  id: string;
-  title: string;
-  userId: string;
-  nodeId: string;
-  messagesId: string;
-  createdAt: Timestamp;
-}
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Chat } from "../../typing";
 
 const useChat = ({ nodeId }: { nodeId: string }) => {
-  const { user } = useUserStore();
+  const { user } = useCurrentUser();
   const userId = useMemo(() => user?.uid, [user?.uid]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { nodes, edges } = usePanel();
@@ -59,7 +57,7 @@ const useChat = ({ nodeId }: { nodeId: string }) => {
           "chats",
           currentChatId,
           "messages",
-          currentMessagesId,
+          currentMessagesId
         );
         const newUserMessage: Message = {
           id: nanoid(),
@@ -74,7 +72,7 @@ const useChat = ({ nodeId }: { nodeId: string }) => {
           messages: arrayUnion(...[newUserMessage, newMessage]),
         });
       },
-      [currentChat, userId, userMessageContent],
+      [currentChat, userId, userMessageContent]
     ),
   });
   const createNewMessagesCollectionItem = useCallback(
@@ -88,7 +86,7 @@ const useChat = ({ nodeId }: { nodeId: string }) => {
       });
       return docSnap.id;
     },
-    [],
+    []
   );
 
   const handleNewChat = useCallback(
@@ -100,7 +98,7 @@ const useChat = ({ nodeId }: { nodeId: string }) => {
         const newChatId = nanoid();
         const messagesId = await createNewMessagesCollectionItem(
           newChatId,
-          userId,
+          userId
         );
 
         const chatDocRef = doc(db, "chats", newChatId);
@@ -125,7 +123,7 @@ const useChat = ({ nodeId }: { nodeId: string }) => {
         console.log("failed to create chat", error);
       }
     },
-    [setInput, setMessages, createNewMessagesCollectionItem, nodeId, userId],
+    [setInput, setMessages, createNewMessagesCollectionItem, nodeId, userId]
   );
   const getMyChats = useCallback(() => {
     try {
@@ -134,7 +132,7 @@ const useChat = ({ nodeId }: { nodeId: string }) => {
       const chatsQuery = query(
         chatsCollectionRef,
         where("userId", "==", userId),
-        where("nodeId", "==", nodeId),
+        where("nodeId", "==", nodeId)
       );
 
       const unsubscribe = onSnapshot(chatsQuery, (chatsSnapshot) => {
@@ -143,7 +141,7 @@ const useChat = ({ nodeId }: { nodeId: string }) => {
             ({
               ...doc.data(),
               id: doc.id,
-            }) as Chat,
+            } as Chat)
         );
         setChats(chatsData);
         if (!(chatsData.length > 0)) {
@@ -174,7 +172,7 @@ const useChat = ({ nodeId }: { nodeId: string }) => {
 
       return unsubscribe;
     },
-    [],
+    []
   );
 
   useEffect(() => {
@@ -187,7 +185,7 @@ const useChat = ({ nodeId }: { nodeId: string }) => {
     if (currentChat?.id && currentChat?.messagesId) {
       const unsubscribe = getCurrentChatMessages(
         currentChat?.id,
-        currentChat?.messagesId,
+        currentChat?.messagesId
       );
       return () => unsubscribe();
     }
@@ -215,11 +213,11 @@ const useChat = ({ nodeId }: { nodeId: string }) => {
       const knowledgeEdges = edges.filter((edge) => edge.target === chatNodeId);
       const knowledgeBaseNodeIds = knowledgeEdges.map((edge) => edge.source);
       const knowledgeBaseNodes = nodes.filter((node) =>
-        knowledgeBaseNodeIds.includes(node.id),
+        knowledgeBaseNodeIds.includes(node.id)
       );
       return knowledgeBaseNodes;
     },
-    [edges, nodes],
+    [edges, nodes]
   );
 
   const handleSendMessage = useCallback(
@@ -307,11 +305,11 @@ const useChat = ({ nodeId }: { nodeId: string }) => {
       nodes,
       userId,
       handleNewChat,
-    ],
+    ]
   );
 
   useEffect(() => {
-    if (messagesEndRef.current) {
+    if (messagesEndRef.current && messages.length > 0) {
       messagesEndRef.current.scrollIntoView({
         behavior: "smooth",
         block: "end",

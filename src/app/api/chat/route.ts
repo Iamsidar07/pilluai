@@ -1,17 +1,7 @@
 import { NextRequest } from "next/server";
-import { CoreMessage, Message, streamText } from "ai";
+import { CoreMessage, ImagePart, Message, streamText, UserContent } from "ai";
 import { AppNode } from "@/components/nodes";
 import { google } from "@ai-sdk/google";
-import {
-  addDoc,
-  arrayUnion,
-  collection,
-  doc,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
-import { db } from "@/firebase";
-import { nanoid } from "nanoid";
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -44,54 +34,54 @@ export const POST = async (req: NextRequest) => {
     const text = knowledgeBaseNodes?.map((node) => node.data.text).join("\n");
     console.log("text", text);
     const lastMessage = messages[messages?.length - 1];
+    const imageAndWebScraperNodes = knowledgeBaseNodes.filter(
+      (node) => node.type === "imageNode" || node.type === "webScrapperNode",
+    );
+    const imagePrompt = imageAndWebScraperNodes.map((node) => {
+      if (node.type === "webScrapperNode") {
+        return {
+          type: "image",
+          image: node.data.screenshotUrl as string,
+        } as ImagePart;
+      }
+      // @ts-ignore
+      return { type: "image", image: node.data.url as string } as ImagePart;
+    });
 
-    const prompt = `
+    const prompt: UserContent = [
+      {
+        type: "text",
+        text: `
         <question>
         ${lastMessage.content}
         </question>
         <context>
         ${text}
         </context>
-        `;
+        `,
+      },
+      ...imagePrompt,
+    ];
 
     const formatCoreMessage = (messages: Message[]) =>
       messages.map(
-        (msg) => ({ role: msg.role, content: msg.content } as CoreMessage)
+        (msg) => ({ role: msg.role, content: msg.content }) as CoreMessage,
       );
 
     const result = await streamText({
       model: google("models/gemini-1.5-flash-latest"),
-      system:
-        "You are cool dude who helps people to find answers to their questions based on their given context",
+      system: `
+        You are an AI assistant who helps people find answers to their questions based on the given context. The context may includes text, images, and YouTube video transcriptions. Use all provided information to provide a comprehensive response.
+        - Answer questions based on the context.
+        - Reference images when relevant.
+        - Integrate transcriptions and text seamlessly into your answers.
+        - Be friendly and engaging.
+      `,
       messages: [
         ...formatCoreMessage(messages),
         { role: "user", content: prompt },
       ],
-      onFinish: async ({ text }) => {
-        // try {
-        //   const messagesCollectionRef = doc(
-        //     db,
-        //     "chats",
-        //     chatId,
-        //     "messages",
-        //     messagesId,
-        //   );
-        //   const newAssistantMessage: Message = {
-        //     id: nanoid(),
-        //     role: "assistant",
-        //     createdAt: new Date(),
-        //     content: text,
-        //   };
-        //   // Add a new message document
-        //   await updateDoc(messagesCollectionRef, {
-        //     chatId,
-        //     userId,
-        //     messages: arrayUnion(lastMessage, newAssistantMessage),
-        //   });
-        // } catch (error) {
-        //   console.log("Failed to save message", error);
-        // }
-      },
+      onFinish: async ({ text }) => {},
     });
     return result.toAIStreamResponse();
   } catch (error) {

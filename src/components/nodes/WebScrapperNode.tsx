@@ -9,11 +9,10 @@ import { useState } from "react";
 import { FaArrowRight, FaSpinner } from "react-icons/fa";
 import { SlGlobe } from "react-icons/sl";
 import CustomHandle from "../CustomHandle";
-import { useToast } from "../ui/use-toast";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
+import { toast } from "sonner";
 
 const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
-  const { toast } = useToast();
   const { updateNode } = usePanel();
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -44,9 +43,7 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
   ) => {
     e.preventDefault();
     if (!isValidURL(url)) {
-      toast({
-        title: "Please enter a valid url",
-      });
+      toast.error("Please enter a valid url");
       return;
     }
     try {
@@ -75,14 +72,14 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
         },
       });
       setIsLoading(false);
-      const { data: imageInfo } = await analyseImage(secure_url as string);
-      console.log("Web, text", imageInfo);
-
-      updateNode({
-        id,
-        type: "webScrapperNode",
-        data: { text: imageInfo.text },
-      });
+      // const { data: imageInfo } = await analyseImage(secure_url as string);
+      // console.log("Web, text", imageInfo);
+      //
+      // updateNode({
+      //   id,
+      //   type: "webScrapperNode",
+      //   data: { text: imageInfo.text },
+      // });
 
       const {
         data: { namespace },
@@ -96,27 +93,24 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
       });
     } catch (error: any) {
       console.log("error:", error);
-      toast({
-        title: "Something went wrong",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error("Something went wrong");
     }
   };
 
   return (
     <div
       className={cn(
-        "flex flex-col max-w-sm w-full h-fit group transition-all bg-blue-200 overflow-hidden p-2 min-w-[320px]",
+        "fixed-dimension shadow-lg overflow-hidden bg-[var(--novel-highlight-blue)] rounded p-2",
         {
-          "ring-2 ring-blue-200 bg-blue-300": selected,
+          "bg-blue-300": selected,
+          "!h-auto": !data.url,
         },
       )}
     >
       <CustomHandle type="source" />
       <div
         className={cn(
-          "flex items-center gap-2 p-2 truncate transition-all h-9 text-blue-500 ",
+          "flex items-center gap-2 mb-2 truncate transition-all text-blue-500",
           {
             "text-white": selected,
           },
@@ -129,45 +123,45 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
         )}
         <h3 className="truncate">{data.title as string}</h3>
       </div>
-      <div className="w-full h-[calc(100%-40px]">
+      <div className="w-full h-full">
         {data.url ? (
-          <AspectRatio ratio={16/9}>
-          <Image
-            src={
-              (data.screenshotUrl ? data.screenshotUrl : data.tempUrl) as string
-            }
-            width={200}
-            height={200}
-            alt="image"
-            className="object-cover w-full h-auto max-w-full "
-          />
+          <AspectRatio ratio={16 / 9} className="h-full w-full rounded">
+            <Image
+              src={
+                (data.screenshotUrl
+                  ? data.screenshotUrl
+                  : data.tempUrl) as string
+              }
+              width={200}
+              height={200}
+              alt="image"
+              className="object-cover w-full h-auto max-w-full rounded"
+            />
           </AspectRatio>
         ) : (
-          <div className="bg-white p-2 border shadow-sm">
-            <form
-              onSubmit={handleAddWebscrapperNode}
-              className="flex items-center gap-2 border p-2"
+          <form
+            onSubmit={handleAddWebscrapperNode}
+            className="flex items-center gap-2 border rounded py-2 bg-white"
+          >
+            <input
+              className="w-full h-full outline-none p-1"
+              type="text"
+              value={url}
+              placeholder="Enter any website url"
+              onChange={(e) => setUrl(e.target.value)}
+            />
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="p-2 rounded-full flex items-center justify-center bg-blue-400 text-white disabled:bg-opacity-80"
             >
-              <input
-                className="w-full h-full outline-none "
-                type="text"
-                value={url}
-                placeholder="Enter any website url"
-                onChange={(e) => setUrl(e.target.value)}
-              />
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="p-2 rounded-full flex items-center justify-center bg-blue-400 text-white disabled:bg-opacity-80"
-              >
-                {isLoading ? (
-                  <FaSpinner className="w-2 h-2 animate-spin" />
-                ) : (
-                  <FaArrowRight className="w-2 h-2" />
-                )}
-              </button>
-            </form>
-          </div>
+              {isLoading ? (
+                <FaSpinner className="w-2 h-2 animate-spin" />
+              ) : (
+                <FaArrowRight className="w-2 h-2" />
+              )}
+            </button>
+          </form>
         )}
       </div>
     </div>

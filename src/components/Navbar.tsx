@@ -4,7 +4,6 @@ import Link from "next/link";
 import React from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useUserStore } from "@/store/userStore";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebase";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -16,24 +15,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { useToast } from "./ui/use-toast";
+import { toast } from "sonner";
+import useCurrentUser from "@/context/currentUser";
 
 const Navbar = () => {
   const pathname = usePathname();
-  const { user, setUser } = useUserStore();
+  const { user, setUser } = useCurrentUser();
   const router = useRouter();
-  const { toast } = useToast();
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
       setUser(null);
       router.push("/login");
     } catch (e: any) {
-      toast({
-        title: "Failed to sign out",
-        description: e.message,
-        variant: "destructive",
-      });
+      toast.error("Failed to signout.");
       console.log(e);
     }
   };
@@ -43,7 +39,7 @@ const Navbar = () => {
         "sticky top-0 flex items-center justify-between bg-white shadow-sm border-b h-14 px-4 lg:px-8",
         {
           hidden: pathname === "/signup" || pathname === "/login",
-        },
+        }
       )}
     >
       <div className="flex items-center gap-6">

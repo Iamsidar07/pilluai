@@ -7,19 +7,19 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import { JSONContent } from "novel";
 import React, { useEffect, useState } from "react";
-import Editor from "./Editor";
+import Editor from "./editor/Editor";
+import { Loader2 } from "lucide-react";
 
 const getBoard = async (boardId: string) => {
   const docRef = doc(db, "boards", boardId);
   const docSnap = await getDoc(docRef);
-  console.log(docSnap.data());
   return docSnap.data();
 };
 
 const Notes = () => {
   const params = useParams();
   const [initialContent, setInitialContent] = useState<JSONContent | null>(
-    null,
+    null
   );
   const {
     data: boardData,
@@ -36,7 +36,11 @@ const Notes = () => {
   useEffect(() => {
     if (boardData && boardData.name) {
       setTitle(boardData.name);
-      setInitialContent(JSON.parse(boardData.notes));
+      setInitialContent(
+        boardData.notes
+          ? JSON.parse(boardData.notes)
+          : { type: "doc", content: [] }
+      );
     }
   }, [boardData, boardData?.name]);
 
@@ -62,19 +66,21 @@ const Notes = () => {
             setTitle(e.target.value);
             const handleTitleChangeDebounced = debounce(
               () => handleTitleChange(e),
-              1000,
+              1000
             );
             handleTitleChangeDebounced();
           }}
         />
         <p className="ml-auto text-right text-sm text-zinc-400">{saveStatus}</p>
       </div>
-      {initialContent && (
+      {initialContent ? (
         <Editor
           initialContent={initialContent}
           boardId={params.boardId as string}
           setSaveStatus={setSaveStatus}
         />
+      ) : (
+        <Loader2 className="w-5 h-5 animate-spin mt-6 mx-auto" />
       )}
     </Panel>
   );

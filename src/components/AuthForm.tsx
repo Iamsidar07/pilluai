@@ -1,13 +1,11 @@
 "use client";
-import React from "react";
+import React, { useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { auth, provider } from "@/firebase";
 import { signInWithPopup } from "firebase/auth";
-import { useRouter } from "next/navigation";
-import { useToast } from "./ui/use-toast";
-import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface AuthFormProps {
   title: string;
@@ -30,23 +28,16 @@ const AuthForm = ({
   googleText,
   isLoading,
 }: AuthFormProps) => {
-  const router = useRouter();
-  const { toast } = useToast();
-  const signInWithGoogle = useMutation({
-    mutationFn: async () => {
-      await signInWithPopup(auth, provider);
-    },
-    onSuccess: () => {
-      // if (user?.uid) router.push("/");
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to login",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  const [isPending, startTransition] = useTransition();
+  const handleSignInWithGoogle = () => {
+    startTransition(async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  };
 
   return (
     <div className="flex flex-col items-center w-full max-w-lg mx-auto p-4 lg:p-8 pt-12 lg:pt-24">
@@ -94,10 +85,13 @@ const AuthForm = ({
           <div className="h-px bg-gray-300 w-full" />
         </div>
         <button
-          onClick={() => signInWithGoogle.mutate()}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleSignInWithGoogle();
+          }}
           className="w-full flex items-center justify-center gap-4 font-bold bg-white border hover:bg-opacity-90  p-2 rounded-md cursor-pointer mt-4"
         >
-          {signInWithGoogle.isPending ? (
+          {isPending ? (
             <Loader2 className="animate-spin opacity-80" />
           ) : (
             <div className="flex items-center gap-2">

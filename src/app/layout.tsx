@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "../styles/novel.css";
+import "../styles/globals.css";
 import Navbar from "@/components/Navbar";
-import FlowWithProvider from "@/components/FlowWithProvider";
-import PanelContextProvider from "@/context/panel";
-import ReactQueryProvider from "@/components/ReactQueryProvider";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
+import Provider from "@/components/Provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,13 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <body className={inter.className}>
-        <ReactQueryProvider>
+        <Provider>
           <Navbar />
-          <FlowWithProvider>
-            <PanelContextProvider>{children}</PanelContextProvider>
-          </FlowWithProvider>
-        </ReactQueryProvider>
-        <Toaster />
+          {children}
+        </Provider>
+        <Toaster position="top-center" />
       </body>
     </html>
   );

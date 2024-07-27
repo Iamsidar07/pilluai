@@ -7,7 +7,7 @@ import CustomHandle from "../CustomHandle";
 import CustomResizer from "../CustomResizer";
 
 const TextNode = ({ id, selected }: NodeProps) => {
-  const {  updateNode } = usePanel();
+  const { updateNode } = usePanel();
 
   const [textContent, setTextContent] = useState("");
   const onChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -26,18 +26,18 @@ const TextNode = ({ id, selected }: NodeProps) => {
 
   return (
     <div
-      className={cn("w-full h-full bg-white", {
+      className={cn("w-full h-full bg-white rounded shadow-lg", {
         "ring ring-gray-200": selected,
       })}
     >
       <CustomResizer />
       <CustomHandle type="source" />
-      <div className="h-full border">
+      <div className="h-full border rounded">
         <textarea
           value={textContent}
           onChange={onChange}
           placeholder="Double click to start typing..."
-          className="resize-none outline-none p-2 w-full h-full bg-transparent text-sm "
+          className="resize-none outline-none p-2 w-full h-full bg-transparent text-sm"
         />
       </div>
     </div>

@@ -5,21 +5,14 @@ import axios from "axios";
 import { nanoid } from "nanoid";
 import { AppNode } from "../nodes";
 import { usePanel } from "@/context/panel";
-import { useToast } from "../ui/use-toast";
+import { toast } from "sonner";
+
 const useAddImageNode = () => {
   const { addNode, updateNode } = usePanel();
-  const { toast } = useToast();
   const { mutateAsync: uploadImage } = useMutation({
     mutationFn: ({ buffer }: { buffer: Buffer }) =>
       axios.post("/api/image/upload", {
         buffer,
-      }),
-  });
-
-  const { mutateAsync: analyseImage } = useMutation({
-    mutationFn: (url: string) =>
-      axios.post("/api/image/analyse", {
-        url,
       }),
   });
 
@@ -31,8 +24,8 @@ const useAddImageNode = () => {
     const newNode: AppNode = {
       position: { x: 0, y: 0 },
       id,
-      width: 515,
-      height: 356,
+      width: 300,
+      height: 200,
       data: {
         type: "imageNode",
         url: "",
@@ -57,23 +50,19 @@ const useAddImageNode = () => {
           url: data.url,
         },
       });
-      const { data: imageInfo } = await analyseImage(data.url);
+      // const { data: imageInfo } = await analyseImage(data.url);
       updateNode({
         id,
         type: "imageNode",
         data: {
-          title: imageInfo.title,
-          description: imageInfo.description,
-          text: imageInfo.description,
+          title: file.name,
+          description: "",
+          text: "",
         },
       });
     } catch (error: any) {
       console.log("Something went wrong!", error);
-      toast({
-        title: "Something went wrong",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast.error("Something went wrong");
     }
   };
 

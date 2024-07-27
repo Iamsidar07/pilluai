@@ -1,8 +1,8 @@
 "use client";
+import { TTextNode, TChatNode, TWebScrapperNode } from "@/components/nodes";
 import { usePanel } from "@/context/panel";
 import { nanoid } from "nanoid";
-import { useCallback, useState } from "react";
-import { TChatNode, TTextNode, TWebScrapperNode } from "../nodes";
+import { useCallback } from "react";
 
 const useAddNode = () => {
   const { addNode } = usePanel();
@@ -12,8 +12,8 @@ const useAddNode = () => {
       id: nanoid(),
       position: { x: 0, y: 0 },
       type: "textNode",
-      width: 515,
-      height: 356,
+      width: 250,
+      height: 100,
       data: {
         text: "",
         type: "textNode",

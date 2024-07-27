@@ -17,19 +17,16 @@ const YoutubeNode = ({ data, selected }: NodeProps) => {
   }, [data.url]);
 
   return (
-    <div className="h-fit">
+    <div className="fixed-dimension overflow-hidden bg-red-100 rounded shadow-lg">
       <CustomHandle type="source" />
       <div
         className={cn(
           "flex flex-col gap-1 group p-1 transition-all w-full h-full overflow-hidden",
-          {
-            "ring-2 ring-red-200": selected,
-          },
         )}
       >
         <div
           className={cn(
-            "flex items-center gap-2 px-2 truncate bg-red-100 text-red-500 transition-all h-8 w-fit max-w-full",
+            "flex items-center rounded py-2 gap-2 px-2 truncate bg-red-100 text-red-500 transition-all w-fit max-w-full",
             {
               "bg-red-600 text-white": selected,
             },
@@ -40,14 +37,12 @@ const YoutubeNode = ({ data, selected }: NodeProps) => {
           </div>
           <h3 className="truncate text-sm">{data.title as string}</h3>
         </div>
-        <div className="w-full h-[calc(100%-40px)]">
-          <iframe
-            className="w-full aspect-[56.35%]"
-            src={`https://www.youtube.com/embed/${videoId}`}
-            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; web-share"
-            referrerPolicy="strict-origin-when-cross-origin"
-          ></iframe>
-        </div>
+        <iframe
+          className="w-full h-full rounded"
+          src={`https://www.youtube.com/embed/${videoId}`}
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+        ></iframe>
       </div>
     </div>
   );

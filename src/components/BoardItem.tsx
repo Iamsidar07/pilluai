@@ -1,9 +1,8 @@
 "use client";
-import { Board } from "@/app/boards/page";
 import { db } from "@/firebase";
 import { useMutation } from "@tanstack/react-query";
 import { deleteDoc, doc } from "firebase/firestore";
-import { Archive, EllipsisVertical, Pencil } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import Link from "next/link";
 import React, { useCallback } from "react";
 import {
@@ -12,29 +11,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { useToast } from "./ui/use-toast";
+import { toast } from "sonner";
+import { Board } from "../../typing";
+import DeleteBoard from "./DeleteBoard";
+import RenameBoard from "./RenameBoard";
 
 interface BoardItemProps {
   board: Board;
-  setNewName: React.Dispatch<React.SetStateAction<string>>;
-  setRenameBoardId: React.Dispatch<React.SetStateAction<string>>;
-  setOpenRenameDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
-const BoardItem = ({
-  board,
-  setNewName,
-  setRenameBoardId,
-  setOpenRenameDialog,
-}: BoardItemProps) => {
-  const { toast } = useToast();
-
+const BoardItem = ({ board }: BoardItemProps) => {
   const deleteBoard = useMutation({
     onError: (e) => {
-      toast({
-        title: "Failed to delete Board",
-        description: e.message,
-        variant: "destructive",
-      });
+      toast.error("Failed to delete Board");
     },
     mutationFn: async (boardId: string) =>
       deleteDoc(doc(db, "boards", boardId)),
@@ -45,7 +33,7 @@ const BoardItem = ({
       e.stopPropagation();
       deleteBoard.mutate(boardId);
     },
-    [deleteBoard],
+    [deleteBoard]
   );
 
   return (
@@ -63,25 +51,12 @@ const BoardItem = ({
         <DropdownMenuTrigger asChild>
           <EllipsisVertical className="w-6 h-6 text-gray-400 cursor-pointer" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="text-gray-400">
-          <DropdownMenuItem
-            onClick={(e) => handleDeleteBoard(board.id as string, e)}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <Archive className="w-4 h-4" />
-            <p>Archive</p>
+        <DropdownMenuContent className="text-gray-400 flex flex-col gap-1">
+          <DropdownMenuItem asChild className="w-full">
+            <DeleteBoard boardId={board.id} />
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-              setNewName(board.name as string);
-              setRenameBoardId(board.id as string);
-              setOpenRenameDialog(true);
-            }}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <Pencil className="w-4 h-4" />
-            <p>Rename</p>
+          <DropdownMenuItem asChild className="w-full">
+            <RenameBoard name={board.name} boardId={board.id} />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

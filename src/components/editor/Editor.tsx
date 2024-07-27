@@ -14,7 +14,11 @@ import {
   EditorRoot,
   JSONContent,
 } from "novel";
-import { handleCommandNavigation, Placeholder, StarterKit } from "novel/extensions";
+import {
+  handleCommandNavigation,
+  Placeholder,
+  StarterKit,
+} from "novel/extensions";
 import { useCallback, useState, useEffect, useMemo } from "react";
 import { slashCommand, suggestionItems } from "./commands";
 import { ColorSelector } from "./selectors/color-selector";
@@ -22,7 +26,6 @@ import { LinkSelector } from "./selectors/link-selector";
 import { NodeSelector } from "./selectors/node-selector";
 import { TextButtons } from "./selectors/text-buttons";
 import { defaultExtensions } from "./extensions";
-
 
 const getBoard = async (boardId: string) => {
   const docRef = doc(db, "boards", boardId);
@@ -60,15 +63,13 @@ const TailwindEditor = ({
     if (boardData && boardData.notes) {
     }
   }, [boardData, boardData?.notes]);
-  
-  
-  const extensions = useMemo(()=>[...defaultExtensions, slashCommand], []);
+
+  const extensions = useMemo(() => [...defaultExtensions, slashCommand], []);
 
   console.log("content", content);
   const onUpdate = async (content: JSONContent) => {
     try {
       setSaveStatus("Saving...");
-      console.log("IM",content);
       const docRef = doc(db, "boards", boardId);
       const docSnap = await updateDoc(docRef, {
         notes: JSON.stringify(content),
@@ -89,14 +90,14 @@ const TailwindEditor = ({
   });
 
   const debouncedUpdateNotes = useCallback(
-    debounce((content: JSONContent) => updateNotes({ content }), 500),
-    [],
+    (content: JSONContent) => debounce(() => updateNotes({ content }), 500),
+    [updateNotes]
   );
   return (
     <EditorRoot>
       <EditorContent
         extensions={extensions}
-        initialContent={initialContent ?? {type: "doc", content: []}}
+        initialContent={initialContent ?? { type: "doc", content: [] }}
         className=""
         editorProps={{
           handleDOMEvents: {

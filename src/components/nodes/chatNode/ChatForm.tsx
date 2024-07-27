@@ -15,10 +15,10 @@ const ChatForm = ({
   handleSendMessage,
 }: ChatFormProps) => {
   return (
-    <div className="px-2 pt-1 bg-white shadow-sm ">
+    <div className="px-2 pt-1 bg-white shadow-sm rounded">
       <form
         onSubmit={handleSendMessage}
-        className="flex items-center gap-2 pr-1 border focus-within:shadow-sm"
+        className="flex items-center gap-2 pr-1 border rounded focus-within:shadow-sm"
       >
         <input
           type="text"

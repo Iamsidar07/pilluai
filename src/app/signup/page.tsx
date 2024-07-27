@@ -1,12 +1,13 @@
 "use client";
-import React from "react";
+import React, { useTransition } from "react";
 import AuthForm from "@/components/AuthForm";
-import { createAccount } from "@/actions";
 import { useRouter } from "next/navigation";
-import { useUserStore, User } from "@/store/userStore";
-import { useMutation } from "@tanstack/react-query";
-import { useToast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
+import { toast } from "sonner";
+import useCurrentUser from "@/context/currentUser";
+import { User } from "../../../typing";
+import signupSchema from "@/schemas/signupSchema";
+import createAccount from "@/actions/createAccount";
 
 const fields = [
   {
@@ -26,30 +27,39 @@ const fields = [
   },
 ];
 const Signup = () => {
-  // TODO: Check if it is necessary to set user here.
-  const { setUser, user } = useUserStore();
+  const { setUser, user } = useCurrentUser();
   const router = useRouter();
-  const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
 
-  const action = useMutation({
-    mutationFn: (formData: FormData) => createAccount(formData),
-    onSuccess: ({ user }) => {
-      setUser(user as User);
-      toast({
-        title: "Successfully logged in",
-        description: "You will be redirected soon",
-      });
-      router.push("/");
-    },
-    onError: (error) => {
-      console.log("Failed to login", error);
-      toast({
-        title: "Failed to login",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  const handleSignup = (formData: FormData) => {
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const { success, error } = signupSchema.safeParse({
+      email,
+      password,
+      name,
+    });
+    if (!success && error) {
+      toast.error(error.message ?? "Please check your inputs");
+      return;
+    }
+
+    if (!name || !email || !password) {
+      toast.error("All fields are required");
+      return;
+    }
+    startTransition(async () => {
+      const { success, user } = await createAccount({ email, password, name });
+      if (success) {
+        setUser(user as User);
+        toast.success("Successfully created account");
+        router.push("/");
+      } else {
+        toast.error("Failed to create account");
+      }
+    });
+  };
 
   useEffect(() => {
     if (user && user.uid) {
@@ -64,9 +74,9 @@ const Signup = () => {
       actionText="Sign Up"
       alternateText="Sign in to your account"
       alternateLink="/login"
-      handleSubmit={action.mutate}
+      handleSubmit={handleSignup}
       googleText="Continue with Google"
-      isLoading={action.isPending}
+      isLoading={isPending}
     />
   );
 };

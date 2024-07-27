@@ -1,6 +1,12 @@
 "use client";
 import React from "react";
-import { Dialog, DialogClose, DialogContent, DialogHeader } from "./ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Loader2, X } from "lucide-react";
@@ -41,7 +47,9 @@ const DialogForm = ({
           <X className="h-4 w-4" />
         </DialogClose>
         <DialogHeader>
-          <h2 className="font-bold text-lg lg:text-2xl">{title}</h2>
+          <DialogTitle className="font-bold text-lg lg:text-2xl">
+            {title}
+          </DialogTitle>
         </DialogHeader>
         <Input value={value} onChange={onChange} />
         <Button onClick={handleActionClick} className="w-full">
