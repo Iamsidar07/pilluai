@@ -1,101 +1,16 @@
 "use client";
-import { usePanel } from "@/context/panel";
-import { cn, isValidURL } from "@/lib/utils";
-import { useMutation } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 import { NodeProps } from "@xyflow/react";
-import axios from "axios";
 import Image from "next/image";
-import { useState } from "react";
 import { FaArrowRight, FaSpinner } from "react-icons/fa";
 import { SlGlobe } from "react-icons/sl";
 import CustomHandle from "../CustomHandle";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import { toast } from "sonner";
+import useWebScrapperNode from "@/hooks/useWebScrapperNode";
 
 const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
-  const { updateNode } = usePanel();
-  const [url, setUrl] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const { mutateAsync: scrape } = useMutation({
-    mutationFn: async (url: string) =>
-      axios.post("/api/website/scrape", { url }),
-  });
-
-  const { mutateAsync: indexWebsite } = useMutation({
-    mutationFn: async (url: string) =>
-      axios.post("/api/website/index", { url }),
-  });
-
-  const { mutateAsync: uploadImage } = useMutation({
-    mutationFn: async (buffer: Buffer) =>
-      axios.post("/api/image/upload", { buffer }),
-  });
-  const { mutateAsync: analyseImage } = useMutation({
-    mutationFn: (url: string) =>
-      axios.post("/api/image/analyse", {
-        url,
-      }),
-  });
-
-  const handleAddWebscrapperNode = async (
-    e: React.FormEvent<HTMLFormElement>,
-  ) => {
-    e.preventDefault();
-    if (!isValidURL(url)) {
-      toast.error("Please enter a valid url");
-      return;
-    }
-    try {
-      setIsLoading(true);
-      const { data } = await scrape(url);
-      updateNode({
-        id,
-        type: "webScrapperNode",
-        data: {
-          url,
-          title: data.title,
-          description: data.description,
-          tempUrl: `data:image/png;base64,${data.base64}`,
-        },
-      });
-
-      const {
-        data: { url: secure_url },
-      } = await uploadImage(data.buffer);
-      updateNode({
-        id,
-        type: "webScrapperNode",
-        data: {
-          screenshotUrl: secure_url as string,
-          tempUrl: null,
-        },
-      });
-      setIsLoading(false);
-      // const { data: imageInfo } = await analyseImage(secure_url as string);
-      // console.log("Web, text", imageInfo);
-      //
-      // updateNode({
-      //   id,
-      //   type: "webScrapperNode",
-      //   data: { text: imageInfo.text },
-      // });
-
-      const {
-        data: { namespace },
-      } = await indexWebsite(url);
-      updateNode({
-        id,
-        type: "webScrapperNode",
-        data: {
-          namespace,
-        },
-      });
-    } catch (error: any) {
-      console.log("error:", error);
-      toast.error("Something went wrong");
-    }
-  };
+  const { handleAddWebscrapperNode, isLoading, setUrl, url } =
+    useWebScrapperNode(id);
 
   return (
     <div
@@ -104,7 +19,7 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
         {
           "bg-blue-300": selected,
           "!h-auto": !data.url,
-        },
+        }
       )}
     >
       <CustomHandle type="source" />
@@ -113,7 +28,7 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
           "flex items-center gap-2 mb-2 truncate transition-all text-blue-500",
           {
             "text-white": selected,
-          },
+          }
         )}
       >
         {isLoading ? (

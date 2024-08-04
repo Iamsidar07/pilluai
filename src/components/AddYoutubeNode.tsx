@@ -1,5 +1,11 @@
 "use client";
-import React, { FormEvent, useEffect, useState, useTransition } from "react";
+import React, {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useState,
+  useTransition,
+} from "react";
 import PanelItem from "./panels/PanelItem";
 import { useKeyPress } from "@xyflow/react";
 import { Youtube } from "lucide-react";
@@ -12,84 +18,16 @@ import {
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { isValidYoutubeUrl } from "@/lib/utils";
-import { toast } from "sonner";
-import { TYoutubeNode } from "./nodes";
-import { nanoid } from "nanoid";
-import getYoutubeVideoInfo from "@/actions/getYoutubeVideoInfo";
-import { usePanel } from "@/context/panel";
-import getVideoTranscription from "@/actions/getVideoTranscription";
+import useYoutubeNode from "@/hooks/useYoutubeNode";
 
 const AddYoutubeNode = () => {
-  const { addNode, updateNode } = usePanel();
+  const { handleSubmit, videoUrl, setVideoUrl, open, setOpen, isPending } =
+    useYoutubeNode();
   const isYPressed = useKeyPress("y" || "Y");
-  const [open, setOpen] = useState(false);
-  const [videoUrl, setVideoUrl] = useState("");
-  const [isPending, startTransition] = useTransition();
-
   useEffect(() => {
     if (isYPressed) {
     }
   }, [isYPressed]);
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!isValidYoutubeUrl(videoUrl)) {
-      toast.error("Invalid video url.");
-      return;
-    }
-    startTransition(async () => {
-      const { success, description, title } = await getYoutubeVideoInfo(
-        videoUrl
-      );
-      if (!success) {
-        toast.error("Failed to get video details");
-        return;
-      }
-      const node: TYoutubeNode = {
-        id: nanoid(),
-        position: { x: 0, y: 0 },
-        type: "youtubeNode",
-        data: {
-          url: videoUrl,
-          type: "youtubeNode",
-          namespace: "",
-          text: "",
-          title: title || "",
-          description: description || "",
-        },
-      };
-      addNode(node);
-      setOpen(false);
-      const { success: isTranscriptionSuccess, text } =
-        await getVideoTranscription(videoUrl);
-      if (!isTranscriptionSuccess) {
-        toast.error("Failed to get transcription.");
-      }
-      const res = await fetch("/api/yt/index", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          url: videoUrl,
-        }),
-      });
-      if (!res.ok) {
-        toast.error("Failed to index video.");
-        return;
-      }
-      const { namespace } = await res.json();
-      updateNode({
-        id: node.id,
-        type: "youtubeNode",
-        data: {
-          namespace,
-          text,
-        },
-      });
-    });
-  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -109,7 +47,7 @@ const AddYoutubeNode = () => {
             className="w-full"
             placeholder="Enter any youtube video URL"
           />
-          <Button type="submit" className="mt-6">
+          <Button type="submit" className="mt-6 w-full">
             {isPending ? "Saving..." : "Save"}
           </Button>
         </form>

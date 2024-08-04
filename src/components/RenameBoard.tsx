@@ -9,10 +9,11 @@ import {
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Pencil } from "lucide-react";
+import { Pencil, Sparkles } from "lucide-react";
 import useCurrentUser from "@/context/currentUser";
 import renameBoard from "@/actions/renameBoard";
 import { toast } from "sonner";
+import useSubscription from "@/hooks/useSubscription";
 
 interface Props {
   name: string;
@@ -21,6 +22,7 @@ interface Props {
 
 const RenameBoard = ({ name, boardId }: Props) => {
   const { user } = useCurrentUser();
+  const { hasUserProPlanSubscribe } = useSubscription();
   const [newBoardName, setNewBoardName] = useState(name ?? "");
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
@@ -30,9 +32,9 @@ const RenameBoard = ({ name, boardId }: Props) => {
       toast.info("Please login to continue.");
       return;
     }
-    if (!newBoardName || !boardId) return;
+    if (!newBoardName || !boardId || !hasUserProPlanSubscribe) return;
     startTransition(async () => {
-      const { success } = await renameBoard(newBoardName, boardId);
+      const { success } = await renameBoard(newBoardName, boardId, user?.uid);
       if (success) {
         toast.success("Successfully renamed board.");
         setIsOpen(false);
@@ -43,10 +45,18 @@ const RenameBoard = ({ name, boardId }: Props) => {
   };
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <Button className="w-full" variant="outline">
+      <Button
+        disabled={!hasUserProPlanSubscribe}
+        className="w-full"
+        variant="outline"
+      >
         <DialogTrigger asChild>
           <div className="flex items-center gap-1">
-            <Pencil />
+            {hasUserProPlanSubscribe ? (
+              <Pencil className="w-4 h-4" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )}
             Rename
           </div>
         </DialogTrigger>

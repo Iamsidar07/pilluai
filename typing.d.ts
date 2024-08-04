@@ -21,8 +21,5 @@ export interface Board {
 export interface Chat {
   id: string;
   title: string;
-  userId: string;
-  nodeId: string;
-  messagesId: string;
   createdAt: Timestamp;
 }

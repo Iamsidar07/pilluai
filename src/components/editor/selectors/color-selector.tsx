@@ -21,7 +21,7 @@ interface ColorSelectorProps {
 const TEXT_COLORS: BubbleColorMenuItem[] = [
   {
     name: "Default",
-    color: "var(--novel-black)",
+    color: "#00000",
   },
   {
     name: "Purple",
@@ -106,11 +106,11 @@ export const ColorSelector = ({ open, onOpenChange }) => {
 
   if (!editor) return null;
   const activeColorItem = TEXT_COLORS.find(({ color }) =>
-    editor.isActive("textStyle", { color })
+    editor.isActive("textStyle", { color }),
   );
 
   const activeHighlightItem = HIGHLIGHT_COLORS.find(({ color }) =>
-    editor.isActive("highlight", { color })
+    editor.isActive("highlight", { color }),
   );
 
   return (

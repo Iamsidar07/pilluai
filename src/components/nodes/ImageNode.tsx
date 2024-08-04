@@ -11,8 +11,8 @@ const ImageNode = ({ id, data, selected }: NodeProps) => {
       className={cn(
         "p-1 pb-0 shadow-lg overflow-hidden fixed-dimension bg-[var(--novel-highlight-gray)] rounded",
         {
-          "ring-1 ring-violet-500": selected,
-        },
+          "ring-1 ring-primary": selected,
+        }
       )}
     >
       <CustomHandle type="source" />

@@ -20,8 +20,7 @@ const Boards = () => {
   const fetchBoards = useCallback(() => {
     setIsLoading(true);
     const q = query(
-      collection(db, "boards"),
-      where("userId", "==", user?.uid || ""),
+      collection(db, `users/${user?.uid}/boards`),
       orderBy("createdAt", "desc")
     );
 

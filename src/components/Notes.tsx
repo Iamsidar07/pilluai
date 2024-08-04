@@ -9,17 +9,19 @@ import { JSONContent } from "novel";
 import React, { useEffect, useState } from "react";
 import Editor from "./editor/Editor";
 import { Loader2 } from "lucide-react";
+import useCurrentUser from "@/context/currentUser";
 
-const getBoard = async (boardId: string) => {
-  const docRef = doc(db, "boards", boardId);
+const getBoard = async (userId: string, boardId: string) => {
+  const docRef = doc(db, `users/${userId}/boards/${boardId}`);
   const docSnap = await getDoc(docRef);
   return docSnap.data();
 };
 
 const Notes = () => {
   const params = useParams();
+  const { user } = useCurrentUser();
   const [initialContent, setInitialContent] = useState<JSONContent | null>(
-    null
+    null,
   );
   const {
     data: boardData,
@@ -27,7 +29,7 @@ const Notes = () => {
     error,
   } = useQuery({
     queryKey: ["board", params.boardId],
-    queryFn: () => getBoard(params.boardId as string),
+    queryFn: () => getBoard(user?.uid as string, params.boardId as string),
   });
 
   const [saveStatus, setSaveStatus] = useState("Save");
@@ -39,13 +41,16 @@ const Notes = () => {
       setInitialContent(
         boardData.notes
           ? JSON.parse(boardData.notes)
-          : { type: "doc", content: [] }
+          : { type: "doc", content: [] },
       );
     }
   }, [boardData, boardData?.name]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const docRef = doc(db, "boards", params.boardId as string);
+    const docRef = doc(
+      db,
+      `users/${user?.uid}/boards/${params.boardId as string}`,
+    );
     updateDoc(docRef, {
       name: e.target.value,
     });
@@ -66,7 +71,7 @@ const Notes = () => {
             setTitle(e.target.value);
             const handleTitleChangeDebounced = debounce(
               () => handleTitleChange(e),
-              1000
+              500,
             );
             handleTitleChangeDebounced();
           }}

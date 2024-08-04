@@ -6,10 +6,10 @@ import { useCallback, useEffect, useState } from "react";
 import CustomHandle from "../CustomHandle";
 import CustomResizer from "../CustomResizer";
 
-const TextNode = ({ id, selected }: NodeProps) => {
+const TextNode = ({ id, selected, data }: NodeProps) => {
   const { updateNode } = usePanel();
 
-  const [textContent, setTextContent] = useState("");
+  const [textContent, setTextContent] = useState((data?.text as string) || "");
   const onChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTextContent(e.target.value);
   }, []);

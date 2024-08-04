@@ -1,90 +1,115 @@
-import { buttonVariants } from "@/components/ui/button";
-import {
-  Bot,
-  FileText,
-  MonitorSmartphone,
-  ShieldCheck,
-  ShieldPlus,
-  Zap,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 
 const FEATURES = [
   {
-    icon: <ShieldCheck />,
-    text: "Keep all your important PDF files securely stored and easily accessible anytime, anywhere.",
+    title: "Converse with Your YouTube Videos",
+    description:
+      "Ever come across an hour-long video but don't have the time to watch it? With PilluAI, you can ask specific questions and get the information you need without watching the entire video.",
+    image: "/a.png",
   },
   {
-    icon: <Zap />,
-    text: "Experience lightning-fast answer to your queries ensuring you get the information you need instantly.",
+    title: "Dive Deep into Your Interests",
+    description:
+      "Whether you're binge-watching Kurzgesagt at 2 AM, uncovering the mysteries of the universe, finishing up your research paper, or working on your next billion-dollar product idea, PilluAI has you covered.",
+    image: "/a.png",
   },
   {
-    icon: <Bot />,
-    text: "Our intelligent chatbot remmebers previous interaction, providing a seamless and personalized experience.",
+    title: "Optimize Your Podcast Listening",
+    description:
+      "Instead of spending hours mindlessly listening to podcasts, give PilluAI all the podcasts you want to listen to. Ask specific questions that could help you and your business, saving you valuable time.",
+    image: "/a.png",
   },
   {
-    icon: <FileText />,
-    text: "Engage with your PDFs like never before using our intuitive and interactive viewer.",
-  },
-  {
-    icon: <ShieldPlus />,
-    text: "Rest assured knowing your documents are safely backed up on the cloud, protected from loss or damage",
-  },
-  {
-    icon: <MonitorSmartphone />,
-    text: "Access and chat with your PDFs seamlessly on any device, whether it's your desktop, tablet, or smartphone.",
+    title: "Chat with Websites and PDF Documents",
+    description:
+      "Interact with websites and PDF documents just like you would with a person. Get the information you need quickly and efficiently without having to sift through pages of content.",
+    image: "/a.png",
   },
 ];
 
 export default async function Home() {
   return (
-    <main className="px-4 md:px-8 py-12 lg:py-24 flex flex-col items-center min-h-screen max-w-7xl mx-auto">
-      <div className="rounded-full ring-1 ring-inset ring-gray-900/10 shadow-sm p-px">
-        <div className="w-full h-full px-4 py-1.5 rounded-full text-sm bg-gradient-to-r from-blue-600 via-green-500 to-indigo-400 inline-block text-transparent bg-clip-text font-bold">
-          Introducing chat with pdf
+    <main className="p-4 lg:p-8 grainy-light w-full overflow-y-auto flex-1 rounded-2xl bg-pink-50">
+      <div className="max-w-7xl mx-auto flex flex-col items-center py-24 lg:py-32">
+        <div className="mx-auto max-w-2xl text-left sm:text-center">
+          <h2 className="font-bold text-gray-600">
+            Your interactive whiteboard comapanion
+          </h2>
+          <h1 className="text-3xl sm:text-5xl mt-2 font-bold capitalize">
+            Your ultimate whiteboard... on{" "}
+            <span className="font-extrabold text-primary">steroids</span>
+          </h1>
+          <p className="mt-3 text-lg leading-6 text-gray-500">
+            Introducing <span className="text-primary font-bold">Pillu AI</span>{" "}
+            <br /> <br />
+            If you&apos;re a developer, video editor, researcher, or anyone who
+            works with their brain,{" "}
+            <span className="text-primary">
+              PilluAI can help you think 10x faster, boosting your productivity
+              and helping you make 10x more money.
+            </span>
+          </p>
+          <Button className="mt-4 rounded-2xl px-6 font-bold" asChild>
+            <Link href={"/boards"}>Get started</Link>
+          </Button>
+        </div>
+        <div className="relative pt-16 overflow-hidden my-12 rounded-2xl">
+          <div className="mx-auto max-w-7xl px-6 lg:px-8">
+            <Image
+              src="/app.png"
+              alt="App screenshot"
+              width={2432}
+              height={1442}
+              quality={100}
+              className="mb-[-0%] rounded-xl shadow-2xl ring-1 ring-gray-900/10"
+            />
+            <div aria-hidden={true}>
+              <div
+                className="absolute bottom-0 top-0 -inset-x-32 bg-gradient-to-t from-white/95 pt-[5%]"
+                aria-hidden={true}
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-12 flex flex-col items-center gap-8 md:gap-24">
+          {FEATURES.map(({ description, title, image }, i) => (
+            <div key={i} className="flex flex-col items-center">
+              <div
+                className={cn(
+                  "max-w-3xl relative mx-auto p-2 ring-1 ring-pink-900/10 rounded-2xl",
+                  {
+                    "bg-orange-50": i === 0,
+                    "bg-green-50": i === 1,
+                    "bg-blue-50": i === 2,
+                    "bg-purple-50": i === 3,
+                  },
+                )}
+              >
+                <Image
+                  alt={title}
+                  src={image}
+                  width={1468}
+                  height={881}
+                  className="rounded-2xl"
+                />
+              </div>
+              <div
+                className={cn("mt-4  leading-6", {
+                  "text-center max-w-2xl": i % 2 !== 0,
+                  "md:ml-[50%] border-l-2 border-pink-300 pl-4  ": i % 2 === 0,
+                })}
+              >
+                <h2 className="text-2xl font-semibold md:text-3xl">{title}</h2>
+                <p className="mt-2 text-lg text-gray-500">{description}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-      <h1 className="text-lg md:text-3xl lg:text-5xl font-bold mt-2">
-        Transform your pdf&apos;s into interactive conversation
-      </h1>
-      <p className="mt-2">
-        Upload your document, and our chatbot will answer questions, summarize
-        content, and answer all your Qs. Ideal for everyone,{" "}
-      </p>
-      <Link
-        href={"/dashboard"}
-        className={buttonVariants({ className: "mt-4" })}
-      >
-        Get started
-      </Link>
-      <div className="w-full max-w-full rounded-2xl shadow-lg shadow-white/80 border p-4 bg-gray-900/5 ring-px ring-inset ring-gray-900/10 overflow-hidden relative my-12 md:my-24">
-        <Image
-          src="/image.png"
-          alt="Product"
-          width={1920}
-          height={1080}
-          quality={100}
-          className="w-full h-full rounded-lg"
-        />
-      </div>
-
-      {/* features */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-6">
-        {FEATURES.map((feature, i) => (
-          <div
-            key={i}
-            className="p-4 ring-1 ring-inset ring-gray-900/10 rounded-lg lg:rounded-2xl space-y-4 bg-zinc-100/5  backdrop-blur-sm"
-          >
-            <div className="w-6 h-6 md:w-12 md:h-12 grid text-gray-400 place-items-center ring-1 ring-inset ring-gray-900/10 rounded-xl">
-              {feature.icon}
-            </div>
-            <p className="font-sm md:font-normal text-gray-500 opacity-80">
-              {feature.text}
-            </p>
-          </div>
-        ))}
-      </section>
     </main>
   );
 }

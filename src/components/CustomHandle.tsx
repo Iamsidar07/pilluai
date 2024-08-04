@@ -11,7 +11,7 @@ const CustomHandle = ({ type }: CustomHandleProps) => {
     <>
       <div
         className={cn(
-          "react-flow__edge-path z-10 group hover:scale-110 transition-all hover:shadow-white hover:shadow-xl w-6 h-6 bg-violet-500 absolute rounded-full -right-2.5 top-1/2 -translate-y-1/2 border-2 border-white shadow-lg grid place-content-center",
+          "react-flow__edge-path z-10 group hover:scale-110 transition-all hover:shadow-white hover:shadow-xl w-6 h-6 bg-pink-400 absolute rounded-full -right-2.5 top-1/2 -translate-y-1/2 border-2 border-white shadow-lg grid place-content-center",
           { "-left-3": type === "target" },
         )}
       >

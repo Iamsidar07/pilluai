@@ -3,6 +3,7 @@ import { edgeTypes } from "@/components/edges";
 import GradientEdge from "@/components/edges/GradientEdge";
 import { nodeTypes } from "@/components/nodes";
 import ResizablePane from "@/components/ResizablePane";
+import useCurrentUser from "@/context/currentUser";
 import { usePanel } from "@/context/panel";
 import { db } from "@/firebase";
 import { debounce } from "@/lib/utils";
@@ -23,34 +24,40 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 
 // Ensure that the save functions are properly debounced
-const debouncedSaveNodes = debounce(async (boardId: string, nodes: Node[]) => {
-  console.log("saveNodes");
-  if (!boardId || !nodes || nodes.length === 0) return;
-  try {
-    const boardRef = doc(db, "boards", boardId);
-    console.log("boardRef", boardRef, nodes, boardId);
-    await updateDoc(boardRef, { nodes });
-  } catch (e) {
-    console.log(e);
-    toast.error("Failed to save nodes");
-    return;
-  }
-}, 1000);
+const debouncedSaveNodes = debounce(
+  async (userId: string, boardId: string, nodes: Node[]) => {
+    console.log("saveNodes");
+    if (!boardId || !nodes || nodes.length === 0 || !userId) return;
+    try {
+      const boardRef = doc(db, `users/${userId}/boards`, boardId);
+      console.log("boardRef", boardRef, nodes, boardId);
+      await updateDoc(boardRef, { nodes });
+    } catch (e) {
+      console.log(e);
+      toast.error("Failed to save nodes");
+      return;
+    }
+  },
+  1000,
+);
 
-const debouncedSaveEdges = debounce(async (boardId: string, edges: Edge[]) => {
-  console.log("saveEdges");
+const debouncedSaveEdges = debounce(
+  async (userId: string, boardId: string, edges: Edge[]) => {
+    console.log("saveEdges");
 
-  if (!boardId || !edges || edges.length === 0) return;
-  const boardRef = doc(db, "boards", boardId);
-  try {
-    console.log("boardRef", boardRef, edges);
-    await updateDoc(boardRef, { edges });
-  } catch (e) {
-    console.log(e);
-    toast.error("Failed to save edges");
-    return;
-  }
-}, 1000);
+    if (!boardId || !edges || edges.length === 0 || !userId) return;
+    const boardRef = doc(db, `users/${userId}/boards`, boardId as string);
+    try {
+      console.log("boardRef", boardRef, edges);
+      await updateDoc(boardRef, { edges });
+    } catch (e) {
+      console.log(e);
+      toast.error("Failed to save edges");
+      return;
+    }
+  },
+  1000,
+);
 
 interface BoardProps {
   boardId: string;
@@ -58,7 +65,8 @@ interface BoardProps {
 
 export default function Board({ boardId }: BoardProps) {
   const { onConnect, edges, nodes, setEdges, setNodes } = usePanel();
-  const panOnDrag = [0.1, 1];
+  const { user } = useCurrentUser();
+  console.log(nodes);
   const rfStyle = {
     background: "#edf1f5",
   };
@@ -68,18 +76,18 @@ export default function Board({ boardId }: BoardProps) {
       console.log("node change");
       // @ts-ignore
       setNodes((nds) => applyNodeChanges(changes, nds));
-      debouncedSaveNodes(boardId, nodes);
+      debouncedSaveNodes(user?.uid as string, boardId, nodes);
     },
-    [boardId, nodes, setNodes],
+    [boardId, nodes, setNodes, user?.uid],
   );
 
   const handleEdgeChange = useCallback(
     (changes: EdgeChange[]) => {
       console.log("edge change");
       setEdges((eds) => applyEdgeChanges(changes, eds));
-      debouncedSaveEdges(boardId, edges);
+      debouncedSaveEdges(user?.uid as string, boardId, edges);
     },
-    [boardId, edges, setEdges],
+    [boardId, edges, setEdges, user?.uid],
   );
 
   return (
@@ -98,6 +106,7 @@ export default function Board({ boardId }: BoardProps) {
         selectionOnDrag
         selectionMode={SelectionMode.Partial}
         style={rfStyle}
+        deleteKeyCode={null}
       >
         <Background />
         <Controls />

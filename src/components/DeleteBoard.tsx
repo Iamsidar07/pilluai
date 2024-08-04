@@ -10,11 +10,12 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Archive } from "lucide-react";
+import { Archive, Sparkles } from "lucide-react";
 import useCurrentUser from "@/context/currentUser";
 import { toast } from "sonner";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/firebase";
+import useSubscription from "@/hooks/useSubscription";
 
 interface Props {
   boardId: string;
@@ -22,6 +23,7 @@ interface Props {
 
 const DeleteBoard = ({ boardId }: Props) => {
   const { user } = useCurrentUser();
+  const { hasUserProPlanSubscribe } = useSubscription();
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const handleDeleteBoard = () => {
@@ -29,10 +31,10 @@ const DeleteBoard = ({ boardId }: Props) => {
       toast.info("Please login to continue.");
       return;
     }
-    if (!boardId) return;
+    if (!boardId || !hasUserProPlanSubscribe) return;
     startTransition(async () => {
       try {
-        await deleteDoc(doc(db, "boards", boardId));
+        await deleteDoc(doc(db, `users/${user?.uid}/boards/${boardId}`));
         setIsOpen(false);
         toast.success("Successfully deleted the board.");
       } catch (error) {
@@ -42,10 +44,18 @@ const DeleteBoard = ({ boardId }: Props) => {
   };
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <Button className="w-full" variant="outline">
+      <Button
+        disabled={!hasUserProPlanSubscribe}
+        className="w-full"
+        variant="outline"
+      >
         <DialogTrigger asChild>
           <div className="flex items-center gap-1">
-            <Archive />
+            {hasUserProPlanSubscribe ? (
+              <Archive className="w-4 h-4" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )}
             Archive
           </div>
         </DialogTrigger>

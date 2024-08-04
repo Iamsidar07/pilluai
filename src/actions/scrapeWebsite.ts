@@ -1,8 +1,9 @@
+"use server"
 import { isValidURL } from "@/lib/utils";
 import puppeteer from "puppeteer-core";
 import { executablePath } from "puppeteer";
 
-export const scrapeWebsite = async (url: string) => {
+const scrapeWebsite = async (url: string) => {
   if (!isValidURL(url)) return null;
   const browser = await puppeteer.launch({
     args: ["--no-sandbox"],
@@ -33,3 +34,5 @@ export const scrapeWebsite = async (url: string) => {
     await browser.close();
   }
 };
+
+export default scrapeWebsite;

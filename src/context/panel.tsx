@@ -4,18 +4,19 @@ import { db } from "@/firebase";
 import { debounce } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import {
-    addEdge,
-    Edge,
-    MarkerType,
-    OnConnect,
-    OnEdgesChange,
-    OnNodesChange,
-    useEdgesState,
-    useNodesState
+  addEdge,
+  Edge,
+  MarkerType,
+  OnConnect,
+  OnEdgesChange,
+  OnNodesChange,
+  useEdgesState,
+  useNodesState,
 } from "@xyflow/react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useParams } from "next/navigation";
-import React, { useCallback, useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import useCurrentUser from "./currentUser";
 
 interface IPanelContext {
   nodes: AppNode[] | [];
@@ -37,6 +38,12 @@ interface IPanelContext {
   }) => void;
 }
 
+interface Board {
+  id: string;
+  nodes: AppNode[];
+  edges: Edge[];
+}
+
 export const PanelContext = React.createContext<IPanelContext>({
   nodes: [],
   edges: [],
@@ -49,24 +56,32 @@ export const PanelContext = React.createContext<IPanelContext>({
   updateNode: () => {},
 });
 
-const getBoard = async (boardId: string) => {
-  const docRef = doc(db, "boards", boardId);
-  const docSnap = await getDoc(docRef);
-  return docSnap?.data();
-};
 const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
   const { boardId } = useParams();
-  const { data: boardData, error } = useQuery({
-    queryKey: [boardId, "board"],
-    queryFn: () => getBoard(boardId as string),
-  });
+  const { user } = useCurrentUser();
+  const [boardData, setBoardData] = useState<Board | undefined>(undefined);
 
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(
-    boardData?.edges,
+    boardData?.edges || [],
   );
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>(
-    boardData?.nodes,
+    boardData?.nodes || [],
   );
+
+  useEffect(() => {
+    const getBoard = async () => {
+      if (!user?.uid || !boardId) return null;
+      try {
+        const docRef = doc(db, `users/${user.uid}/boards`, boardId as string);
+        const docSnap = await getDoc(docRef);
+        console.log("boardData", docSnap?.data());
+        setBoardData({ id: docSnap.id, ...docSnap.data() } as Board);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    getBoard();
+  }, [user?.uid, boardId]);
 
   useEffect(() => {
     if (boardData && boardData.nodes) {
@@ -81,17 +96,25 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
     // @ts-ignore
     async (edges) => {
       console.log("saveEdges");
-      const boardRef = doc(db, "boards", boardId as string);
-      updateDoc(boardRef, {
-        edges: edges,
-      });
+      try {
+        const boardRef = doc(
+          db,
+          `users/${user?.uid}/boards`,
+          boardId as string,
+        );
+        updateDoc(boardRef, {
+          edges: edges,
+        });
+      } catch (e) {
+        console.log(e);
+      }
     },
-    [boardId],
+    [boardId, user?.uid],
   );
 
   const onConnect: OnConnect = useCallback(
     (connection) => {
-      console.log("Connect")
+      if (!connection.source || !connection.target) return;
       const edge = {
         ...connection,
         animated: true,
@@ -107,7 +130,7 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
     },
     [edges, saveEdges, setEdges],
   );
-  
+
   const addNode = useCallback(
     (node: AppNode) => {
       setNodes((nds) => [...nds, node]);

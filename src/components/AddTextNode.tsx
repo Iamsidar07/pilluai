@@ -16,7 +16,7 @@ const AddTextNode = () => {
   }, [isTPressed, addTextNode]);
 
   return (
-    <PanelItem onClick={addTextNode} text="Image" shortcutKey="I">
+    <PanelItem onClick={addTextNode} text="Text" shortcutKey="t">
       <Type />
     </PanelItem>
   );

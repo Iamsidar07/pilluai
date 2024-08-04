@@ -24,12 +24,12 @@ const CreateBoard = () => {
     e.preventDefault();
     if (!boardName || !user) return;
     startTransition(async () => {
-      const { success } = await createNewBoard(boardName, user);
+      const { success, message } = await createNewBoard(boardName, user);
       if (success) {
         toast.success("Successfully create new board.");
         setIsOpen(false);
       } else {
-        toast.error("Failed to create new board");
+        toast.error(message ? message : "Failed to create new board");
       }
     });
   };

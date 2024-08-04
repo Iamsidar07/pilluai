@@ -9,13 +9,9 @@ const nextConfig = {
       "lh3.googleusercontent.com",
     ],
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
     config.resolve.alias.canvas = false;
     config.resolve.alias.encoding = false;
-    if (!isServer) {
-      // Ensure that all imports of 'yjs' resolve to the same instance
-      // config.resolve.alias["yjs"] = path.resolve(__dirname, "node_modules/yjs");
-    }
     return config;
   },
 };

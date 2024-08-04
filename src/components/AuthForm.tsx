@@ -6,6 +6,8 @@ import { auth, provider } from "@/firebase";
 import { signInWithPopup } from "firebase/auth";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 interface AuthFormProps {
   title: string;
@@ -48,48 +50,46 @@ const AuthForm = ({
         height={100}
       />
       <h1 className="text-3xl font-bold text-center mt-4">{title}</h1>
-      <form
-        action={handleSubmit}
-        className="mt-4 w-full h-fit max-w-xl shadow-sm bg-white border px-6 py-12 rounded-md flex flex-col gap-4"
-      >
-        {fields.map((field) => (
-          <div key={field.name}>
-            <label
-              htmlFor={field.name.toLowerCase()}
-              className="block text-sm font-medium text-gray-700"
-            >
-              {field.label}
-            </label>
-            <input
-              type={field.type}
-              id={field.name}
-              name={field.name}
-              className="w-full outline-none p-2 ring-1 ring-gray-300 rounded-md mt-2 focus-within:ring-indigo-500 focus-within:border-indigo-500"
-            />
-          </div>
-        ))}
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-violet-500 hover:bg-opacity-90 text-white p-2 rounded-md cursor-pointer mt-4"
+      <div className="w-full max-w-xl shadow-sm bg-white border px-6 py-12 rounded-md mt-4 flex flex-col gap-4">
+        <form
+          action={handleSubmit}
+          className="w-full h-full flex flex-col gap-4"
         >
-          {isLoading ? (
-            <Loader2 className="animate-spin opacity-80 mx-auto" />
-          ) : (
-            actionText
-          )}
-        </button>
+          {fields.map((field) => (
+            <div key={field.name}>
+              <label
+                htmlFor={field.name.toLowerCase()}
+                className="block text-sm font-medium text-gray-700 capitalize"
+              >
+                {field.label}
+              </label>
+              <Input
+                type={field.type}
+                id={field.name}
+                name={field.name}
+                className="mt-2"
+              />
+            </div>
+          ))}
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <Loader2 className="animate-spin opacity-80 mx-auto" />
+            ) : (
+              actionText
+            )}
+          </Button>
+        </form>
         <div className="flex items-center gap-1 mt-4">
           <div className="h-px bg-gray-300 w-full" />
           <p className="text-gray-500 uppercase">or</p>
           <div className="h-px bg-gray-300 w-full" />
         </div>
-        <button
+        <Button
+          variant="outline"
           onClick={(e) => {
             e.stopPropagation();
             handleSignInWithGoogle();
           }}
-          className="w-full flex items-center justify-center gap-4 font-bold bg-white border hover:bg-opacity-90  p-2 rounded-md cursor-pointer mt-4"
         >
           {isPending ? (
             <Loader2 className="animate-spin opacity-80" />
@@ -116,14 +116,14 @@ const AuthForm = ({
               {googleText}
             </div>
           )}
-        </button>
+        </Button>
         <Link
           href={alternateLink}
-          className="text-center font-bold text-violet-500"
+          className="text-center font-bold text-primary"
         >
           {alternateText}
         </Link>
-      </form>
+      </div>
     </div>
   );
 };

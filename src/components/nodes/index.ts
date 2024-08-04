@@ -1,9 +1,10 @@
 import type { BuiltInNode, Node, NodeTypes } from "@xyflow/react";
-import ChatNode from "./chatNode/ChatNode";
+import ChatNode from "./ChatNode";
 import ImageNode from "./ImageNode";
 import TextNode from "./TextNode";
 import WebScrapperNode from "./WebScrapperNode";
 import YoutubeNode from "./YoutubeNode";
+import PdfNode from "./PdfNode";
 
 export type TTextNode = Node<
   {
@@ -11,6 +12,16 @@ export type TTextNode = Node<
     type: "textNode";
   },
   "textNode"
+>;
+
+export type TPdfNode = Node<
+  {
+    url: string;
+    type: "pdfNode";
+    name: string;
+    namespace: string;
+  },
+  "pdfNode"
 >;
 
 export type TChatNode = Node<
@@ -37,10 +48,10 @@ export type TWebScrapperNode = Node<
 export type TImageNode = Node<
   {
     description: string;
-    tempUrl: string; //TODO: base64 of image
+    tempUrl: string;
     text: string;
     title: string;
-    url: string; //TODO: Uploaded url
+    url: string;
     type: "imageNode";
   },
   "imageNode"
@@ -62,7 +73,8 @@ export type AppNode =
   | TChatNode
   | BuiltInNode
   | TYoutubeNode
-  | TTextNode;
+  | TTextNode
+  | TPdfNode;
 
 export const initialNodes: AppNode[] = [];
 
@@ -72,4 +84,5 @@ export const nodeTypes = {
   webScrapperNode: WebScrapperNode,
   imageNode: ImageNode,
   youtubeNode: YoutubeNode,
+  pdfNode: PdfNode,
 } satisfies NodeTypes;

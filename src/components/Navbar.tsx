@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { usePathname } from "next/navigation";
@@ -17,6 +16,7 @@ import {
 } from "./ui/dropdown-menu";
 import { toast } from "sonner";
 import useCurrentUser from "@/context/currentUser";
+import UpgradeButton from "./UpgradeButton";
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -34,64 +34,70 @@ const Navbar = () => {
     }
   };
   return (
-    <header
-      className={cn(
-        "sticky top-0 flex items-center justify-between bg-white shadow-sm border-b h-14 px-4 lg:px-8",
-        {
-          hidden: pathname === "/signup" || pathname === "/login",
-        }
-      )}
+    <div
+      className={cn("sticky top-0 z-30 bg-white/75 backdrop-blur border-b ", {
+        hidden: pathname === "/signup" || pathname === "/login",
+      })}
     >
-      <div className="flex items-center gap-6">
-        <Link href="/">
-          <Image
-            src="https://poppyai.vercel.app/_next/image?url=%2Flogo-300-no-text.png&w=48&q=75"
-            alt="logo"
-            width={40}
-            height={40}
-          />
-        </Link>
-        <Link
-          href="/boards"
-          className={cn("", {
-            "text-violet-500": pathname === "/boards",
-          })}
-        >
-          Boards
-        </Link>
-      </div>
-      {!user?.uid && (
-        <div className="flex items-center gap-2">
-          <Link href="/login">
-            <p className="text-gray-500">Login</p>
-          </Link>
-          <Link href="/signup">
-            <p className="text-gray-500">Sign up</p>
+      <header className="flex items-center justify-between w-full max-w-7xl mx-auto h-14 px-4 lg:px-0">
+        <div className="flex items-center gap-6">
+          <Link href="/" className="text-2xl font-bold">
+            Pillu <span className="text-primary">AI</span>
           </Link>
         </div>
-      )}
-      {user?.uid && (
         <div className="flex items-center gap-2">
-          <span>Welcome, {user.name || ""}</span>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="cursor-pointer">
-              <Avatar>
-                <AvatarFallback>{user.name?.[0]}</AvatarFallback>
-                <AvatarImage src={user.photoURL} />
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem
-                onClick={handleLogout}
-                className="cursor-pointer"
-              >
-                Sign Out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Link
+            href="/boards"
+            className={cn("", {
+              "text-primary": pathname === "/boards",
+            })}
+          >
+            Boards
+          </Link>
+          <Link
+            href="/pricing"
+            className={cn("hidden md:block", {
+              "text-primary": pathname === "/pricing",
+            })}
+          >
+            Pricing
+          </Link>
+
+          {!user?.uid && (
+            <>
+              <Link href="/login">
+                <p className="text-gray-500">Login</p>
+              </Link>
+              <Link href="/signup">
+                <p className="text-gray-500">Sign up</p>
+              </Link>
+            </>
+          )}
+
+          {user?.uid && (
+            <>
+              <UpgradeButton />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild className="cursor-pointer">
+                  <Avatar>
+                    <AvatarFallback>{user.name?.[0]}</AvatarFallback>
+                    <AvatarImage src={user.photoURL} />
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="cursor-pointer"
+                  >
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          )}
         </div>
-      )}
-    </header>
+      </header>
+    </div>
   );
 };
 

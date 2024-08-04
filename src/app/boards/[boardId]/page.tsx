@@ -15,16 +15,24 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { boardId } = params;
   const boardRef = doc(db, "boards", boardId);
-  const board = await getDoc(boardRef);
-
   const previousImages = (await parent).openGraph?.images || [];
+  try {
+    const board = await getDoc(boardRef);
 
-  return {
-    title: board?.data()?.name || "My Board",
-    openGraph: {
-      images: ["/og.png", ...previousImages],
-    },
-  };
+    return {
+      title: board?.data()?.name || "My Board",
+      openGraph: {
+        images: ["/og.png", ...previousImages],
+      },
+    };
+  } catch (error) {
+    return {
+      title: "My Board",
+      openGraph: {
+        images: ["/og.png", ...previousImages],
+      },
+    };
+  }
 }
 
 export default function BoardPage({ params }: BoardProps) {

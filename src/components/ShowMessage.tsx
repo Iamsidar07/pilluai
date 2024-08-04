@@ -14,7 +14,7 @@ const ShowMessage = ({ role, content }: Message) => {
     return <MarkdownRenderer content={content} />;
   }, [content]);
   return (
-    <div className="nowheel nodrag">
+    <div className="nowheel nodrag textselectable">
       <div className="flex items-center gap-1">
         <Image
           src={
@@ -31,7 +31,7 @@ const ShowMessage = ({ role, content }: Message) => {
         {role === "user" ? (
           <span className="text-green-500 text-sm">{user?.name || ""}</span>
         ) : (
-          <span className="text-violet-500 text-sm">Pillu</span>
+          <span className="text-primary text-sm">Pillu AI</span>
         )}
       </div>
       <div className="w-full pr-10 relative">

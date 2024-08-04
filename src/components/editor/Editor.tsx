@@ -26,9 +26,10 @@ import { LinkSelector } from "./selectors/link-selector";
 import { NodeSelector } from "./selectors/node-selector";
 import { TextButtons } from "./selectors/text-buttons";
 import { defaultExtensions } from "./extensions";
+import useCurrentUser from "@/context/currentUser";
 
-const getBoard = async (boardId: string) => {
-  const docRef = doc(db, "boards", boardId);
+const getBoard = async (userId: string, boardId: string) => {
+  const docRef = doc(db, `users/${userId}/boards`, boardId);
   const docSnap = await getDoc(docRef);
   return docSnap.data();
 };
@@ -42,6 +43,7 @@ const TailwindEditor = ({
   initialContent: JSONContent | null;
   setSaveStatus: React.Dispatch<React.SetStateAction<string>>;
 }) => {
+  const { user } = useCurrentUser();
   const [openNode, setOpenNode] = useState(false);
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
@@ -56,7 +58,7 @@ const TailwindEditor = ({
     error: errorWhileFetchingNotes,
   } = useQuery({
     queryKey: ["board", boardId],
-    queryFn: () => getBoard(boardId),
+    queryFn: () => getBoard(user?.uid as string, boardId),
   });
 
   useEffect(() => {
@@ -66,11 +68,10 @@ const TailwindEditor = ({
 
   const extensions = useMemo(() => [...defaultExtensions, slashCommand], []);
 
-  console.log("content", content);
   const onUpdate = async (content: JSONContent) => {
     try {
       setSaveStatus("Saving...");
-      const docRef = doc(db, "boards", boardId);
+      const docRef = doc(db, `users/${user?.uid}/boards`, boardId);
       const docSnap = await updateDoc(docRef, {
         notes: JSON.stringify(content),
       });
@@ -85,31 +86,28 @@ const TailwindEditor = ({
     }
   };
 
-  const { mutateAsync: updateNotes, error } = useMutation({
-    mutationFn: ({ content }: { content: JSONContent }) => onUpdate(content),
-  });
-
-  const debouncedUpdateNotes = useCallback(
-    (content: JSONContent) => debounce(() => updateNotes({ content }), 500),
-    [updateNotes]
-  );
   return (
     <EditorRoot>
       <EditorContent
         extensions={extensions}
         initialContent={initialContent ?? { type: "doc", content: [] }}
-        className=""
+        className="p-4"
         editorProps={{
           handleDOMEvents: {
             keydown: (_view, event) => handleCommandNavigation(event),
           },
           attributes: {
-            class: `prose dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full h-full `,
+            class: `prose prose-headings:font-title focus:outline-none max-w-full h-full `,
           },
         }}
         onUpdate={({ editor }) => {
           setContent(editor.getJSON());
-          debouncedUpdateNotes(editor.getJSON());
+          console.log("onUpdate", editor.getJSON());
+          const onUpdateDebounced = debounce(
+            async () => await onUpdate(editor.getJSON()),
+            700,
+          );
+          onUpdateDebounced();
         }}
       >
         <EditorCommand className="z-50 h-auto max-h-[330px]  w-72 overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
