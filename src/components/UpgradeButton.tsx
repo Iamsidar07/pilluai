@@ -1,14 +1,14 @@
 "use client";
 
-import useSubscription from "@/hooks/useSubscription";
-import { Button } from "./ui/button";
-import Link from "next/link";
-import { Loader, Loader2, StarsIcon } from "lucide-react";
-import { useTransition } from "react";
 import createStripePortal from "@/actions/createStripePortal";
 import useCurrentUser from "@/context/currentUser";
+import useSubscription from "@/hooks/useSubscription";
+import { Loader2, StarsIcon } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { toast } from "sonner";
+import { Button } from "./ui/button";
 
 const UpgradeButton = () => {
   const { user } = useCurrentUser();
@@ -41,7 +41,7 @@ const UpgradeButton = () => {
   if (loading)
     return (
       <Button>
-        <Loader className="animate-spin" />
+        <Loader2 className="animate-spin" />
       </Button>
     );
 

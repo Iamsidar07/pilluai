@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import useCurrentUser from "@/context/currentUser";
 import UpgradeButton from "./UpgradeButton";
+import Image from "next/image";
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -41,7 +42,14 @@ const Navbar = () => {
     >
       <header className="flex items-center justify-between w-full max-w-7xl mx-auto h-14 px-4 lg:px-0">
         <div className="flex items-center gap-6">
-          <Link href="/" className="text-2xl font-bold">
+          <Link href="/" className="text-2xl font-bold flex items-center gap-1">
+            <Image
+              src="/logo.png"
+              alt="Pillu AI"
+              width={50}
+              height={50}
+              className="object-contain"
+            />
             Pillu <span className="text-primary">AI</span>
           </Link>
         </div>

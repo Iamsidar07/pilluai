@@ -1,18 +1,18 @@
 "use client";
-import { FolderPlus, Loader2, Plus } from "lucide-react";
-import React, { FormEvent, useState, useTransition } from "react";
-import { Button } from "./ui/button";
+import createNewBoard from "@/actions/createNewBoard";
 import useCurrentUser from "@/context/currentUser";
+import { FolderPlus, Loader2, Plus } from "lucide-react";
+import { FormEvent, useState, useTransition } from "react";
+import { toast } from "sonner";
+import { Button } from "./ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from "./ui/dialog";
 import { Input } from "./ui/input";
-import createNewBoard from "@/actions/createNewBoard";
-import { toast } from "sonner";
 
 const CreateBoard = () => {
   const { user } = useCurrentUser();
@@ -39,7 +39,7 @@ const CreateBoard = () => {
       <FolderPlus className="w-8 h-8 text-gray-400 mx-auto" />
 
       <DialogTrigger asChild>
-        <Button className="border mt-2 text-white font-normal capitalize flex items-center gap-1">
+        <Button className="border mt-2 text-white capitalize flex items-center gap-1 font-bold">
           <>
             <div className="w-6 h-6">
               {isPending ? <Loader2 className="animate-spin" /> : <Plus />}

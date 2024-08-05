@@ -1,5 +1,6 @@
 import GetStartedButton from "@/components/GetStartedButton";
 import Pricing from "@/components/Pricing";
+
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
@@ -39,7 +40,8 @@ const FEATURES = [
 export default async function Home() {
   return (
     <main className="p-4 lg:p-8 grainy-light w-full overflow-y-auto flex-1 rounded-2xl bg-pink-50">
-      <div className="max-w-7xl mx-auto flex flex-col items-center py-24 lg:py-32">
+      <div className="max-w-7xl mx-auto flex flex-col items-center py-24 lg:py-32 relative z-[1]">
+        <div className="absolute w-full h-80 bg-gradient-to-b from-pink-300 z-[-1] blur-[20rem]" />
         <div className="mx-auto max-w-2xl text-left sm:text-center">
           <h2 className="font-bold text-gray-600">
             Your interactive whiteboard comapanion

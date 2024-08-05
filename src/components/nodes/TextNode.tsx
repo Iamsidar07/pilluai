@@ -1,10 +1,9 @@
 "use client";
 import { usePanel } from "@/context/panel";
 import { cn } from "@/lib/utils";
-import { NodeProps } from "@xyflow/react";
+import { NodeProps, NodeResizeControl, NodeResizer } from "@xyflow/react";
 import { useCallback, useEffect, useState } from "react";
 import CustomHandle from "../CustomHandle";
-import CustomResizer from "../CustomResizer";
 
 const TextNode = ({ id, selected, data }: NodeProps) => {
   const { updateNode } = usePanel();
@@ -30,7 +29,8 @@ const TextNode = ({ id, selected, data }: NodeProps) => {
         "ring ring-gray-200": selected,
       })}
     >
-      <CustomResizer />
+      <NodeResizeControl />
+      <NodeResizer />
       <CustomHandle type="source" />
       <div className="h-full border rounded">
         <textarea

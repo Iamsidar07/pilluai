@@ -1,25 +1,24 @@
 "use client";
 import CustomHandle from "@/components/CustomHandle";
-import CustomResizer from "@/components/CustomResizer";
-import { NodeProps } from "@xyflow/react";
+import { NodeProps, NodeResizeControl, NodeResizer } from "@xyflow/react";
 
 import ShowMessage from "@/components/ShowMessage";
-import { IoCreateOutline } from "react-icons/io5";
-import { ArrowRightIcon, Bot } from "lucide-react";
-import { Message, useChat } from "ai/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { useCollection } from "react-firebase-hooks/firestore";
-import { nanoid } from "nanoid";
-import { usePanel } from "@/context/panel";
-import { useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import useCurrentUser from "@/context/currentUser";
-import { collection, doc, orderBy, query, setDoc } from "firebase/firestore";
+import { usePanel } from "@/context/panel";
 import { db } from "@/firebase";
 import useSubscription from "@/hooks/useSubscription";
 import { maxChatInOneChatNode } from "@/lib/config";
+import { cn } from "@/lib/utils";
+import { Message, useChat } from "ai/react";
+import { collection, doc, orderBy, query, setDoc } from "firebase/firestore";
+import { ArrowRightIcon, Bot } from "lucide-react";
+import { nanoid } from "nanoid";
+import { useParams } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useCollection } from "react-firebase-hooks/firestore";
+import { IoCreateOutline } from "react-icons/io5";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 
 interface Chat {
   id: string;
@@ -39,7 +38,6 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
     setMessages,
   } = useChat({
     onResponse() {
-      console.log("onResponse", messages);
       setIsAIThinking(false);
     },
     onError() {
@@ -142,7 +140,6 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       id: newChatId,
       createdAt: new Date(),
     } as Chat);
-    console.log("created new chat: ", newChatId);
   }, [
     boardId,
     chats.length,
@@ -170,7 +167,6 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       e.preventDefault();
       if (!input || input.trim().length === 0) return;
       let currentChatId = currentChat?.id;
-      console.log("currentChat", currentChat);
       setIsAIThinking(true);
       try {
         if (!currentChat) {
@@ -207,7 +203,6 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
             },
           },
         });
-        console.log("messages", messages);
         messages.pop();
         setInput("");
       } catch (error) {
@@ -237,7 +232,8 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
 
   return (
     <div className="bg-white shadow-sm rounded border overflow-hidden flex h-full w-full">
-      <CustomResizer color={selected ? "violet" : "transparent"} />
+      <NodeResizeControl />
+      <NodeResizer />
       <CustomHandle type="target" />
       <div className="w-1/3 border-r relative">
         <div className="p-2 bg-zinc-100 h-full ">

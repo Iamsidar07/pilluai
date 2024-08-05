@@ -3,8 +3,10 @@ import React from "react";
 
 const loading = () => {
   return (
-    <div className="w-full h-[calc(100vh-56px)] overflow-hidden pt-12 lg:pt-24">
-      <Loader2 className="animate-spin mx-auto" />
+    <div className="absolute inset-0 bg-zinc-100 flex flex-col items-center justify-center">
+      <h1 className="text-3xl lg:text-9xl font-bold text-gray-200">
+        Loading...
+      </h1>
     </div>
   );
 };

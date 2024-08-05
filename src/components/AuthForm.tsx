@@ -1,11 +1,10 @@
 "use client";
-import React, { useTransition } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { auth, provider } from "@/firebase";
 import { signInWithPopup } from "firebase/auth";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import Image from "next/image";
+import Link from "next/link";
+import { useTransition } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
@@ -43,12 +42,7 @@ const AuthForm = ({
 
   return (
     <div className="flex flex-col items-center w-full max-w-lg mx-auto p-4 lg:p-8 pt-12 lg:pt-24">
-      <Image
-        src="https://poppyai.vercel.app/_next/image?url=%2Flogo-300.png&w=128&q=75"
-        alt="logo"
-        width={100}
-        height={100}
-      />
+      <Image src="/logo.png" alt="logo" width={100} height={100} />
       <h1 className="text-3xl font-bold text-center mt-4">{title}</h1>
       <div className="w-full max-w-xl shadow-sm bg-white border px-6 py-12 rounded-md mt-4 flex flex-col gap-4">
         <form

@@ -1,13 +1,11 @@
 /** @type {import('next').NextConfig} */
-import path from "path";
 const nextConfig = {
   images: {
-    domains: [
-      "generated.vusercontent.net",
-      "res.cloudinary.com",
-      "poppyai.vercel.app",
-      "lh3.googleusercontent.com",
-      "firebasestorage.googleapis.com",
+    remotePatterns: [
+      { hostname: "firebasestorage.googleapis.com", protocol: "https" },
+      {
+        hostname: "lh3.googleusercontent.com",
+      },
     ],
   },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {

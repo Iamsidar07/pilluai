@@ -1,14 +1,10 @@
 "use client";
 
-import { NodeProps } from "@xyflow/react";
-import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { NodeProps, NodeResizeControl, NodeResizer } from "@xyflow/react";
 import CustomHandle from "../CustomHandle";
-import CustomResizer from "../CustomResizer";
-import { FaRegFilePdf } from "react-icons/fa";
-import useUpload from "@/hooks/useUpload";
 import FileUploader from "../PdfFileUploader";
 import PdfViewer from "../PdfViewer";
-import { cn } from "@/lib/utils";
 
 const PdfNode = ({ id, selected, data }: NodeProps) => {
   return (
@@ -17,11 +13,12 @@ const PdfNode = ({ id, selected, data }: NodeProps) => {
         "ring-1 ring-gray-900/10 w-full h-full bg-white shadow-sm rounded",
         {
           "ring-primary": selected,
-        },
+        }
       )}
     >
       <CustomHandle type="source" />
-      <CustomResizer />
+      <NodeResizeControl />
+      <NodeResizer />
       <div className="w-full h-full flex flex-col items-center justify-center gap-4 !text-xs">
         {data?.url && data?.name ? (
           <div className="truncate w-full h-full">
