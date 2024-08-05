@@ -26,6 +26,7 @@ const useYoutubeNode = () => {
       const { success, description, title } = await getYoutubeVideoInfo(
         videoUrl
       );
+      console.log(success, description, title);
       if (!success) {
         toast.error("Failed to get video details");
         return;

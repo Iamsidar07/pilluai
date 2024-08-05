@@ -31,13 +31,14 @@ const AddImageNode = () => {
         data,
       });
     },
-    [updateNode],
+    [updateNode]
   );
 
   const handleSelectFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files?.length === 0 || !files) return;
     const file = files[0];
+    console.log("adding image node", file);
     const newNode: TImageNode = {
       position: { x: 0, y: 0 },
       id: nanoid(),
@@ -48,7 +49,7 @@ const AddImageNode = () => {
         url: "",
         description: "",
         text: "",
-        title: file.name,
+        title: "Uploading...",
         tempUrl: URL.createObjectURL(file),
       },
       type: "imageNode",
@@ -60,13 +61,13 @@ const AddImageNode = () => {
       const blob = await file.arrayBuffer();
       const uploadTask = await uploadBytesResumable(imageRef, blob);
       const url = await getDownloadURL(uploadTask.ref);
-      updateImageNode(newNode.id, { url });
+      console.log("from add image node", { url });
+      updateImageNode(newNode.id, { url, tempUrl: null, title: file.name });
     } catch (error: any) {
       console.log("Something went wrong!", error);
       toast.error("Something went wrong");
     }
   };
-
   return (
     <PanelItem text="Image" shortcutKey="I">
       <label ref={selectImageRef} htmlFor="selectImage">

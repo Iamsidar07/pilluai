@@ -7,6 +7,7 @@ const nextConfig = {
       "res.cloudinary.com",
       "poppyai.vercel.app",
       "lh3.googleusercontent.com",
+      "firebasestorage.googleapis.com",
     ],
   },
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {

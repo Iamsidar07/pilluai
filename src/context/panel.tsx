@@ -19,6 +19,7 @@ import useCurrentUser from "./currentUser";
 import { useDocument } from "react-firebase-hooks/firestore";
 import useSubscription from "@/hooks/useSubscription";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 
 interface IPanelContext {
   nodes: AppNode[] | [];
@@ -65,24 +66,21 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useCurrentUser();
   const [boardData, setBoardData] = useState<Board | undefined>(undefined);
 
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(
-    boardData?.edges || []
-  );
-  const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>(
-    boardData?.nodes || []
-  );
-  const [snapshot, loading, err] = useDocument(
-    user && boardId ? doc(db, `users/${user.uid}/boards`, boardId) : null
-  );
-  console.log("err", err);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
+
   useEffect(() => {
-    if (!snapshot) return;
-    const data = snapshot.data();
-    if (!data) return;
-    setBoardData({ id: snapshot.id, ...data } as Board);
-    setNodes(data?.nodes);
-    setEdges(data?.edges);
-  }, [setEdges, setNodes, snapshot]);
+    if (!user || !boardId) return;
+    const getBoard = async (userId: string, boardId: string) => {
+      const docRef = doc(db, `users/${userId}/boards`, boardId);
+      const docSnap = await getDoc(docRef);
+      const data = docSnap.data();
+      console.log("data", data);
+      setNodes(data?.nodes);
+      setEdges(data?.edges);
+    };
+    getBoard(user.uid, boardId);
+  }, [user, boardId, setNodes, setEdges]);
 
   const saveEdges = useCallback(
     // @ts-ignore
@@ -107,6 +105,8 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
   const onConnect: OnConnect = useCallback(
     (connection) => {
       if (!connection.source || !connection.target) return;
+      console.log("edges", edges);
+      console.log("connection", connection);
       const edge = {
         ...connection,
         animated: true,
@@ -120,7 +120,7 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
       );
       saveEdgesDebounced();
     },
-    [edges, saveEdges, setEdges]
+    [saveEdges, setEdges]
   );
 
   const addNode = useCallback(
@@ -167,7 +167,7 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
       }
       setNodes((nds) => [...nds, node]);
     },
-    [setNodes, nodes, hasActiveMembership]
+    [setNodes]
   );
 
   const updateNode = useCallback(

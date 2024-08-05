@@ -38,7 +38,7 @@ const debouncedSaveNodes = debounce(
       return;
     }
   },
-  1000,
+  1000
 );
 
 const debouncedSaveEdges = debounce(
@@ -56,7 +56,7 @@ const debouncedSaveEdges = debounce(
       return;
     }
   },
-  1000,
+  1000
 );
 
 interface BoardProps {
@@ -78,7 +78,7 @@ export default function Board({ boardId }: BoardProps) {
       setNodes((nds) => applyNodeChanges(changes, nds));
       debouncedSaveNodes(user?.uid as string, boardId, nodes);
     },
-    [boardId, nodes, setNodes, user?.uid],
+    [boardId, nodes, setNodes, user?.uid]
   );
 
   const handleEdgeChange = useCallback(
@@ -87,7 +87,7 @@ export default function Board({ boardId }: BoardProps) {
       setEdges((eds) => applyEdgeChanges(changes, eds));
       debouncedSaveEdges(user?.uid as string, boardId, edges);
     },
-    [boardId, edges, setEdges, user?.uid],
+    [boardId, edges, setEdges, user?.uid]
   );
 
   return (
@@ -106,7 +106,7 @@ export default function Board({ boardId }: BoardProps) {
         selectionOnDrag
         selectionMode={SelectionMode.Partial}
         style={rfStyle}
-        deleteKeyCode={null}
+        // deleteKeyCode={null}
       >
         <Background />
         <Controls />

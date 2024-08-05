@@ -26,8 +26,9 @@ const AddYoutubeNode = () => {
   const isYPressed = useKeyPress("y" || "Y");
   useEffect(() => {
     if (isYPressed) {
+      setOpen(true);
     }
-  }, [isYPressed]);
+  }, [isYPressed, setOpen]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -47,7 +48,7 @@ const AddYoutubeNode = () => {
             className="w-full"
             placeholder="Enter any youtube video URL"
           />
-          <Button type="submit" className="mt-6 w-full">
+          <Button disabled={isPending} type="submit" className="mt-6 w-full">
             {isPending ? "Saving..." : "Save"}
           </Button>
         </form>

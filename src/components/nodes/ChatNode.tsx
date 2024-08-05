@@ -14,15 +14,7 @@ import { nanoid } from "nanoid";
 import { usePanel } from "@/context/panel";
 import { useParams } from "next/navigation";
 import useCurrentUser from "@/context/currentUser";
-import {
-  addDoc,
-  collection,
-  doc,
-  orderBy,
-  query,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { collection, doc, orderBy, query, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
 import useSubscription from "@/hooks/useSubscription";
 import { maxChatInOneChatNode } from "@/lib/config";
@@ -61,7 +53,6 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
-  console.log({ boardId, nodeId, userId: user?.uid });
 
   const [chatsSnapshot, loading, error] = useCollection(
     user &&
@@ -91,7 +82,6 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       )
   );
   useEffect(() => {
-    console.log("chatsSnapshot", chatsSnapshot?.docs);
     if (chatsSnapshot) {
       const newChats = chatsSnapshot.docs.map(
         (doc) =>
@@ -108,7 +98,6 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
   }, [chatsSnapshot]);
 
   useEffect(() => {
-    console.log("messagesSnapshot", messagesSnapshot?.docs);
     if (messagesSnapshot) {
       const newMessages = messagesSnapshot.docs.map(
         (doc) =>
@@ -120,7 +109,6 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       setMessages(newMessages);
     }
   }, [messagesSnapshot, currentChat, setMessages]);
-  console.log({ currentChat });
 
   useEffect(() => {
     if (messagesEndRef.current && messages.length > 0) {
@@ -132,7 +120,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
     }
   }, [messages, messagesEndRef]);
 
-  const handleCreateNewChat = async () => {
+  const handleCreateNewChat = useCallback(async () => {
     if (!hasUserProPlanSubscribe && chats.length >= maxChatInOneChatNode) {
       toast.info("You've reached the limit of new chats.");
       return;
@@ -155,7 +143,15 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       createdAt: new Date(),
     } as Chat);
     console.log("created new chat: ", newChatId);
-  };
+  }, [
+    boardId,
+    chats.length,
+    hasUserProPlanSubscribe,
+    nodeId,
+    setInput,
+    setMessages,
+    user?.uid,
+  ]);
 
   const getKnowledgeBaseNodes = useCallback(
     (chatNodeId: string) => {
@@ -169,63 +165,75 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
     [edges, nodes]
   );
 
-  const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!input || input.trim().length === 0) return;
-    let currentChatId = currentChat?.id;
-    console.log("currentChat", currentChat);
-    setIsAIThinking(true);
-    try {
-      if (!currentChat) {
-        const newChatId = nanoid();
-        currentChatId = newChatId;
-        setChats((prevChats) => [
-          { id: newChatId, title: input, createdAt: new Date() },
-          ...prevChats,
-        ]);
-        const chatCollectionRef = doc(
-          db,
-          `users/${user?.uid}/boards/${boardId}/chatNodes/${nodeId}/chats`,
-          newChatId
-        );
-        await setDoc(chatCollectionRef, {
-          title: null,
-          createdAt: new Date(),
-        });
-        setCurrentChat({
-          id: newChatId,
-          title: null,
-          createdAt: new Date(),
-        });
-      }
+  const handleSendMessage = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!input || input.trim().length === 0) return;
+      let currentChatId = currentChat?.id;
+      console.log("currentChat", currentChat);
+      setIsAIThinking(true);
+      try {
+        if (!currentChat) {
+          const newChatId = nanoid();
+          currentChatId = newChatId;
+          setChats((prevChats) => [
+            { id: newChatId, title: input, createdAt: new Date() },
+            ...prevChats,
+          ]);
+          const chatCollectionRef = doc(
+            db,
+            `users/${user?.uid}/boards/${boardId}/chatNodes/${nodeId}/chats`,
+            newChatId
+          );
+          await setDoc(chatCollectionRef, {
+            title: null,
+            createdAt: new Date(),
+          });
+          setCurrentChat({
+            id: newChatId,
+            title: null,
+            createdAt: new Date(),
+          });
+        }
 
-      handleSubmit(e, {
-        options: {
-          body: {
-            knowledgeBaseNodes: getKnowledgeBaseNodes(nodeId),
-            userId: user?.uid,
-            boardId,
-            nodeId,
-            currentChat,
+        handleSubmit(e, {
+          options: {
+            body: {
+              knowledgeBaseNodes: getKnowledgeBaseNodes(nodeId),
+              userId: user?.uid,
+              boardId,
+              nodeId,
+              currentChat,
+            },
           },
-        },
-      });
-      console.log("messages", messages);
-      messages.pop();
-      setInput("");
-    } catch (error) {
-      console.log(error);
-      setMessages([
-        ...messages,
-        {
-          id: nanoid(),
-          role: "assistant",
-          content: "Oops! Something went wrong. Please try again later.",
-          createdAt: new Date(),
-        },
-      ]);
-    }
-  };
+        });
+        console.log("messages", messages);
+        messages.pop();
+        setInput("");
+      } catch (error) {
+        console.log(error);
+        setMessages([
+          ...messages,
+          {
+            id: nanoid(),
+            role: "assistant",
+            content: "Oops! Something went wrong. Please try again later.",
+            createdAt: new Date(),
+          },
+        ]);
+      }
+    },
+    [
+      boardId,
+      getKnowledgeBaseNodes,
+      handleSubmit,
+      nodeId,
+      setInput,
+      setMessages,
+      user?.uid,
+      setCurrentChat,
+    ]
+  );
 
   return (
     <div className="bg-white shadow-sm rounded border overflow-hidden flex h-full w-full">

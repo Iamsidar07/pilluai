@@ -28,48 +28,52 @@ const useWebScrapperNode = (nodeId: string) => {
     [nodeId, updateNode]
   );
 
-  const handleAddWebscrapperNode = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-    if (!isValidURL(url)) {
-      toast.error("Please enter a valid url");
-      return;
-    }
-    try {
-      setIsLoading(true);
-      const scrapedData = await scrapeWebsite(url);
-      if (!scrapedData) {
-        toast.error("Failed to scrape.");
+  const handleAddWebscrapperNode = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      if (!isValidURL(url)) {
+        toast.error("Please enter a valid url");
         return;
       }
-      updateWebScrapperNode({
-        url,
-        title: scrapedData.title,
-        description: scrapedData.description,
-        tempUrl: `data:image/png;base64,${scrapedData.base64}`,
-      });
-      const imageRef = ref(storage, `users/${user?.uid}/files/${nanoid()}`);
-      const uploadTask = await uploadBytesResumable(
-        imageRef,
-        scrapedData.buffer
-      );
-      const uploadedImageUrl = await getDownloadURL(uploadTask.ref);
-      const { namespace, success } = await storeWebsiteEmbeddings(url);
-      if (!success) {
-        toast.error("Failed to generate embedding.");
-        return;
+      try {
+        setIsLoading(true);
+        const scrapedData = await scrapeWebsite(url);
+        if (!scrapedData) {
+          toast.error("Failed to scrape.");
+          return;
+        }
+        updateWebScrapperNode({
+          url,
+          title: scrapedData.title,
+          description: scrapedData.description,
+          tempUrl: `data:image/png;base64,${scrapedData.base64}`,
+        });
+        const imageRef = ref(storage, `users/${user?.uid}/files/${nanoid()}`);
+        const uploadTask = await uploadBytesResumable(
+          imageRef,
+          scrapedData.buffer
+        );
+        const uploadedImageUrl = await getDownloadURL(uploadTask.ref);
+        console.log("uploadedImage: ", uploadedImageUrl);
+        const { namespace, success } = await storeWebsiteEmbeddings(url);
+        if (!success) {
+          toast.error("Failed to generate embedding.");
+          return;
+        }
+        updateWebScrapperNode({
+          screenshotUrl: uploadedImageUrl as string,
+          tempUrl: null,
+          namespace,
+        });
+      } catch (error: any) {
+        console.log("error:", error);
+        toast.error("Something went wrong");
+      } finally {
+        setIsLoading(false);
       }
-      updateWebScrapperNode({
-        screenshotUrl: uploadedImageUrl as string,
-        tempUrl: null,
-        namespace,
-      });
-    } catch (error: any) {
-      console.log("error:", error);
-      toast.error("Something went wrong");
-    }
-  };
+    },
+    [updateWebScrapperNode, setIsLoading, url, user?.uid]
+  );
 
   return { handleAddWebscrapperNode, url, setUrl, isLoading };
 };

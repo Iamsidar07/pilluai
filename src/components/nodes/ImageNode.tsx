@@ -6,6 +6,7 @@ import CustomHandle from "../CustomHandle";
 import { AspectRatio } from "../ui/aspect-ratio";
 
 const ImageNode = ({ id, data, selected }: NodeProps) => {
+
   return (
     <div
       className={cn(
