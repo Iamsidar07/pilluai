@@ -20,7 +20,7 @@ const UpgradeButton = () => {
   const handleAccount = () => {
     if (!user) return;
     if (isPaymentEnabled) {
-      toast.info("Payment is not working right now.");
+      toast.info("Payment is not disabled right now.");
       return;
     }
     startTransition(async () => {
