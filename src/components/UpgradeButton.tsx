@@ -8,15 +8,21 @@ import { useTransition } from "react";
 import createStripePortal from "@/actions/createStripePortal";
 import useCurrentUser from "@/context/currentUser";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const UpgradeButton = () => {
   const { user } = useCurrentUser();
   const { hasActiveMembership, loading } = useSubscription();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const isPaymentEnabled = true;
 
   const handleAccount = () => {
     if (!user) return;
+    if (isPaymentEnabled) {
+      toast.info("Payment is not working right now.");
+      return;
+    }
     startTransition(async () => {
       const stripePortalUrl = await createStripePortal(user.uid);
       router.push(stripePortalUrl);
