@@ -1,7 +1,7 @@
-import { Button } from "@/components/ui/button";
+import GetStartedButton from "@/components/GetStartedButton";
+import Pricing from "@/components/Pricing";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import Link from "next/link";
 
 const FEATURES = [
   {
@@ -28,6 +28,12 @@ const FEATURES = [
       "Interact with websites and PDF documents just like you would with a person. Get the information you need quickly and efficiently without having to sift through pages of content.",
     image: "/a.png",
   },
+  {
+    title: "Notion-like Editor for Note-taking",
+    description:
+      "Experience a beautiful and intuitive Notion-like editor within PilluAI. Seamlessly write and organize your notes, thoughts, and ideas all in one place.",
+    image: "/a.png",
+  },
 ];
 
 export default async function Home() {
@@ -52,9 +58,7 @@ export default async function Home() {
               and helping you make 10x more money.
             </span>
           </p>
-          <Button className="mt-4 rounded-2xl px-6 font-bold" asChild>
-            <Link href={"/boards"}>Get started</Link>
-          </Button>
+          <GetStartedButton />
         </div>
         <div className="relative pt-16 overflow-hidden my-12 rounded-2xl">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -86,7 +90,7 @@ export default async function Home() {
                     "bg-green-50": i === 1,
                     "bg-blue-50": i === 2,
                     "bg-purple-50": i === 3,
-                  },
+                  }
                 )}
               >
                 <Image
@@ -110,6 +114,7 @@ export default async function Home() {
           ))}
         </div>
       </div>
+      <Pricing />
     </main>
   );
 }

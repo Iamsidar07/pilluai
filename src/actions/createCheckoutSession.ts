@@ -1,13 +1,13 @@
 "use server";
 
-import { UserDetails } from "@/app/pricing/page";
 import { adminDb } from "@/firebaseAdmin";
 import getBaseURL from "@/lib/getBaseURL";
 import stripe from "@/lib/stripe";
+import { UserDetails } from "../../typing";
 
 const createCheckoutSession = async (
   userId: string,
-  userDetails: UserDetails,
+  userDetails: UserDetails
 ) => {
   if (!userId) {
     throw new Error("User ID is required");

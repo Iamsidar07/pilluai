@@ -68,15 +68,15 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       query(
         collection(
           db,
-          `users/${user.uid}/boards/${boardId}/chatNodes/${nodeId}/chats`,
+          `users/${user.uid}/boards/${boardId}/chatNodes/${nodeId}/chats`
         ),
-        orderBy("createdAt", "desc"),
+        orderBy("createdAt", "desc")
       ),
     {
       snapshotListenOptions: {
         includeMetadataChanges: true,
       },
-    },
+    }
   );
 
   const [messagesSnapshot] = useCollection(
@@ -85,10 +85,10 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       query(
         collection(
           db,
-          `users/${user.uid}/boards/${boardId}/chatNodes/${nodeId}/chats/${currentChat.id}/messages`,
+          `users/${user.uid}/boards/${boardId}/chatNodes/${nodeId}/chats/${currentChat.id}/messages`
         ),
-        orderBy("createdAt", "asc"),
-      ),
+        orderBy("createdAt", "asc")
+      )
   );
   useEffect(() => {
     console.log("chatsSnapshot", chatsSnapshot?.docs);
@@ -98,7 +98,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
           ({
             ...doc.data(),
             id: doc.id,
-          }) as Chat,
+          } as Chat)
       );
       setChats(newChats);
       if (newChats.length > 0) {
@@ -115,11 +115,11 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
           ({
             ...doc.data(),
             id: doc.id,
-          }) as Message,
+          } as Message)
       );
       setMessages(newMessages);
     }
-  }, [messagesSnapshot, currentChat]);
+  }, [messagesSnapshot, currentChat, setMessages]);
   console.log({ currentChat });
 
   useEffect(() => {
@@ -143,7 +143,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
     const chatCollectionRef = doc(
       db,
       `users/${user?.uid}/boards/${boardId}/chatNodes/${nodeId}/chats`,
-      newChatId,
+      newChatId
     );
     await setDoc(chatCollectionRef, {
       title: null,
@@ -162,11 +162,11 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       const knowledgeEdges = edges.filter((edge) => edge.target === chatNodeId);
       const knowledgeBaseNodeIds = knowledgeEdges.map((edge) => edge.source);
       const knowledgeBaseNodes = nodes.filter((node) =>
-        knowledgeBaseNodeIds.includes(node.id),
+        knowledgeBaseNodeIds.includes(node.id)
       );
       return knowledgeBaseNodes;
     },
-    [edges, nodes],
+    [edges, nodes]
   );
 
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -186,7 +186,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
         const chatCollectionRef = doc(
           db,
           `users/${user?.uid}/boards/${boardId}/chatNodes/${nodeId}/chats`,
-          newChatId,
+          newChatId
         );
         await setDoc(chatCollectionRef, {
           title: null,
@@ -255,7 +255,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
                       {
                         "font-bold bg-pink-100 rounded":
                           currentChat?.id === chat.id,
-                      },
+                      }
                     )}
                     onClick={() => {
                       setCurrentChat(chat);
@@ -263,7 +263,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
                   >
                     {chat?.title || ""}
                   </p>
-                ),
+                )
             )}
           </div>
         </div>

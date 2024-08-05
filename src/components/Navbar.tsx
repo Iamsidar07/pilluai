@@ -46,14 +46,16 @@ const Navbar = () => {
           </Link>
         </div>
         <div className="flex items-center gap-2">
-          <Link
-            href="/boards"
-            className={cn("", {
-              "text-primary": pathname === "/boards",
-            })}
-          >
-            Boards
-          </Link>
+          {user?.uid && (
+            <Link
+              href="/boards"
+              className={cn("", {
+                "text-primary": pathname === "/boards",
+              })}
+            >
+              Boards
+            </Link>
+          )}
           <Link
             href="/pricing"
             className={cn("hidden md:block", {
@@ -65,12 +67,8 @@ const Navbar = () => {
 
           {!user?.uid && (
             <>
-              <Link href="/login">
-                <p className="text-gray-500">Login</p>
-              </Link>
-              <Link href="/signup">
-                <p className="text-gray-500">Sign up</p>
-              </Link>
+              <Link href="/login">Login</Link>
+              <Link href="/signup">Sign up</Link>
             </>
           )}
 

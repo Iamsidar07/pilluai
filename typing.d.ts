@@ -23,3 +23,8 @@ export interface Chat {
   title: string;
   createdAt: Timestamp;
 }
+
+export interface UserDetails {
+  email: string;
+  name: string;
+}

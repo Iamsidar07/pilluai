@@ -2,7 +2,6 @@
 import { AppNode } from "@/components/nodes";
 import { db } from "@/firebase";
 import { debounce } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
 import {
   addEdge,
   Edge,
@@ -17,6 +16,9 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import useCurrentUser from "./currentUser";
+import { useDocument } from "react-firebase-hooks/firestore";
+import useSubscription from "@/hooks/useSubscription";
+import { toast } from "sonner";
 
 interface IPanelContext {
   nodes: AppNode[] | [];
@@ -57,40 +59,30 @@ export const PanelContext = React.createContext<IPanelContext>({
 });
 
 const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const { boardId } = useParams();
+  const params = useParams();
+  const boardId = params.boardId as string;
+  const { hasActiveMembership } = useSubscription();
   const { user } = useCurrentUser();
   const [boardData, setBoardData] = useState<Board | undefined>(undefined);
 
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(
-    boardData?.edges || [],
+    boardData?.edges || []
   );
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>(
-    boardData?.nodes || [],
+    boardData?.nodes || []
   );
-
+  const [snapshot, loading, err] = useDocument(
+    user && boardId ? doc(db, `users/${user.uid}/boards`, boardId) : null
+  );
+  console.log("err", err);
   useEffect(() => {
-    const getBoard = async () => {
-      if (!user?.uid || !boardId) return null;
-      try {
-        const docRef = doc(db, `users/${user.uid}/boards`, boardId as string);
-        const docSnap = await getDoc(docRef);
-        console.log("boardData", docSnap?.data());
-        setBoardData({ id: docSnap.id, ...docSnap.data() } as Board);
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    getBoard();
-  }, [user?.uid, boardId]);
-
-  useEffect(() => {
-    if (boardData && boardData.nodes) {
-      setNodes(boardData.nodes);
-    }
-    if (boardData && boardData.edges) {
-      setEdges(boardData.edges);
-    }
-  }, [boardData, setEdges, setNodes]);
+    if (!snapshot) return;
+    const data = snapshot.data();
+    if (!data) return;
+    setBoardData({ id: snapshot.id, ...data } as Board);
+    setNodes(data?.nodes);
+    setEdges(data?.edges);
+  }, [setEdges, setNodes, snapshot]);
 
   const saveEdges = useCallback(
     // @ts-ignore
@@ -100,7 +92,7 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
         const boardRef = doc(
           db,
           `users/${user?.uid}/boards`,
-          boardId as string,
+          boardId as string
         );
         updateDoc(boardRef, {
           edges: edges,
@@ -109,7 +101,7 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
         console.log(e);
       }
     },
-    [boardId, user?.uid],
+    [boardId, user?.uid]
   );
 
   const onConnect: OnConnect = useCallback(
@@ -124,18 +116,58 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
       setEdges((edges) => addEdge(edge, edges));
       const saveEdgesDebounced = debounce(
         () => saveEdges([...edges, edge]),
-        1000,
+        1000
       );
       saveEdgesDebounced();
     },
-    [edges, saveEdges, setEdges],
+    [edges, saveEdges, setEdges]
   );
 
   const addNode = useCallback(
     (node: AppNode) => {
+      // limit the nodes
+      const pdfNodes = nodes.filter((nd) => nd.type === "pdfNode");
+      // free user and have pdfnode more than 1
+      if (!hasActiveMembership && pdfNodes.length > 1) {
+        return toast.error("Reached the limit of pdf node");
+      }
+      if (hasActiveMembership && pdfNodes.length > 7) {
+        return toast.error("Reached the limit of pdf node");
+      }
+      const imageNodes = nodes.filter((nd) => nd.type === "imageNode");
+      if (!hasActiveMembership && imageNodes.length > 2) {
+        return toast.error("Reached the limit of image node");
+      }
+      if (hasActiveMembership && pdfNodes.length > 15) {
+        return toast.error("Reached the limit of image node");
+      }
+
+      const webScrapperNodes = nodes.filter(
+        (nd) => nd.type === "webScrapperNode"
+      );
+      if (!hasActiveMembership && webScrapperNodes.length > 1) {
+        return toast.error("Reached the limit of website node");
+      }
+      if (hasActiveMembership && webScrapperNodes.length > 7) {
+        return toast.error("Reached the limit of website node");
+      }
+      const youtubeNodes = nodes.filter((nd) => nd.type === "youtubeNode");
+      if (!hasActiveMembership && youtubeNodes.length > 1) {
+        return toast.error("Reached the limit of youtube video node");
+      }
+      if (hasActiveMembership && youtubeNodes.length > 7) {
+        return toast.error("Reached the limit of youtube video node");
+      }
+      const chatNodes = nodes.filter((nd) => nd.type === "chatNode");
+      if (!hasActiveMembership && chatNodes.length > 1) {
+        return toast.error("Reached the limit of chat node");
+      }
+      if (hasActiveMembership && chatNodes.length > 5) {
+        return toast.error("Reached the limit of chat node");
+      }
       setNodes((nds) => [...nds, node]);
     },
-    [setNodes],
+    [setNodes, nodes, hasActiveMembership]
   );
 
   const updateNode = useCallback(
@@ -152,10 +184,10 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
             };
           }
           return node;
-        }),
+        })
       );
     },
-    [setNodes],
+    [setNodes]
   );
 
   return (

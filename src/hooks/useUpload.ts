@@ -9,7 +9,8 @@ import useCurrentUser from "@/context/currentUser";
 import { usePanel } from "@/context/panel";
 import generateEmbeddings from "@/actions/generateEmbeddings";
 import { toast } from "sonner";
-import { updateDoc } from "firebase/firestore";
+import useSubscription from "./useSubscription";
+import { freePdfSize, proPdfSize } from "@/lib/config";
 
 export enum StatusText {
   UPLOADING = "Uploading file...",
@@ -21,6 +22,7 @@ export enum StatusText {
 export type Status = (typeof StatusText)[keyof typeof StatusText];
 
 function useUpload(nodeId: string) {
+  const { hasActiveMembership } = useSubscription();
   const [progress, setProgress] = useState<number | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
   const { user } = useCurrentUser();
@@ -31,8 +33,16 @@ function useUpload(nodeId: string) {
     const fileIdToUpload = nanoid();
     const storageRef = ref(
       storage,
-      `/users/${user.uid}/files/${fileIdToUpload}`,
+      `/users/${user.uid}/files/${fileIdToUpload}`
     );
+    // limit file size
+    if (!hasActiveMembership && file.size >= freePdfSize * 10 ** 6) {
+      return toast.error(`Reached the ${freePdfSize}MB limit size.`);
+    }
+    // limit file size
+    if (hasActiveMembership && file.size >= proPdfSize * 10 ** 6) {
+      return toast.error(`Reached the ${proPdfSize}MB limit size.`);
+    }
     const uploadTask = uploadBytesResumable(storageRef, file);
     uploadTask.on(
       "state_changed",
@@ -72,7 +82,7 @@ function useUpload(nodeId: string) {
             namespace,
           },
         });
-      },
+      }
     );
   };
   return { progress, status, handleUpload };
