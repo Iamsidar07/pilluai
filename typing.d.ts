@@ -18,6 +18,12 @@ export interface Board {
   userId: string;
 }
 
+export interface Chat {
+  id: string;
+  title: string | null;
+  createdAt: Date;
+}
+
 export interface UserDetails {
   email: string;
   name: string;

@@ -36,7 +36,7 @@ function useSubscription() {
     const boards = boardsSnapshot.docs;
     const userLimit = hasActiveMembership ? maxProBoards : maxFreeBoards;
     setIsOverBoardLimit(boards.length >= userLimit);
-  }, [boardsSnapshot, hasActiveMembership, maxProBoards, maxFreeBoards]);
+  }, [boardsSnapshot, hasActiveMembership]);
 
   const hasUserProPlanSubscribe = true;
   return {

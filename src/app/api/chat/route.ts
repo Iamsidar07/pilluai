@@ -34,13 +34,13 @@ const formatCoreMessage = (messages: Message[]) =>
   messages.map((msg) =>
     msg.role === "user"
       ? new HumanMessage(msg.content)
-      : new AIMessage(msg.content),
+      : new AIMessage(msg.content)
   );
 
 async function handleVectorQuery(
   namespace: string,
   messages: Message[],
-  query: string,
+  query: string
 ) {
   const vectorStore = await UpstashVectorStore.fromExistingIndex(embeddings, {
     index,
@@ -111,7 +111,7 @@ export const POST = async (req: NextRequest) => {
 
     const lastMessage = messages[messages?.length - 1];
     const imageAndWebScraperNodes = knowledgeBaseNodes.filter(
-      (node) => node.type === "imageNode" || node.type === "webScrapperNode",
+      (node) => node.type === "imageNode" || node.type === "webScrapperNode"
     );
     await adminDb
       .collection("users")
@@ -149,7 +149,7 @@ export const POST = async (req: NextRequest) => {
         return await handleVectorQuery(
           namespace,
           messages,
-          lastMessage.content,
+          lastMessage.content
         );
       }
       // @ts-ignore

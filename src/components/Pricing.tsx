@@ -45,7 +45,7 @@ const Pricing = () => {
         <div className="text-gray-400 text-normal sm:text-lg leading-7 text-center max-w-xl mx-auto">
           Choose an affordable plan that packed with the best features for
           interacting with your PDFs, Youtube Videos, Images and chat with
-          Website. enhancing productivity, streamlining your workflows.
+          Website, enhancing productivity, streamlining your workflows.
         </div>
       </div>
       {/*plans*/}

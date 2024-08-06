@@ -19,12 +19,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { IoCreateOutline } from "react-icons/io5";
 import { toast } from "sonner";
-
-interface Chat {
-  id: string;
-  title: string | null;
-  createdAt: Date;
-}
+import { Chat } from "../../../typing";
 
 const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
   const [isAIThinking, setIsAIThinking] = useState(false);
