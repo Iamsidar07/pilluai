@@ -38,20 +38,19 @@ const useWebScrapperNode = (nodeId: string) => {
       try {
         setIsLoading(true);
         const scrapedData = await scrapeWebsite(url);
-        if (!scrapedData) {
+        if (!scrapedData?.success) {
           toast.error("Failed to scrape.");
           return;
         }
         updateWebScrapperNode({
           url,
           title: scrapedData.title,
-          description: scrapedData.description,
           tempUrl: `data:image/png;base64,${scrapedData.base64}`,
         });
         const imageRef = ref(storage, `users/${user?.uid}/files/${nanoid()}`);
         const uploadTask = await uploadBytesResumable(
           imageRef,
-          scrapedData.buffer
+          scrapedData.buffer as Buffer
         );
         const uploadedImageUrl = await getDownloadURL(uploadTask.ref);
         console.log("uploadedImage: ", uploadedImageUrl);

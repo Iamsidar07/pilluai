@@ -9,7 +9,7 @@ const FEATURES = [
     title: "Converse with Your YouTube Videos",
     description:
       "Ever come across an hour-long video but don't have the time to watch it? With PilluAI, you can ask specific questions and get the information you need without watching the entire video.",
-    image: "/a.png",
+    image: "/chat_with_youtube_video.png",
   },
   {
     title: "Dive Deep into Your Interests",
@@ -21,19 +21,19 @@ const FEATURES = [
     title: "Optimize Your Podcast Listening",
     description:
       "Instead of spending hours mindlessly listening to podcasts, give PilluAI all the podcasts you want to listen to. Ask specific questions that could help you and your business, saving you valuable time.",
-    image: "/a.png",
+    image: "/chat_with_youtube_video.png",
   },
   {
     title: "Chat with Websites and PDF Documents",
     description:
       "Interact with websites and PDF documents just like you would with a person. Get the information you need quickly and efficiently without having to sift through pages of content.",
-    image: "/a.png",
+    image: "/chatwith_pdf.png",
   },
   {
     title: "Notion-like Editor for Note-taking",
     description:
       "Experience a beautiful and intuitive Notion-like editor within PilluAI. Seamlessly write and organize your notes, thoughts, and ideas all in one place.",
-    image: "/a.png",
+    image: "/notion_like_editor.png",
   },
 ];
 
@@ -98,8 +98,8 @@ export default async function Home() {
                 <Image
                   alt={title}
                   src={image}
-                  width={1468}
-                  height={881}
+                  width={1920}
+                  height={1080}
                   className="rounded-2xl"
                 />
               </div>

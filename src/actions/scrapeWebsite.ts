@@ -1,4 +1,4 @@
-"use server"
+"use server";
 import { isValidURL } from "@/lib/utils";
 import puppeteer from "puppeteer-core";
 import { executablePath } from "puppeteer";
@@ -20,16 +20,15 @@ const scrapeWebsite = async (url: string) => {
       optimizeForSpeed: true,
     });
     const title = await page.title();
-    const description = await page.evaluate(() =>
-      document
-        .querySelector('meta[name="description"]')
-        ?.getAttribute("content"),
-    );
-    await browser.close();
-    return { title, description, buffer, base64: buffer.toString("base64") };
+    return {
+      success: true,
+      title,
+      buffer,
+      base64: buffer.toString("base64"),
+    };
   } catch (error) {
     console.log(error);
-    return null;
+    return { success: false };
   } finally {
     await browser.close();
   }
