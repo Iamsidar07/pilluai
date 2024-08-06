@@ -6,12 +6,13 @@ import useCurrentUser from "@/context/currentUser";
 import useSubscription from "@/hooks/useSubscription";
 import getStripe from "@/lib/stripe-js";
 import { CheckIcon, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useTransition } from "react";
 import { UserDetails } from "../../typing";
 
 const Pricing = () => {
   const { user } = useCurrentUser();
+  const pathname = usePathname();
   const router = useRouter();
   const { hasActiveMembership, loading } = useSubscription();
   const [isPending, startTransition] = useTransition();
@@ -111,19 +112,21 @@ const Pricing = () => {
             <span className="text-4xl sm:text-5xl font-bold">$5.99</span>
             <span className="text-sm font-semibold text-gray-400">/month</span>
           </div>
-          <Button
-            onClick={handleUpgrade}
-            disabled={loading || isPending}
-            className="w-full mb-4 font-bold"
-          >
-            {loading || isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : hasActiveMembership ? (
-              "Manage Plan"
-            ) : (
-              "Upgrade to Pro"
-            )}
-          </Button>
+          {pathname === "/pricing" && (
+            <Button
+              onClick={handleUpgrade}
+              disabled={loading || isPending}
+              className="w-full mb-4 font-bold"
+            >
+              {loading || isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : hasActiveMembership ? (
+                "Manage Plan"
+              ) : (
+                "Upgrade to Pro"
+              )}
+            </Button>
+          )}
           <ul className="space-y-2 text-sm text-gray-400">
             <li className="flex items-center gap-2">
               <CheckIcon className="h-4 w-4 text-primary" />

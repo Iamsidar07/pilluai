@@ -115,8 +115,8 @@ export default async function Home() {
             </div>
           ))}
         </div>
+        <Pricing />
       </div>
-      <Pricing />
     </main>
   );
 }
