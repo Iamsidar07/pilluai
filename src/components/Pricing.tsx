@@ -10,6 +10,7 @@ import { usePathname, useRouter } from "next/navigation";
 import React, { useTransition } from "react";
 import { UserDetails } from "../../typing";
 import { toast } from "sonner";
+import { isPaymentEnabled } from "@/lib/config";
 
 const Pricing = () => {
   const { user } = useCurrentUser();
@@ -25,6 +26,10 @@ const Pricing = () => {
     };
 
     startTransition(async () => {
+      if (!isPaymentEnabled) {
+        toast.info("Payment is not enabled");
+        return;
+      }
       const stripe = await getStripe();
       if (hasActiveMembership) {
         // manage

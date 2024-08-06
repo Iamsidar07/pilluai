@@ -6,6 +6,7 @@ const maxProMessage = 100;
 const maxProChatInOneChatNode = 7;
 const freePdfSize = 4; // in mb
 const proPdfSize = 16; // in mb
+const isPaymentEnabled = false;
 const NODE_LIMITS = {
   pdfNode: { free: 1, active: 7 },
   imageNode: { free: 2, active: 15 },
@@ -13,7 +14,6 @@ const NODE_LIMITS = {
   youtubeNode: { free: 1, active: 7 },
   chatNode: { free: 1, active: 5 },
 };
-
 export {
   freePdfSize,
   proPdfSize,
@@ -24,4 +24,5 @@ export {
   maxFreeMessage,
   maxFreeChatInOneChatNode as maxChatInOneChatNode,
   NODE_LIMITS,
+  isPaymentEnabled,
 };

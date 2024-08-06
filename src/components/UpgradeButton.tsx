@@ -9,18 +9,18 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
+import { isPaymentEnabled } from "@/lib/config";
 
 const UpgradeButton = () => {
   const { user } = useCurrentUser();
   const { hasActiveMembership, loading } = useSubscription();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const isPaymentEnabled = true;
 
   const handleAccount = () => {
     if (!user) return;
-    if (isPaymentEnabled) {
-      toast.info("Payment is not disabled right now.");
+    if (!isPaymentEnabled) {
+      toast.info("Payment is not enabled right now.");
       return;
     }
     startTransition(async () => {
