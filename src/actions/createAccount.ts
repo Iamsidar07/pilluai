@@ -34,7 +34,7 @@ const createAccount = async ({
     };
   } catch (e: any) {
     console.log("failed to create account", e);
-    throw new Error(e.message);
+    return { success: false, message: e.message };
   }
 };
 

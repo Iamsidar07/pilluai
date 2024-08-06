@@ -20,6 +20,7 @@ import { useDocument } from "react-firebase-hooks/firestore";
 import useSubscription from "@/hooks/useSubscription";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { NODE_LIMITS } from "@/lib/config";
 
 interface IPanelContext {
   nodes: AppNode[] | [];
@@ -125,49 +126,27 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
 
   const addNode = useCallback(
     (node: AppNode) => {
-      // limit the nodes
-      const pdfNodes = nodes.filter((nd) => nd.type === "pdfNode");
-      // free user and have pdfnode more than 1
-      if (!hasActiveMembership && pdfNodes.length > 1) {
-        return toast.error("Reached the limit of pdf node");
-      }
-      if (hasActiveMembership && pdfNodes.length > 7) {
-        return toast.error("Reached the limit of pdf node");
-      }
-      const imageNodes = nodes.filter((nd) => nd.type === "imageNode");
-      if (!hasActiveMembership && imageNodes.length > 2) {
-        return toast.error("Reached the limit of image node");
-      }
-      if (hasActiveMembership && pdfNodes.length > 15) {
-        return toast.error("Reached the limit of image node");
-      }
+      setNodes((nds) => {
+        const nodeType = node.type as keyof typeof NODE_LIMITS;
+        if (!NODE_LIMITS[nodeType]) {
+          return nds; // Return unchanged if the node type is not defined in the limits
+        }
 
-      const webScrapperNodes = nodes.filter(
-        (nd) => nd.type === "webScrapperNode"
-      );
-      if (!hasActiveMembership && webScrapperNodes.length > 1) {
-        return toast.error("Reached the limit of website node");
-      }
-      if (hasActiveMembership && webScrapperNodes.length > 7) {
-        return toast.error("Reached the limit of website node");
-      }
-      const youtubeNodes = nodes.filter((nd) => nd.type === "youtubeNode");
-      if (!hasActiveMembership && youtubeNodes.length > 1) {
-        return toast.error("Reached the limit of youtube video node");
-      }
-      if (hasActiveMembership && youtubeNodes.length > 7) {
-        return toast.error("Reached the limit of youtube video node");
-      }
-      const chatNodes = nodes.filter((nd) => nd.type === "chatNode");
-      if (!hasActiveMembership && chatNodes.length > 1) {
-        return toast.error("Reached the limit of chat node");
-      }
-      if (hasActiveMembership && chatNodes.length > 5) {
-        return toast.error("Reached the limit of chat node");
-      }
-      setNodes((nds) => [...nds, node]);
+        const limit = hasActiveMembership
+          ? NODE_LIMITS[nodeType].active
+          : NODE_LIMITS[nodeType].free;
+
+        const nodeCount = nds.filter((nd) => nd.type === nodeType).length;
+
+        if (nodeCount >= limit) {
+          toast.error(`Reached the limit of ${nodeType}`);
+          return nds;
+        }
+
+        return [...nds, node];
+      });
     },
-    [setNodes]
+    [hasActiveMembership, setNodes]
   );
 
   const updateNode = useCallback(

@@ -6,6 +6,13 @@ const maxProMessage = 100;
 const maxProChatInOneChatNode = 7;
 const freePdfSize = 4; // in mb
 const proPdfSize = 16; // in mb
+const NODE_LIMITS = {
+  pdfNode: { free: 1, active: 7 },
+  imageNode: { free: 2, active: 15 },
+  webScrapperNode: { free: 1, active: 7 },
+  youtubeNode: { free: 1, active: 7 },
+  chatNode: { free: 1, active: 5 },
+};
 
 export {
   freePdfSize,
@@ -16,4 +23,5 @@ export {
   maxFreeBoards,
   maxFreeMessage,
   maxFreeChatInOneChatNode as maxChatInOneChatNode,
+  NODE_LIMITS,
 };

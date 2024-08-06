@@ -24,8 +24,15 @@ const UpgradeButton = () => {
       return;
     }
     startTransition(async () => {
-      const stripePortalUrl = await createStripePortal(user.uid);
-      router.push(stripePortalUrl);
+      const { success, message, sessionUrl } = await createStripePortal(
+        user.uid
+      );
+      if (!success && message) {
+        toast.error(message);
+        return;
+      }
+      if (!sessionUrl) return;
+      router.push(sessionUrl);
     });
   };
 

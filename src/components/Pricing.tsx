@@ -9,6 +9,7 @@ import { CheckIcon, Loader2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useTransition } from "react";
 import { UserDetails } from "../../typing";
+import { toast } from "sonner";
 
 const Pricing = () => {
   const { user } = useCurrentUser();
@@ -27,10 +28,26 @@ const Pricing = () => {
       const stripe = await getStripe();
       if (hasActiveMembership) {
         // manage
-        const stripePortalUrl = await createStripePortal(user.uid);
-        return router.push(stripePortalUrl);
+        const { success, message, sessionUrl } = await createStripePortal(
+          user.uid
+        );
+
+        if (!success && message) {
+          toast.error(message);
+          return;
+        }
+        if (!sessionUrl) return;
+        return router.push(sessionUrl);
       }
-      const sessionId = await createCheckoutSession(user.uid, userDetails);
+      const { success, message, sessionId } = await createCheckoutSession(
+        user.uid,
+        userDetails
+      );
+      if (!success && message) {
+        toast.error(message);
+        return;
+      }
+      if (!sessionId) return;
       await stripe?.redirectToCheckout({
         sessionId,
       });
