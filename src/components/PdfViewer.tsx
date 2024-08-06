@@ -72,7 +72,11 @@ const PdfViewer = ({ url, name }: { url: string; name: string }) => {
           onLoadSuccess={onDocumentLoadSuccess}
           className="nowheel nodrag overflow-y-auto textselectable"
         >
-          <Page className="shadow-lg" pageNumber={pageNumber} scale={1.3} />
+          <Page
+            className="shadow-lg pb-8"
+            pageNumber={pageNumber}
+            scale={1.3}
+          />
         </Document>
       </div>
     </div>
