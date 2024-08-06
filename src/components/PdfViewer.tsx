@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import React, { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Button } from "./ui/button";
+import { toast } from "sonner";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`;
 
@@ -68,7 +69,7 @@ const PdfViewer = ({ url, name }: { url: string; name: string }) => {
         <Document
           loading={<Loader2 className="w-6 h-6 m-4 mx-auto animate-spin" />}
           file={url}
-          onLoadError={(e) => console.log("failed to load pdf", e)}
+          onLoadError={(e) => toast.error("Failed to load pdf")}
           onLoadSuccess={onDocumentLoadSuccess}
           className="nowheel nodrag overflow-y-auto textselectable"
         >

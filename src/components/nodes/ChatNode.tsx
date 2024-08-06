@@ -1,6 +1,11 @@
 "use client";
 import CustomHandle from "@/components/CustomHandle";
-import { NodeProps, NodeResizeControl, NodeResizer } from "@xyflow/react";
+import {
+  NodeProps,
+  NodeResizeControl,
+  NodeResizer,
+  ResizeControlVariant,
+} from "@xyflow/react";
 
 import ShowMessage from "@/components/ShowMessage";
 import { Button } from "@/components/ui/button";
@@ -118,12 +123,13 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       toast.info("You've reached the limit of new chats.");
       return;
     }
+    if (!user || !boardId || !nodeId) return;
     setInput("");
     setMessages([]);
     const newChatId = nanoid();
     const chatCollectionRef = doc(
       db,
-      `users/${user?.uid}/boards/${boardId}/chatNodes/${nodeId}/chats`,
+      `users/${user.uid}/boards/${boardId}/chatNodes/${nodeId}/chats`,
       newChatId
     );
     await setDoc(chatCollectionRef, {
@@ -144,6 +150,13 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
     setMessages,
     user?.uid,
   ]);
+
+  useEffect(() => {
+    if (chatsSnapshot?.docs.length === 0 && !loading && !error) {
+      // Indeed there is no chats
+      handleCreateNewChat();
+    }
+  }, [chatsSnapshot?.docs.length, error, handleCreateNewChat, loading]);
 
   const getKnowledgeBaseNodes = useCallback(
     (chatNodeId: string) => {
@@ -226,9 +239,9 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
   );
 
   return (
-    <div className="bg-white shadow-sm rounded border overflow-hidden flex h-full w-full">
-      <NodeResizeControl />
-      <NodeResizer />
+    <div className="bg-white ring-1 ring-gray-900/15 rounded border overflow-hidden flex h-full w-full">
+      <NodeResizeControl color="#E00000" keepAspectRatio />
+      <NodeResizer color="#E00000" keepAspectRatio />
       <CustomHandle type="target" />
       <div className="w-1/3 border-r relative">
         <div className="p-2 bg-zinc-100 h-full ">

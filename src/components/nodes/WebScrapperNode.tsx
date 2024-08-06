@@ -1,12 +1,12 @@
 "use client";
+import useWebScrapperNode from "@/hooks/useWebScrapperNode";
 import { cn } from "@/lib/utils";
+import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 import { NodeProps } from "@xyflow/react";
 import Image from "next/image";
 import { FaArrowRight, FaSpinner } from "react-icons/fa";
 import { SlGlobe } from "react-icons/sl";
 import CustomHandle from "../CustomHandle";
-import { AspectRatio } from "@radix-ui/react-aspect-ratio";
-import useWebScrapperNode from "@/hooks/useWebScrapperNode";
 
 const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
   const { handleAddWebscrapperNode, isLoading, setUrl, url } =
@@ -15,7 +15,7 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
   return (
     <div
       className={cn(
-        "fixed-dimension shadow-lg overflow-hidden bg-[var(--novel-highlight-blue)] rounded p-2",
+        "fixed-dimension ring-1 ring-gray-900/15 overflow-hidden bg-[var(--novel-highlight-blue)] rounded p-2",
         {
           "bg-blue-300": selected,
           "!h-auto": !data.url,

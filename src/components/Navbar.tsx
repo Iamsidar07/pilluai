@@ -36,7 +36,7 @@ const Navbar = () => {
   };
   return (
     <div
-      className={cn("sticky top-0 z-30 bg-white/75 backdrop-blur border-b ", {
+      className={cn("sticky top-0 z-30 bg-white/75 backdrop-blur border-b", {
         hidden: pathname === "/signup" || pathname === "/login",
       })}
     >

@@ -39,49 +39,53 @@ const FEATURES = [
 
 export default async function Home() {
   return (
-    <main className="p-4 lg:p-8 grainy-light w-full overflow-y-auto flex-1 rounded-2xl bg-pink-50">
-      <div className="max-w-7xl mx-auto flex flex-col items-center py-24 lg:py-32 relative z-[1]">
-        <div className="absolute w-full h-80 bg-gradient-to-b from-pink-300 z-[-1] blur-[20rem]" />
-        <div className="mx-auto max-w-2xl text-left sm:text-center">
-          <h2 className="font-bold text-gray-600">
-            Your interactive whiteboard comapanion
-          </h2>
-          <h1 className="text-3xl sm:text-5xl mt-2 font-bold capitalize">
-            Your ultimate whiteboard... on{" "}
-            <span className="font-extrabold text-primary">steroids</span>
-          </h1>
-          <p className="mt-3 text-lg leading-6 text-gray-500">
-            Introducing <span className="text-primary font-bold">Pillu AI</span>{" "}
-            <br /> <br />
-            If you&apos;re a developer, video editor, researcher, or anyone who
-            works with their brain,{" "}
-            <span className="text-primary">
-              PilluAI can help you think 10x faster, boosting your productivity
-              and helping you make 10x more money.
-            </span>
-          </p>
-          <GetStartedButton />
-        </div>
-        <div className="relative pt-16 overflow-hidden my-12 rounded-2xl">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <Image
-              src="/app.png"
-              alt="App screenshot"
-              width={2432}
-              height={1442}
-              quality={100}
-              className="mb-[-0%] rounded-xl shadow-2xl ring-1 ring-gray-900/10"
-            />
-            <div aria-hidden={true}>
-              <div
-                className="absolute bottom-0 top-0 -inset-x-32 bg-gradient-to-t from-white/95 pt-[5%]"
-                aria-hidden={true}
-              ></div>
+    <main className="w-full overflow-y-auto flex-1">
+      <div className="p-4 lg:p-8 grainy-light  bg-pink-50">
+        <div className="max-w-7xl mx-auto flex flex-col items-center py-24 lg:py-32 relative z-[1]">
+          <div className="absolute w-full h-80 bg-gradient-to-b from-pink-300 z-[-1] blur-[20rem]" />
+          <div className="mx-auto max-w-2xl text-left sm:text-center">
+            <h2 className="font-bold text-gray-600">
+              Your interactive whiteboard comapanion
+            </h2>
+            <h1 className="text-3xl sm:text-5xl mt-2 font-bold capitalize">
+              Your ultimate whiteboard... on{" "}
+              <span className="font-extrabold text-primary">steroids</span>
+            </h1>
+            <p className="mt-3 text-lg leading-6 text-gray-500">
+              Introducing{" "}
+              <span className="text-primary font-bold">Pillu AI</span> <br />{" "}
+              <br />
+              If you&apos;re a developer, video editor, researcher, or anyone
+              who works with their brain,{" "}
+              <span className="text-primary">
+                PilluAI can help you think 10x faster, boosting your
+                productivity and helping you make 10x more money.
+              </span>
+            </p>
+            <GetStartedButton />
+          </div>
+          <div className="relative pt-16 overflow-hidden my-12 rounded-2xl">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+              <Image
+                src="/app.png"
+                alt="App screenshot"
+                width={2432}
+                height={1442}
+                quality={100}
+                className="mb-[-0%] rounded-xl shadow-2xl ring-1 ring-gray-900/10"
+              />
+              <div aria-hidden={true}>
+                <div
+                  className="absolute bottom-0 top-0 -inset-x-32 bg-gradient-to-t from-white/95 pt-[5%]"
+                  aria-hidden={true}
+                ></div>
+              </div>
             </div>
           </div>
         </div>
-
-        <div className="mt-12 flex flex-col items-center gap-8 md:gap-24">
+      </div>
+      <div className="bg-teal-100 grainy-light p-4 lg:p-8">
+        <div className="pt-12 flex flex-col items-center gap-8 md:gap-24 max-w-7xl mx-auto">
           {FEATURES.map(({ description, title, image }, i) => (
             <div key={i} className="flex flex-col items-center">
               <div
@@ -98,8 +102,8 @@ export default async function Home() {
                 <Image
                   alt={title}
                   src={image}
-                  width={1920}
-                  height={1080}
+                  width={2432}
+                  height={1442}
                   className="rounded-2xl"
                 />
               </div>
@@ -115,6 +119,8 @@ export default async function Home() {
             </div>
           ))}
         </div>
+      </div>
+      <div className="bg-green-100 grainy-light">
         <Pricing />
       </div>
     </main>

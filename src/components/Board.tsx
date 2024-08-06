@@ -123,13 +123,14 @@ export default function Board({ boardId }: BoardProps) {
             autoPanSpeed={0.5}
             connectOnClick
             connectionMode={ConnectionMode.Strict}
-            connectionLineType={ConnectionLineType.SmoothStep}
+            connectionLineType={ConnectionLineType.Bezier}
             defaultMarkerColor="yellow"
             elevateEdgesOnSelect
             elevateNodesOnSelect
             nodesDraggable
             onError={(_, msg) => toast.error(msg)}
             onlyRenderVisibleElements
+            connectionRadius={10}
             // deleteKeyCode={null}
           >
             <Background />

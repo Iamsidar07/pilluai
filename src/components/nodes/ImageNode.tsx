@@ -6,13 +6,12 @@ import CustomHandle from "../CustomHandle";
 import { AspectRatio } from "../ui/aspect-ratio";
 
 const ImageNode = ({ id, data, selected }: NodeProps) => {
-
   return (
     <div
       className={cn(
-        "p-1 pb-0 shadow-lg overflow-hidden fixed-dimension bg-[var(--novel-highlight-gray)] rounded",
+        "p-1 pb-0 ring-1 ring-gray-900/10 overflow-hidden fixed-dimension bg-[var(--novel-highlight-gray)] rounded",
         {
-          "ring-1 ring-primary": selected,
+          "transition-transform scale-105": selected,
         }
       )}
     >

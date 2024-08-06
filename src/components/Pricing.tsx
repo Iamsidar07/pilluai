@@ -7,7 +7,7 @@ import useSubscription from "@/hooks/useSubscription";
 import getStripe from "@/lib/stripe-js";
 import { CheckIcon, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useTransition } from "react";
+import React, { useEffect, useTransition } from "react";
 import { UserDetails } from "../../typing";
 import { toast } from "sonner";
 import { isPaymentEnabled } from "@/lib/config";
@@ -57,6 +57,16 @@ const Pricing = () => {
       });
     });
   };
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        console.log("Got location", pos);
+      },
+      (err) => console.log("Failed to get location", err)
+    );
+  }, []);
+
   return (
     <div className="min-h-screen p-8 py-24 md:py-32">
       <div className="flex flex-col items-center space-y-4 max-w-5xl mx-auto">

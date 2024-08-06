@@ -11,17 +11,17 @@ const YoutubeNode = ({ data, selected }: NodeProps) => {
   useEffect(() => {
     setVideoId(
       new URLSearchParams(String(data?.url).split("watch")[1]).get(
-        "v",
-      ) as string,
+        "v"
+      ) as string
     );
   }, [data.url]);
 
   return (
-    <div className="fixed-dimension overflow-hidden bg-red-100 rounded shadow-lg">
+    <div className="fixed-dimension overflow-hidden bg-red-100 rounded ring-1 ring-gray-900/15">
       <CustomHandle type="source" />
       <div
         className={cn(
-          "flex flex-col gap-1 group p-1 transition-all w-full h-full overflow-hidden",
+          "flex flex-col gap-1 group p-1 transition-all w-full h-full overflow-hidden"
         )}
       >
         <div
@@ -29,7 +29,7 @@ const YoutubeNode = ({ data, selected }: NodeProps) => {
             "flex items-center rounded py-2 gap-2 px-2 truncate bg-red-100 text-red-500 transition-all w-fit max-w-full",
             {
               "bg-red-600 text-white": selected,
-            },
+            }
           )}
         >
           <div className="w-6 h-6 grid place-items-center">

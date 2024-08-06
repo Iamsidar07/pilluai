@@ -1,10 +1,10 @@
 import type { BuiltInNode, Node, NodeTypes } from "@xyflow/react";
 import ChatNode from "./ChatNode";
 import ImageNode from "./ImageNode";
+import PdfNode from "./PdfNode";
 import TextNode from "./TextNode";
 import WebScrapperNode from "./WebScrapperNode";
 import YoutubeNode from "./YoutubeNode";
-import PdfNode from "./PdfNode";
 
 export type TTextNode = Node<
   {

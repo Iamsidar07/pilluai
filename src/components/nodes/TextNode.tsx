@@ -25,12 +25,12 @@ const TextNode = ({ id, selected, data }: NodeProps) => {
 
   return (
     <div
-      className={cn("w-full h-full bg-white rounded shadow-lg", {
+      className={cn("w-full h-full bg-white rounded ring-1 ring-gray-900/15", {
         "ring ring-gray-200": selected,
       })}
     >
-      <NodeResizeControl />
-      <NodeResizer />
+      <NodeResizeControl color="#FFA500" />
+      <NodeResizer color="#FFA500" />
       <CustomHandle type="source" />
       <div className="h-full border rounded">
         <textarea
