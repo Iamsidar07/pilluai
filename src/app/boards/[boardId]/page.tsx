@@ -11,7 +11,7 @@ interface BoardProps {
 
 export async function generateMetadata(
   { params }: BoardProps,
-  parent: ResolvingMetadata,
+  parent: ResolvingMetadata
 ): Promise<Metadata> {
   const { boardId } = params;
   const boardRef = doc(db, "boards", boardId);

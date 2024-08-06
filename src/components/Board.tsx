@@ -8,22 +8,31 @@ import { usePanel } from "@/context/panel";
 import { db } from "@/firebase";
 import { debounce } from "@/lib/utils";
 import {
-    applyEdgeChanges,
-    applyNodeChanges,
-    Background,
-    ConnectionLineType,
-    ConnectionMode,
-    Controls,
-    Edge,
-    EdgeChange,
-    NodeChange,
-    ReactFlow,
-    SelectionMode,
+  applyEdgeChanges,
+  applyNodeChanges,
+  Background,
+  ConnectionLineType,
+  ConnectionMode,
+  Controls,
+  Edge,
+  EdgeChange,
+  NodeChange,
+  ReactFlow,
+  SelectionMode,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { doc, updateDoc } from "firebase/firestore";
-import { useCallback } from "react";
+import { Suspense, useCallback } from "react";
 import { toast } from "sonner";
+import { ErrorBoundary } from "react-error-boundary";
+
+const Loader = () => (
+  <div className="absolute inset-0 bg-zinc-200 flex flex-col items-center justify-center">
+    <h1 className="text-[20vw] font-bold text-white animate-pulse">
+      Loading...
+    </h1>
+  </div>
+);
 
 const debouncedSaveNodes = debounce(
   async (userId: string, boardId: string, nodes: Node[]) => {
@@ -85,40 +94,50 @@ export default function Board({ boardId }: BoardProps) {
 
   return (
     <div className="w-full h-[calc(100vh-56px)] overflow-hidden">
-      <GradientEdge />
-      <ReactFlow
-        nodes={nodes}
-        nodeTypes={nodeTypes}
-        onNodesChange={handleNodeChange}
-        edges={edges}
-        edgeTypes={edgeTypes}
-        onEdgesChange={handleEdgeChange}
-        fitView
-        onConnect={onConnect}
-        panOnScroll
-        selectionOnDrag
-        selectionMode={SelectionMode.Partial}
-        style={rfStyle}
-        color="red"
-        colorMode="light"
-        autoPanOnConnect
-        autoPanOnNodeDrag
-        autoPanSpeed={0.5}
-        connectOnClick
-        connectionMode={ConnectionMode.Strict}
-        connectionLineType={ConnectionLineType.SmoothStep}
-        defaultMarkerColor="yellow"
-        elevateEdgesOnSelect
-        elevateNodesOnSelect
-        nodesDraggable
-        onError={(_, msg) => toast.error(msg)}
-        onlyRenderVisibleElements
-        // deleteKeyCode={null}
+      <ErrorBoundary
+        fallback={
+          <h1 className="text-2xl lg:text-5xl text-center">
+            Something went wrong! Please refresh the page
+          </h1>
+        }
       >
-        <Background />
-        <Controls />
-        <ResizablePane />
-      </ReactFlow>
+        <Suspense fallback={<Loader />}>
+          <GradientEdge />
+          <ReactFlow
+            nodes={nodes}
+            nodeTypes={nodeTypes}
+            onNodesChange={handleNodeChange}
+            edges={edges}
+            edgeTypes={edgeTypes}
+            onEdgesChange={handleEdgeChange}
+            fitView
+            onConnect={onConnect}
+            panOnScroll
+            selectionOnDrag
+            selectionMode={SelectionMode.Partial}
+            style={rfStyle}
+            color="red"
+            colorMode="light"
+            autoPanOnConnect
+            autoPanOnNodeDrag
+            autoPanSpeed={0.5}
+            connectOnClick
+            connectionMode={ConnectionMode.Strict}
+            connectionLineType={ConnectionLineType.SmoothStep}
+            defaultMarkerColor="yellow"
+            elevateEdgesOnSelect
+            elevateNodesOnSelect
+            nodesDraggable
+            onError={(_, msg) => toast.error(msg)}
+            onlyRenderVisibleElements
+            // deleteKeyCode={null}
+          >
+            <Background />
+            <Controls />
+            <ResizablePane />
+          </ReactFlow>
+        </Suspense>
+      </ErrorBoundary>
     </div>
   );
 }
