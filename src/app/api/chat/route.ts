@@ -132,7 +132,7 @@ export const POST = async (req: NextRequest) => {
         });
     };
 
-    await addMessageToDb("user", lastMessage.content);
+    addMessageToDb("user", lastMessage.content);
 
     const imagePrompt = imageAndWebScraperNodes.map((node) => {
       if (node.type === "webScrapperNode") {
@@ -189,10 +189,10 @@ export const POST = async (req: NextRequest) => {
       ],
       onFinish: async ({ text }) => {
         try {
-          await addMessageToDb("assistant", text);
+          addMessageToDb("assistant", text);
           if (!currentChat.title) {
             console.log("Updating chat title...");
-            await adminDb
+            adminDb
               .collection("users")
               .doc(userId)
               .collection("boards")
