@@ -1,11 +1,13 @@
 "use server";
 import { embeddings, index } from "@/lib/langchain";
+import { auth } from "@clerk/nextjs/server";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { UpstashVectorStore } from "@langchain/community/vectorstores/upstash";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { nanoid } from "nanoid";
 
 const generateEmbeddings = async (url: string) => {
+  auth().protect();
   try {
     const namespace = nanoid();
     const res = await fetch(url);

@@ -11,30 +11,30 @@ import {
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Archive, Sparkles } from "lucide-react";
-import useCurrentUser from "@/context/currentUser";
 import { toast } from "sonner";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/firebase";
 import useSubscription from "@/hooks/useSubscription";
+import { useAuth } from "@clerk/nextjs";
 
 interface Props {
   boardId: string;
 }
 
 const DeleteBoard = ({ boardId }: Props) => {
-  const { user } = useCurrentUser();
+  const { userId } = useAuth();
   const { hasUserProPlanSubscribe } = useSubscription();
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const handleDeleteBoard = () => {
-    if (!user?.uid) {
+    if (!userId) {
       toast.info("Please login to continue.");
       return;
     }
     if (!boardId || !hasUserProPlanSubscribe) return;
     startTransition(async () => {
       try {
-        await deleteDoc(doc(db, `users/${user?.uid}/boards/${boardId}`));
+        await deleteDoc(doc(db, `users/${userId}/boards/${boardId}`));
         setIsOpen(false);
         toast.success("Successfully deleted the board.");
       } catch (error) {

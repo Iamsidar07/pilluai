@@ -3,7 +3,6 @@ import { edgeTypes } from "@/components/edges";
 import GradientEdge from "@/components/edges/GradientEdge";
 import { nodeTypes } from "@/components/nodes";
 import ResizablePane from "@/components/ResizablePane";
-import useCurrentUser from "@/context/currentUser";
 import { usePanel } from "@/context/panel";
 import { db } from "@/firebase";
 import { debounce } from "@/lib/utils";
@@ -11,6 +10,7 @@ import {
   applyEdgeChanges,
   applyNodeChanges,
   Background,
+  BackgroundVariant,
   ConnectionLineType,
   ConnectionMode,
   Controls,
@@ -25,6 +25,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { Suspense, useCallback } from "react";
 import { toast } from "sonner";
 import { ErrorBoundary } from "react-error-boundary";
+import { useUser } from "@clerk/nextjs";
 
 const Loader = () => (
   <div className="absolute inset-0 bg-zinc-200 flex flex-col items-center justify-center">
@@ -69,27 +70,24 @@ interface BoardProps {
 }
 
 export default function Board({ boardId }: BoardProps) {
+  const { user } = useUser();
   const { onConnect, edges, nodes, setEdges, setNodes } = usePanel();
-  const { user } = useCurrentUser();
-  const rfStyle = {
-    background: "#edf1f5",
-  };
 
   const handleNodeChange = useCallback(
     (changes: NodeChange[]) => {
       // @ts-ignore
       setNodes((nds) => applyNodeChanges(changes, nds));
-      debouncedSaveNodes(user?.uid as string, boardId, nodes);
+      debouncedSaveNodes(user?.id as string, boardId, nodes);
     },
-    [boardId, nodes, setNodes, user?.uid]
+    [boardId, nodes, setNodes, user?.id]
   );
 
   const handleEdgeChange = useCallback(
     (changes: EdgeChange[]) => {
       setEdges((eds) => applyEdgeChanges(changes, eds));
-      debouncedSaveEdges(user?.uid as string, boardId, edges);
+      debouncedSaveEdges(user?.id as string, boardId, edges);
     },
-    [boardId, edges, setEdges, user?.uid]
+    [boardId, edges, setEdges, user?.id]
   );
 
   return (
@@ -115,15 +113,13 @@ export default function Board({ boardId }: BoardProps) {
             panOnScroll
             selectionOnDrag
             selectionMode={SelectionMode.Partial}
-            style={rfStyle}
-            color="red"
             colorMode="light"
             autoPanOnConnect
             autoPanOnNodeDrag
             autoPanSpeed={0.5}
             connectOnClick
             connectionMode={ConnectionMode.Strict}
-            connectionLineType={ConnectionLineType.Bezier}
+            connectionLineType={ConnectionLineType.SmoothStep}
             defaultMarkerColor="yellow"
             elevateEdgesOnSelect
             elevateNodesOnSelect
@@ -133,8 +129,8 @@ export default function Board({ boardId }: BoardProps) {
             connectionRadius={10}
             // deleteKeyCode={null}
           >
-            <Background />
-            <Controls />
+            <Background variant={BackgroundVariant.Dots} bgColor="#edf1f5" />
+            <Controls/>
             <ResizablePane />
           </ReactFlow>
         </Suspense>

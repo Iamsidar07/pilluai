@@ -10,10 +10,10 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Pencil, Sparkles } from "lucide-react";
-import useCurrentUser from "@/context/currentUser";
 import renameBoard from "@/actions/renameBoard";
 import { toast } from "sonner";
 import useSubscription from "@/hooks/useSubscription";
+import { useAuth } from "@clerk/nextjs";
 
 interface Props {
   name: string;
@@ -21,20 +21,20 @@ interface Props {
 }
 
 const RenameBoard = ({ name, boardId }: Props) => {
-  const { user } = useCurrentUser();
+  const { userId } = useAuth();
   const { hasUserProPlanSubscribe } = useSubscription();
   const [newBoardName, setNewBoardName] = useState(name ?? "");
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!user?.uid) {
+    if (!userId) {
       toast.info("Please login to continue.");
       return;
     }
     if (!newBoardName || !boardId || !hasUserProPlanSubscribe) return;
     startTransition(async () => {
-      const { success } = await renameBoard(newBoardName, boardId, user?.uid);
+      const { success } = await renameBoard(newBoardName, boardId);
       if (success) {
         toast.success("Successfully renamed board.");
         setIsOpen(false);

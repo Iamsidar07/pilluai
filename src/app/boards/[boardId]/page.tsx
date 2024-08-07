@@ -1,5 +1,6 @@
 import Board from "@/components/Board";
 import { db } from "@/firebase";
+import { auth } from "@clerk/nextjs/server";
 import { doc, getDoc } from "firebase/firestore";
 import { Metadata, ResolvingMetadata } from "next";
 
@@ -14,28 +15,21 @@ export async function generateMetadata(
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const { boardId } = params;
-  const boardRef = doc(db, "boards", boardId);
+  const { userId } = auth();
+  const boardRef = doc(db, `users/${userId}/boards`, boardId);
   const previousImages = (await parent).openGraph?.images || [];
-  try {
-    const board = await getDoc(boardRef);
+  const board = await getDoc(boardRef);
 
-    return {
-      title: board?.data()?.name || "My Board",
-      openGraph: {
-        images: ["/og.png", ...previousImages],
-      },
-    };
-  } catch (error) {
-    return {
-      title: "My Board",
-      openGraph: {
-        images: ["/og.png", ...previousImages],
-      },
-    };
-  }
+  return {
+    title: board?.data()?.name || "My Board",
+    openGraph: {
+      images: ["/og.png", ...previousImages],
+    },
+  };
 }
 
 export default function BoardPage({ params }: BoardProps) {
+  auth().protect();
   const { boardId } = params;
   return <Board boardId={boardId} />;
 }

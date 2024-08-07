@@ -1,15 +1,9 @@
 "use client";
 import CustomHandle from "@/components/CustomHandle";
-import {
-  NodeProps,
-  NodeResizeControl,
-  NodeResizer,
-  ResizeControlVariant,
-} from "@xyflow/react";
+import { NodeProps, NodeResizeControl, NodeResizer } from "@xyflow/react";
 
 import ShowMessage from "@/components/ShowMessage";
 import { Button } from "@/components/ui/button";
-import useCurrentUser from "@/context/currentUser";
 import { usePanel } from "@/context/panel";
 import { db } from "@/firebase";
 import useSubscription from "@/hooks/useSubscription";
@@ -25,6 +19,7 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import { IoCreateOutline } from "react-icons/io5";
 import { toast } from "sonner";
 import { Chat } from "../../../typing";
+import { useUser } from "@clerk/nextjs";
 
 const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
   const [isAIThinking, setIsAIThinking] = useState(false);
@@ -46,7 +41,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
   });
   const { nodes, edges } = usePanel();
   const { boardId } = useParams();
-  const { user } = useCurrentUser();
+  const { user } = useUser();
   const { hasUserProPlanSubscribe } = useSubscription();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
@@ -57,7 +52,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       query(
         collection(
           db,
-          `users/${user.uid}/boards/${boardId}/chatNodes/${nodeId}/chats`
+          `users/${user.id}/boards/${boardId}/chatNodes/${nodeId}/chats`
         ),
         orderBy("createdAt", "desc")
       ),
@@ -74,7 +69,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       query(
         collection(
           db,
-          `users/${user.uid}/boards/${boardId}/chatNodes/${nodeId}/chats/${currentChat.id}/messages`
+          `users/${user.id}/boards/${boardId}/chatNodes/${nodeId}/chats/${currentChat.id}/messages`
         ),
         orderBy("createdAt", "asc")
       )
@@ -129,7 +124,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
     const newChatId = nanoid();
     const chatCollectionRef = doc(
       db,
-      `users/${user.uid}/boards/${boardId}/chatNodes/${nodeId}/chats`,
+      `users/${user.id}/boards/${boardId}/chatNodes/${nodeId}/chats`,
       newChatId
     );
     await setDoc(chatCollectionRef, {
@@ -148,7 +143,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
     nodeId,
     setInput,
     setMessages,
-    user?.uid,
+    user,
   ]);
 
   useEffect(() => {
@@ -186,7 +181,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
           ]);
           const chatCollectionRef = doc(
             db,
-            `users/${user?.uid}/boards/${boardId}/chatNodes/${nodeId}/chats`,
+            `users/${user?.id}/boards/${boardId}/chatNodes/${nodeId}/chats`,
             newChatId
           );
           await setDoc(chatCollectionRef, {
@@ -204,7 +199,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
           options: {
             body: {
               knowledgeBaseNodes: getKnowledgeBaseNodes(nodeId),
-              userId: user?.uid,
+              userId: user?.id,
               boardId,
               nodeId,
               currentChat,
@@ -233,7 +228,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       nodeId,
       setInput,
       setMessages,
-      user?.uid,
+      user?.id,
       setCurrentChat,
     ]
   );

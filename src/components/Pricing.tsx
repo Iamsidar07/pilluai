@@ -2,26 +2,37 @@
 import createCheckoutSession from "@/actions/createCheckoutSession";
 import createStripePortal from "@/actions/createStripePortal";
 import { Button } from "@/components/ui/button";
-import useCurrentUser from "@/context/currentUser";
 import useSubscription from "@/hooks/useSubscription";
 import getStripe from "@/lib/stripe-js";
 import { CheckIcon, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useTransition } from "react";
+import React, { useTransition } from "react";
 import { UserDetails } from "../../typing";
 import { toast } from "sonner";
 import { isPaymentEnabled } from "@/lib/config";
+import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "./ui/skeleton";
+import { useUser } from "@clerk/nextjs";
 
 const Pricing = () => {
-  const { user } = useCurrentUser();
+  const { user } = useUser();
   const router = useRouter();
   const { hasActiveMembership, loading } = useSubscription();
   const [isPending, startTransition] = useTransition();
+  const { data, isLoading } = useQuery({
+    queryKey: ["country"],
+    queryFn: async () => {
+      const res = await fetch("https://ipapi.co/json/");
+      const data = await res.json();
+      return data;
+    },
+  });
+
   const handleUpgrade = () => {
     if (!user) return;
     const userDetails: UserDetails = {
-      email: user.email,
-      name: user.name,
+      email: user.emailAddresses[0].toString(),
+      name: user.fullName!,
     };
 
     startTransition(async () => {
@@ -32,9 +43,7 @@ const Pricing = () => {
       const stripe = await getStripe();
       if (hasActiveMembership) {
         // manage
-        const { success, message, sessionUrl } = await createStripePortal(
-          user.uid
-        );
+        const { success, message, sessionUrl } = await createStripePortal();
 
         if (!success && message) {
           toast.error(message);
@@ -43,10 +52,8 @@ const Pricing = () => {
         if (!sessionUrl) return;
         return router.push(sessionUrl);
       }
-      const { success, message, sessionId } = await createCheckoutSession(
-        user.uid,
-        userDetails
-      );
+      const { success, message, sessionId } =
+        await createCheckoutSession(userDetails);
       if (!success && message) {
         toast.error(message);
         return;
@@ -57,15 +64,6 @@ const Pricing = () => {
       });
     });
   };
-
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        console.log("Got location", pos);
-      },
-      (err) => console.log("Failed to get location", err)
-    );
-  }, []);
 
   return (
     <div className="min-h-screen p-8 py-24 md:py-32">
@@ -140,7 +138,13 @@ const Pricing = () => {
             Maximize your productivity with PRO features.
           </p>
           <div className="flex gap-1 items-baseline">
-            <span className="text-4xl sm:text-5xl font-bold">$5.99</span>
+            {isLoading ? (
+              <Skeleton className="h-6 w-20" />
+            ) : (
+              <span className="text-4xl sm:text-5xl font-bold">
+                {data?.country === "IN" ? "₹599" : "$5.99"}
+              </span>
+            )}
             <span className="text-sm font-semibold text-gray-400">/month</span>
           </div>
 
@@ -160,17 +164,17 @@ const Pricing = () => {
           <ul className="space-y-2 text-sm text-gray-400">
             <li className="flex items-center gap-2">
               <CheckIcon className="h-4 w-4 text-primary" />
-              <p className="text-sm ">Can add 10 youtube node in one board</p>
+              <p className="text-sm ">10 youtube node in one board</p>
             </li>
             <li className="flex items-center gap-2">
               <CheckIcon className="h-4 w-4 text-primary" />
-              <p className="text-sm ">Can add 10 website node in one board</p>
+              <p className="text-sm ">10 website node in one board</p>
             </li>
 
             <li className="flex items-start gap-2">
               <CheckIcon className="h-4 w-4 text-primary" />
               <p className="text-sm ">
-                Can add 10 pdf document (up to size 16mb) node in one board
+                10 pdf document (up to size 16mb) node in one board
               </p>
             </li>
             <li className="flex items-center gap-2">

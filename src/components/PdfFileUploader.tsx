@@ -42,7 +42,7 @@ const FileUploader = ({ nodeId }: { nodeId: string }) => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center gap-4 !text-xs">
+    <div className="w-full h-screen flex flex-col items-center justify-center gap-4 !text-xs">
       {/* Loading */}
       {uploadProgress && status && (
         <div className="flex flex-col gap-1 items-center justify-center">
@@ -54,7 +54,7 @@ const FileUploader = ({ nodeId }: { nodeId: string }) => {
         <div
           {...getRootProps()}
           className={cn(
-            "p-4 border w-full h-full flex flex-col items-center justify-center rounded border-dashed border-gray-300 bg-gray-100/10 text-gray-400 shadow-sm",
+            "p-8 border w-full h-full flex flex-col items-center justify-center rounded border-dashed border-gray-300 bg-gray-100/10 text-gray-400 shadow-sm",
             {
               "bg-blue-100 text-blue-600 border-blue-800":
                 isFocused || isDragAccept,

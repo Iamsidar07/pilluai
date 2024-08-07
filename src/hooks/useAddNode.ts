@@ -30,7 +30,6 @@ const useAddNode = () => {
       height: 600,
       type: "chatNode",
       data: {
-        text: "",
         type: "chatNode",
       },
     };
@@ -45,12 +44,8 @@ const useAddNode = () => {
       data: {
         title: "Website",
         type: "webScrapperNode",
-        text: "",
         url: "",
         screenshotUrl: "",
-        userName: "",
-        userEmail: "",
-        description: "",
         namespace: "",
       },
     };

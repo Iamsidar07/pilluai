@@ -1,20 +1,14 @@
 "use client";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect } from "react";
 import PanelItem from "./panels/PanelItem";
-import { ImageIcon } from "lucide-react";
 import { useKeyPress } from "@xyflow/react";
 import { nanoid } from "nanoid";
-import { TImageNode, TPdfNode } from "./nodes";
+import { TPdfNode } from "./nodes";
 import { usePanel } from "@/context/panel";
-import { toast } from "sonner";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { storage } from "@/firebase";
-import useCurrentUser from "@/context/currentUser";
-import { FaRegFilePdf, FaRegFileImage } from "react-icons/fa";
+import { FaRegFilePdf } from "react-icons/fa";
 
 const AddPdfNode = () => {
-  const { user } = useCurrentUser();
-  const { addNode, updateNode } = usePanel();
+  const { addNode } = usePanel();
   const isIPressed = useKeyPress("p" || "P");
 
   const handleAddPdfNode = useCallback(() => {

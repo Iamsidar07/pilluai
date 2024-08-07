@@ -1,16 +1,16 @@
 "use client";
 
-import { db, storage } from "@/firebase";
+import { storage } from "@/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { useCallback, useState } from "react";
 import { nanoid } from "nanoid";
 
-import useCurrentUser from "@/context/currentUser";
 import { usePanel } from "@/context/panel";
 import generateEmbeddings from "@/actions/generateEmbeddings";
 import { toast } from "sonner";
 import useSubscription from "./useSubscription";
 import { freePdfSize, proPdfSize } from "@/lib/config";
+import { useUser } from "@clerk/nextjs";
 
 export enum StatusText {
   UPLOADING = "Uploading file...",
@@ -25,7 +25,7 @@ function useUpload(nodeId: string) {
   const { hasActiveMembership } = useSubscription();
   const [progress, setProgress] = useState<number | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
-  const { user } = useCurrentUser();
+  const { user } = useUser();
   const { updateNode } = usePanel();
 
   const handleUpload = useCallback(
@@ -34,7 +34,7 @@ function useUpload(nodeId: string) {
       const fileIdToUpload = nanoid();
       const storageRef = ref(
         storage,
-        `/users/${user.uid}/files/${fileIdToUpload}`
+        `/users/${user.id}/files/${fileIdToUpload}`,
       );
       // limit file size
       if (!hasActiveMembership && file.size >= freePdfSize * 10 ** 6) {
@@ -83,10 +83,10 @@ function useUpload(nodeId: string) {
               namespace,
             },
           });
-        }
+        },
       );
     },
-    [hasActiveMembership, nodeId, updateNode, user]
+    [hasActiveMembership, nodeId, updateNode, user],
   );
   return { progress, status, handleUpload };
 }

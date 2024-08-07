@@ -14,6 +14,7 @@ import { createHistoryAwareRetriever } from "langchain/chains/history_aware_retr
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { createRetrievalChain } from "langchain/chains/retrieval";
 import { adminDb } from "@/firebaseAdmin";
+import { auth } from "@clerk/nextjs/server";
 
 const index = new Index({
   url: process.env.UPSTASH_INDEX_URL as string,
@@ -86,7 +87,6 @@ async function handleVectorQuery(
     input: query,
   });
   console.log("reply:", reply.answer);
-  console.log("context:", reply.context);
   return reply.answer;
 }
 
@@ -95,40 +95,44 @@ export const POST = async (req: NextRequest) => {
     const {
       messages,
       knowledgeBaseNodes,
-      userId,
       boardId,
       nodeId,
       currentChat,
     }: {
       messages: Message[];
       knowledgeBaseNodes: AppNode[];
-      userId: string;
       boardId: string;
       nodeId: string;
       currentChat: Chat;
     } = await req.json();
+    auth().protect();
+    const { userId } = auth();
+    if (!userId) return new Response("Unauthorized", { status: 401 });
     // @ts-ignore
-
     const lastMessage = messages[messages?.length - 1];
     const imageAndWebScraperNodes = knowledgeBaseNodes.filter(
       (node) => node.type === "imageNode" || node.type === "webScrapperNode"
     );
-    await adminDb
-      .collection("users")
-      .doc(userId)
-      .collection("boards")
-      .doc(boardId)
-      .collection("chatNodes")
-      .doc(nodeId)
-      .collection("chats")
-      .doc(currentChat.id)
-      .collection("messages")
-      .add({
-        id: nanoid(),
-        role: "user",
-        content: lastMessage.content,
-        createdAt: new Date(),
-      });
+    const addMessageToDb = async (role: string, content: string) => {
+      await adminDb
+        .collection("users")
+        .doc(userId)
+        .collection("boards")
+        .doc(boardId)
+        .collection("chatNodes")
+        .doc(nodeId)
+        .collection("chats")
+        .doc(currentChat.id)
+        .collection("messages")
+        .add({
+          id: nanoid(),
+          role,
+          content,
+          createdAt: new Date(),
+        });
+    };
+
+    await addMessageToDb("user", lastMessage.content);
 
     const imagePrompt = imageAndWebScraperNodes.map((node) => {
       if (node.type === "webScrapperNode") {
@@ -184,31 +188,9 @@ export const POST = async (req: NextRequest) => {
         { role: "user", content: prompt },
       ],
       onFinish: async ({ text }) => {
-        console.log("finished...");
         try {
-          console.log("Adding message to the collection...");
-          await adminDb
-            .collection("users")
-            .doc(userId)
-            .collection("boards")
-            .doc(boardId)
-            .collection("chatNodes")
-            .doc(nodeId)
-            .collection("chats")
-            .doc(currentChat.id)
-            .collection("messages")
-            .add({
-              id: nanoid(),
-              role: "assistant",
-              content: text,
-              createdAt: new Date(),
-            });
-        } catch (error) {
-          console.log("Failed to add message to the collection: ", error);
-        }
-
-        if (currentChat.title === null) {
-          try {
+          await addMessageToDb("assistant", text);
+          if (!currentChat.title) {
             console.log("Updating chat title...");
             await adminDb
               .collection("users")
@@ -222,9 +204,9 @@ export const POST = async (req: NextRequest) => {
               .update({
                 title: lastMessage.content,
               });
-          } catch (error) {
-            console.log("Failed to update chat title: ", error);
           }
+        } catch (error) {
+          console.log("Failed to update chat title: ", error);
         }
       },
     });

@@ -1,7 +1,6 @@
 "use client";
 
 import createStripePortal from "@/actions/createStripePortal";
-import useCurrentUser from "@/context/currentUser";
 import useSubscription from "@/hooks/useSubscription";
 import { Loader2, StarsIcon } from "lucide-react";
 import Link from "next/link";
@@ -10,9 +9,10 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { isPaymentEnabled } from "@/lib/config";
+import { useUser } from "@clerk/nextjs";
 
 const UpgradeButton = () => {
-  const { user } = useCurrentUser();
+  const { user } = useUser();
   const { hasActiveMembership, loading } = useSubscription();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -24,9 +24,7 @@ const UpgradeButton = () => {
       return;
     }
     startTransition(async () => {
-      const { success, message, sessionUrl } = await createStripePortal(
-        user.uid
-      );
+      const { success, message, sessionUrl } = await createStripePortal();
       if (!success && message) {
         toast.error(message);
         return;

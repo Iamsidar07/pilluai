@@ -3,12 +3,13 @@
 import { adminDb } from "@/firebaseAdmin";
 import getBaseURL from "@/lib/getBaseURL";
 import stripe from "@/lib/stripe";
+import { auth } from "@clerk/nextjs/server";
 
-const createStripePortal = async (userId: string) => {
-  if (!userId) {
-    return { success: false, message: "User not found" };
-  }
+const createStripePortal = async () => {
+  auth().protect();
   try {
+    const { userId } = auth();
+    if (!userId) return { success: false, message: "user not found" };
     const user = await adminDb.collection("users").doc(userId).get();
     const stripeCustomerId = user.data()?.stripeCustomerId;
     if (!stripeCustomerId) {

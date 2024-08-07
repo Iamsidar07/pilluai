@@ -9,7 +9,8 @@ import { JSONContent } from "novel";
 import React, { useEffect, useState } from "react";
 import Editor from "./editor/Editor";
 import { Loader2 } from "lucide-react";
-import useCurrentUser from "@/context/currentUser";
+import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 const getBoard = async (userId: string, boardId: string) => {
   const docRef = doc(db, `users/${userId}/boards/${boardId}`);
@@ -18,8 +19,8 @@ const getBoard = async (userId: string, boardId: string) => {
 };
 
 const Notes = () => {
+  const { userId } = useAuth();
   const params = useParams();
-  const { user } = useCurrentUser();
   const [initialContent, setInitialContent] = useState<JSONContent | null>(
     null,
   );
@@ -29,7 +30,7 @@ const Notes = () => {
     error,
   } = useQuery({
     queryKey: ["board", params.boardId],
-    queryFn: () => getBoard(user?.uid as string, params.boardId as string),
+    queryFn: () => getBoard(userId!, params.boardId as string),
   });
 
   const [saveStatus, setSaveStatus] = useState("Save");
@@ -47,16 +48,19 @@ const Notes = () => {
   }, [boardData, boardData?.name]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!userId) {
+      toast.error("Please login to continue");
+      return;
+    }
     const docRef = doc(
       db,
-      `users/${user?.uid}/boards/${params.boardId as string}`,
+      `users/${userId}/boards/${params.boardId as string}`,
     );
     updateDoc(docRef, {
       name: e.target.value,
     });
   };
 
-  console.log({ isLoading, error, boardData });
   return (
     <Panel
       position="top-right"
@@ -71,7 +75,7 @@ const Notes = () => {
             setTitle(e.target.value);
             const handleTitleChangeDebounced = debounce(
               () => handleTitleChange(e),
-              500,
+              200,
             );
             handleTitleChangeDebounced();
           }}

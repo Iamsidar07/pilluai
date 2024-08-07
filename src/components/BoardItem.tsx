@@ -1,41 +1,20 @@
-"use client";
-import { db } from "@/firebase";
-import { useMutation } from "@tanstack/react-query";
-import { deleteDoc, doc } from "firebase/firestore";
 import { EllipsisVertical } from "lucide-react";
 import Link from "next/link";
-import React, { useCallback } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { toast } from "sonner";
 import { Board } from "../../typing";
 import DeleteBoard from "./DeleteBoard";
 import RenameBoard from "./RenameBoard";
+import { formatDistanceToNow } from "date-fns";
 
 interface BoardItemProps {
   board: Board;
 }
 const BoardItem = ({ board }: BoardItemProps) => {
-  const deleteBoard = useMutation({
-    onError: (e) => {
-      toast.error("Failed to delete Board");
-    },
-    mutationFn: async (boardId: string) =>
-      deleteDoc(doc(db, "boards", boardId)),
-  });
-
-  const handleDeleteBoard = useCallback(
-    (boardId: string, e: React.MouseEvent) => {
-      e.stopPropagation();
-      deleteBoard.mutate(boardId);
-    },
-    [deleteBoard]
-  );
-
   return (
     <div
       key={board.id}
@@ -43,8 +22,11 @@ const BoardItem = ({ board }: BoardItemProps) => {
     >
       <Link href={`/boards/${board.id}`}>
         <p className="font-bold">{board.name}</p>
-        <p className="text-gray-400 mt-2">
-          Date: {board.createdAt.toDate().toLocaleString()}
+        <p className="text-gray-400 mt-2 text-xs">
+          {formatDistanceToNow(new Date(board.createdAt.toDate()), {
+            addSuffix: true,
+            includeSeconds: true,
+          })}
         </p>
       </Link>
       <DropdownMenu>

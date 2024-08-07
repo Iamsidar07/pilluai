@@ -23,9 +23,8 @@ const useYoutubeNode = () => {
       return;
     }
     startTransition(async () => {
-      const { success, description, title } = await getYoutubeVideoInfo(
-        videoUrl
-      );
+      const { success, description, title } =
+        await getYoutubeVideoInfo(videoUrl);
       console.log(success, description, title);
       if (!success) {
         toast.error("Failed to get video details");
@@ -39,9 +38,7 @@ const useYoutubeNode = () => {
           url: videoUrl,
           type: "youtubeNode",
           namespace: "",
-          text: "",
           title: title || "",
-          description: description || "",
         },
       };
       addNode(node);

@@ -2,12 +2,18 @@
 
 import { db } from "@/firebase";
 import { Timestamp, addDoc, collection, getDocs } from "firebase/firestore";
-import { User } from "../../typing";
 import { maxFreeBoards } from "@/lib/config";
+import { auth } from "@clerk/nextjs/server";
 
-const createNewBoard = async (name: string, user: User) => {
+const createNewBoard = async (name: string) => {
+  auth().protect();
+  const { userId } = auth();
+  console.log({ userId });
+  if (!userId) {
+    return { success: false, message: "You are not signed in." };
+  }
   try {
-    const boards = await getDocs(collection(db, `users/${user.uid}/boards`));
+    const boards = await getDocs(collection(db, `users/${userId}/boards`));
     if (boards.size >= maxFreeBoards) {
       return {
         success: false,
@@ -15,13 +21,11 @@ const createNewBoard = async (name: string, user: User) => {
       };
     }
     // LIMIT the boards
-    await addDoc(collection(db, `users/${user.uid}/boards`), {
+    await addDoc(collection(db, `users/${userId}/boards`), {
       nodes: [],
       edges: [],
       notes: "",
       name: name || "",
-      userId: user.uid,
-      userName: user.name || "",
       createdAt: Timestamp.now(),
     });
     return { success: true };

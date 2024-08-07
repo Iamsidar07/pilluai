@@ -56,7 +56,7 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
         ) : (
           <form
             onSubmit={handleAddWebscrapperNode}
-            className="flex items-center gap-2 border rounded py-2 bg-white"
+            className="flex items-center gap-2 border rounded py-2 bg-white mx-2"
           >
             <input
               className="w-full h-full outline-none p-1"

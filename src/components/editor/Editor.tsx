@@ -2,7 +2,7 @@
 
 import { db } from "@/firebase";
 import { debounce } from "@/lib/utils";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import {
   EditorBubble,
@@ -14,19 +14,15 @@ import {
   EditorRoot,
   JSONContent,
 } from "novel";
-import {
-  handleCommandNavigation,
-  Placeholder,
-  StarterKit,
-} from "novel/extensions";
-import { useCallback, useState, useEffect, useMemo } from "react";
+import { handleCommandNavigation } from "novel/extensions";
+import { useState, useEffect, useMemo } from "react";
 import { slashCommand, suggestionItems } from "./commands";
 import { ColorSelector } from "./selectors/color-selector";
 import { LinkSelector } from "./selectors/link-selector";
 import { NodeSelector } from "./selectors/node-selector";
 import { TextButtons } from "./selectors/text-buttons";
 import { defaultExtensions } from "./extensions";
-import useCurrentUser from "@/context/currentUser";
+import { useAuth } from "@clerk/nextjs";
 
 const getBoard = async (userId: string, boardId: string) => {
   const docRef = doc(db, `users/${userId}/boards`, boardId);
@@ -43,7 +39,7 @@ const TailwindEditor = ({
   initialContent: JSONContent | null;
   setSaveStatus: React.Dispatch<React.SetStateAction<string>>;
 }) => {
-  const { user } = useCurrentUser();
+  const { userId } = useAuth();
   const [openNode, setOpenNode] = useState(false);
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
@@ -57,8 +53,8 @@ const TailwindEditor = ({
     isLoading,
     error: errorWhileFetchingNotes,
   } = useQuery({
-    queryKey: ["board", boardId],
-    queryFn: () => getBoard(user?.uid as string, boardId),
+    queryKey: ["board", boardId, userId],
+    queryFn: () => getBoard(userId!, boardId),
   });
 
   useEffect(() => {
@@ -69,9 +65,10 @@ const TailwindEditor = ({
   const extensions = useMemo(() => [...defaultExtensions, slashCommand], []);
 
   const onUpdate = async (content: JSONContent) => {
+    if (!userId) return;
     try {
       setSaveStatus("Saving...");
-      const docRef = doc(db, `users/${user?.uid}/boards`, boardId);
+      const docRef = doc(db, `users/${userId}/boards`, boardId);
       const docSnap = await updateDoc(docRef, {
         notes: JSON.stringify(content),
       });

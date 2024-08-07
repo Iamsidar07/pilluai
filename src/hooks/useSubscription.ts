@@ -1,19 +1,19 @@
 "use client";
 
-import useCurrentUser from "@/context/currentUser";
 import { db } from "@/firebase";
 import { maxFreeBoards, maxProBoards } from "@/lib/config";
+import { useUser } from "@clerk/nextjs";
 import { collection, doc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useCollection, useDocument } from "react-firebase-hooks/firestore";
 
 function useSubscription() {
-  const { user } = useCurrentUser();
+  const { user } = useUser();
   const [hasActiveMembership, setHasActiveMembership] = useState(null);
   const [isOverBoardLimit, setIsOverBoardLimit] = useState(false);
 
   const [snapshot, loading, error] = useDocument(
-    user && doc(db, "users", user.uid),
+    user && doc(db, "users", user.id),
     {
       snapshotListenOptions: {
         includeMetadataChanges: true,
@@ -22,7 +22,7 @@ function useSubscription() {
   );
 
   const [boardsSnapshot, boardsSnapshotLoading, boardsSnapshotError] =
-    useCollection(user && collection(db, "users", user.uid, "boards"));
+    useCollection(user && collection(db, "users", user.id, "boards"));
 
   useEffect(() => {
     if (!snapshot) return;

@@ -1,9 +1,11 @@
 "use server";
 
 import { isValidYoutubeUrl } from "@/lib/utils";
+import { auth } from "@clerk/nextjs/server";
 import ytdl from "ytdl-core";
 
 const getYoutubeVideoInfo = async (url: string) => {
+  auth().protect();
   if (!isValidYoutubeUrl(url)) {
     return { success: false };
   }

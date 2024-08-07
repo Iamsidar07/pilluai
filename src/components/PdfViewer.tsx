@@ -67,7 +67,11 @@ const PdfViewer = ({ url, name }: { url: string; name: string }) => {
       </div>
       <div className="flex-1 p-6 overflow-y-auto">
         <Document
-          loading={<Loader2 className="w-6 h-6 m-4 mx-auto animate-spin" />}
+          loading={
+            <div className="w-44 h-44 flex flex-col items-center justify-center mx-auto">
+              <Loader2 className="w-6 h-6 mx-auto animate-spin" />
+            </div>
+          }
           file={url}
           onLoadError={(e) => toast.error("Failed to load pdf")}
           onLoadSuccess={onDocumentLoadSuccess}

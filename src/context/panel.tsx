@@ -15,12 +15,10 @@ import {
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import useCurrentUser from "./currentUser";
-import { useDocument } from "react-firebase-hooks/firestore";
 import useSubscription from "@/hooks/useSubscription";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
 import { NODE_LIMITS } from "@/lib/config";
+import { useUser } from "@clerk/nextjs";
 
 interface IPanelContext {
   nodes: AppNode[] | [];
@@ -64,7 +62,7 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
   const params = useParams();
   const boardId = params.boardId as string;
   const { hasActiveMembership } = useSubscription();
-  const { user } = useCurrentUser();
+  const { user } = useUser();
   const [boardData, setBoardData] = useState<Board | undefined>(undefined);
 
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -80,19 +78,16 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
       setNodes(data?.nodes);
       setEdges(data?.edges);
     };
-    getBoard(user.uid, boardId);
+    getBoard(user?.id, boardId);
   }, [user, boardId, setNodes, setEdges]);
 
   const saveEdges = useCallback(
     // @ts-ignore
     async (edges) => {
       console.log("saveEdges");
+      if (!user) return;
       try {
-        const boardRef = doc(
-          db,
-          `users/${user?.uid}/boards`,
-          boardId as string
-        );
+        const boardRef = doc(db, `users/${user?.id}/boards`, boardId as string);
         updateDoc(boardRef, {
           edges: edges,
         });
@@ -100,14 +95,12 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
         console.log(e);
       }
     },
-    [boardId, user?.uid]
+    [boardId, user]
   );
 
   const onConnect: OnConnect = useCallback(
     (connection) => {
       if (!connection.source || !connection.target) return;
-      console.log("edges", edges);
-      console.log("connection", connection);
       const edge = {
         ...connection,
         animated: true,
@@ -128,10 +121,6 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
     (node: AppNode) => {
       setNodes((nds) => {
         const nodeType = node.type as keyof typeof NODE_LIMITS;
-        if (!NODE_LIMITS[nodeType]) {
-          return nds; // Return unchanged if the node type is not defined in the limits
-        }
-
         const limit = hasActiveMembership
           ? NODE_LIMITS[nodeType].active
           : NODE_LIMITS[nodeType].free;
@@ -142,7 +131,6 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
           toast.error(`Reached the limit of ${nodeType}`);
           return nds;
         }
-
         return [...nds, node];
       });
     },

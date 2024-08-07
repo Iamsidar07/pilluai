@@ -80,7 +80,6 @@
 @layer base {
   * {
     @apply border-border;
-    font-family: "SF Mono";
   }
   body {
     @apply bg-background text-foreground;

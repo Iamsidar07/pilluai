@@ -2,11 +2,13 @@
 
 import { embeddings, index } from "@/lib/langchain";
 import { isValidYoutubeUrl } from "@/lib/utils";
+import { auth } from "@clerk/nextjs/server";
 import { YoutubeLoader } from "@langchain/community/document_loaders/web/youtube";
 import { UpstashVectorStore } from "@langchain/community/vectorstores/upstash";
 import { nanoid } from "nanoid";
 
 const storeYoutubeVideoEmbeddings = async (url: string) => {
+  auth().protect();
   if (!isValidYoutubeUrl(url)) {
     return { success: false };
   }

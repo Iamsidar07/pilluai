@@ -9,10 +9,10 @@ import { usePanel } from "@/context/panel";
 import { toast } from "sonner";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "@/firebase";
-import useCurrentUser from "@/context/currentUser";
+import { useAuth } from "@clerk/nextjs";
 
 const AddImageNode = () => {
-  const { user } = useCurrentUser();
+  const { userId } = useAuth();
   const { addNode, updateNode } = usePanel();
   const isIPressed = useKeyPress("i" || "I");
   const selectImageRef = useRef<HTMLLabelElement | null>(null);
@@ -31,12 +31,12 @@ const AddImageNode = () => {
         data,
       });
     },
-    [updateNode]
+    [updateNode],
   );
 
   const handleSelectFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files?.length === 0 || !files) return;
+    if (files?.length === 0 || !files || !userId) return;
     const file = files[0];
     console.log("adding image node", file);
     const newNode: TImageNode = {
@@ -47,8 +47,6 @@ const AddImageNode = () => {
       data: {
         type: "imageNode",
         url: "",
-        description: "",
-        text: "",
         title: "Uploading...",
         tempUrl: URL.createObjectURL(file),
       },
@@ -57,7 +55,7 @@ const AddImageNode = () => {
 
     try {
       addNode(newNode);
-      const imageRef = ref(storage, `users/${user?.uid}/files/${nanoid()}`);
+      const imageRef = ref(storage, `users/${userId}/files/${nanoid()}`);
       const blob = await file.arrayBuffer();
       const uploadTask = await uploadBytesResumable(imageRef, blob);
       const url = await getDownloadURL(uploadTask.ref);

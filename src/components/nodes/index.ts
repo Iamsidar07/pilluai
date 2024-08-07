@@ -26,7 +26,6 @@ export type TPdfNode = Node<
 
 export type TChatNode = Node<
   {
-    text: string;
     type: "chatNode";
   },
   "chatNode"
@@ -34,22 +33,16 @@ export type TChatNode = Node<
 export type TWebScrapperNode = Node<
   {
     url: string;
-    description: string;
     screenshotUrl: string;
     type: "webScrapperNode";
-    userEmail: string;
-    userName: string;
     title: string;
     namespace: string;
-    text: string;
   },
   "webScrapperNode"
 >;
 export type TImageNode = Node<
   {
-    description: string;
     tempUrl: string;
-    text: string;
     title: string;
     url: string;
     type: "imageNode";
@@ -58,12 +51,10 @@ export type TImageNode = Node<
 >;
 export type TYoutubeNode = Node<
   {
-    description: string;
     title: string;
     url: string;
     type: "youtubeNode";
     namespace: string;
-    text: string;
   },
   "youtubeNode"
 >;

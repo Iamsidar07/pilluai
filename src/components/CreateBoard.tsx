@@ -1,30 +1,28 @@
 "use client";
 import createNewBoard from "@/actions/createNewBoard";
-import useCurrentUser from "@/context/currentUser";
 import { FolderPlus, Loader2, Plus } from "lucide-react";
 import { FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 
 const CreateBoard = () => {
-  const { user } = useCurrentUser();
   const [isPending, startTransition] = useTransition();
   const [boardName, setBoardName] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!boardName || !user) return;
+    if (!boardName) return;
     startTransition(async () => {
-      const { success, message } = await createNewBoard(boardName, user);
+      const { success, message } = await createNewBoard(boardName);
       if (success) {
         toast.success("Successfully create new board.");
         setIsOpen(false);

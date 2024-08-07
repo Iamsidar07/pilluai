@@ -9,10 +9,7 @@ const ImageNode = ({ id, data, selected }: NodeProps) => {
   return (
     <div
       className={cn(
-        "p-1 pb-0 ring-1 ring-gray-900/10 overflow-hidden fixed-dimension bg-[var(--novel-highlight-gray)] rounded",
-        {
-          "transition-transform scale-105": selected,
-        }
+        "p-1 pb-0 ring-1 ring-gray-900/10 overflow-hidden fixed-dimension bg-[var(--novel-highlight-gray)] rounded"
       )}
     >
       <CustomHandle type="source" />

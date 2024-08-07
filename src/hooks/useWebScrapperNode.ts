@@ -2,18 +2,18 @@
 
 import scrapeWebsite from "@/actions/scrapeWebsite";
 import storeWebsiteEmbeddings from "@/actions/storeWebsiteEmbeddings";
-import useCurrentUser from "@/context/currentUser";
 import { usePanel } from "@/context/panel";
 import { storage } from "@/firebase";
 import { isValidURL } from "@/lib/utils";
+import { useAuth } from "@clerk/nextjs";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { nanoid } from "nanoid";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 const useWebScrapperNode = (nodeId: string) => {
+  const { userId } = useAuth();
   const { updateNode } = usePanel();
-  const { user } = useCurrentUser();
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,7 +25,7 @@ const useWebScrapperNode = (nodeId: string) => {
         data,
       });
     },
-    [nodeId, updateNode]
+    [nodeId, updateNode],
   );
 
   const handleAddWebscrapperNode = useCallback(
@@ -47,10 +47,11 @@ const useWebScrapperNode = (nodeId: string) => {
           title: scrapedData.title,
           tempUrl: `data:image/png;base64,${scrapedData.base64}`,
         });
-        const imageRef = ref(storage, `users/${user?.uid}/files/${nanoid()}`);
+        const imageRef = ref(storage, `users/${userId}/files/${nanoid()}`);
+
         const uploadTask = await uploadBytesResumable(
           imageRef,
-          scrapedData.buffer as Buffer
+          Buffer.from(scrapedData?.base64!, "base64"),
         );
         const uploadedImageUrl = await getDownloadURL(uploadTask.ref);
         console.log("uploadedImage: ", uploadedImageUrl);
@@ -71,7 +72,7 @@ const useWebScrapperNode = (nodeId: string) => {
         setIsLoading(false);
       }
     },
-    [updateWebScrapperNode, setIsLoading, url, user?.uid]
+    [updateWebScrapperNode, setIsLoading, url, userId],
   );
 
   return { handleAddWebscrapperNode, url, setUrl, isLoading };

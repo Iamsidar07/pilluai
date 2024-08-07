@@ -4,11 +4,11 @@ import { adminDb } from "@/firebaseAdmin";
 import getBaseURL from "@/lib/getBaseURL";
 import stripe from "@/lib/stripe";
 import { UserDetails } from "../../typing";
+import { auth } from "@clerk/nextjs/server";
 
-const createCheckoutSession = async (
-  userId: string,
-  userDetails: UserDetails
-) => {
+const createCheckoutSession = async (userDetails: UserDetails) => {
+  auth().protect();
+  const { userId } = auth();
   if (!userId) {
     return { success: false, message: "User ID is required" };
   }

@@ -6,11 +6,11 @@ import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import Provider from "@/components/Provider";
 
-// const inter = Manrope({
-//   subsets: ["latin"],
-//   weight: ["200", "300", "400", "500", "600", "700", "800"],
-//   variable: "--heading-font",
-// });
+const inter = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--heading-font",
+});
 
 export const metadata: Metadata = {
   title: "PilluAI",
@@ -23,14 +23,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="light">
-      <body>
-        <Provider>
+    <Provider>
+      <html lang="en" className="light">
+        <body className={inter.className}>
           <Navbar />
           {children}
-        </Provider>
-        <Toaster position="top-center" />
-      </body>
-    </html>
+          <Toaster position="top-center" />
+        </body>
+      </html>
+    </Provider>
   );
 }

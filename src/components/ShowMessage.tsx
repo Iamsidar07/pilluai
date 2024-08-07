@@ -1,14 +1,14 @@
 "use client";
-import useCurrentUser from "@/context/currentUser";
 import { Message } from "ai";
 import { Copy } from "lucide-react";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { useUser } from "@clerk/nextjs";
 
 const ShowMessage = ({ role, content }: Message) => {
-  const { user } = useCurrentUser();
+  const { user } = useUser();
 
   const MemoizedMarkdownRenderer = useMemo(() => {
     return <MarkdownRenderer content={content} />;
@@ -17,18 +17,20 @@ const ShowMessage = ({ role, content }: Message) => {
     <div className="nowheel nodrag textselectable">
       <div className="flex items-center gap-1">
         {role === "user" ? (
-          <Avatar>
-            <AvatarImage src={user?.photoURL} className="w-5 h-5" />
-            <AvatarFallback>{user?.name?.[0]}</AvatarFallback>
+          <Avatar className="w-5 h-5">
+            <AvatarImage src={user?.imageUrl} />
+            <AvatarFallback>{user?.firstName?.[0]}</AvatarFallback>
           </Avatar>
         ) : (
-          <Avatar>
-            <AvatarImage src="/logo.png" className="w-5 h-5" />
+          <Avatar className="w-5 h-5">
+            <AvatarImage src="/logo.png" />
             <AvatarFallback>Pillu AI</AvatarFallback>
           </Avatar>
         )}
         {role === "user" ? (
-          <span className="text-green-500 text-sm">{user?.name || ""}</span>
+          <span className="text-green-500 text-sm">
+            {user?.fullName || user?.emailAddresses.toString().substring(0, 5)}
+          </span>
         ) : (
           <span className="text-primary text-sm">Pillu AI</span>
         )}
