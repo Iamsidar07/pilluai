@@ -43,7 +43,7 @@ export default async function Home() {
     <main className="w-full overflow-y-auto flex-1">
       <div className="p-4 lg:p-8 grainy-light border-b">
         <div className="max-w-7xl mx-auto flex flex-col items-center py-24 lg:py-32">
-          <div className="mx-auto max-w-2xl text-left sm:text-center">
+          <div className="mx-auto max-w-4xl text-left sm:text-center">
             <h2 className="font-bold text-gray-600 font-heading">
               Your interactive whiteboard comapanion
             </h2>

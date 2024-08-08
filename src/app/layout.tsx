@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <Provider>
       <html lang="en" className="light">
-        <body className={cn(inter.className, audiowide.className)}>
+        <body className={cn(audiowide.className, inter.className)}>
           <Navbar />
           {children}
           <Toaster position="top-center" />
