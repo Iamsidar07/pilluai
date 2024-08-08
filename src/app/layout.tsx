@@ -1,12 +1,11 @@
-import "../styles/novel.css";
 import "../styles/globals.css";
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { Poppins } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import Provider from "@/components/Provider";
 
-const inter = Manrope({
+const inter = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
   variable: "--heading-font",

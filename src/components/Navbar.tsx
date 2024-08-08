@@ -15,8 +15,8 @@ const Navbar = () => {
             <Image
               src="/logo.png"
               alt="Pillu AI"
-              width={50}
-              height={50}
+              width={30}
+              height={30}
               placeholder="blur"
               blurDataURL="/logo.png"
               className="object-contain"

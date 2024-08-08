@@ -11,7 +11,7 @@ import { maxChatInOneChatNode } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { Message, useChat } from "ai/react";
 import { collection, doc, orderBy, query, setDoc } from "firebase/firestore";
-import { ArrowRightIcon, Bot } from "lucide-react";
+import { ArrowRightIcon, Bot, Loader2 } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -252,6 +252,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
           </div>
           <h3 className="mt-4 mb-2 text-zinc-400">Previous Chats</h3>
           <div className="flex flex-col">
+            {loading && <Loader2 className="w-5 h-5 mt-4 mx-auto" />}
             {chats?.map(
               (chat) =>
                 chat.title && (

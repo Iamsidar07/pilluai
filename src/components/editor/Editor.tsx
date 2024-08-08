@@ -1,5 +1,5 @@
 "use client";
-
+import "@/styles/novel.css";
 import { db } from "@/firebase";
 import { debounce } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";

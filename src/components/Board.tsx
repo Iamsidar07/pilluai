@@ -110,6 +110,7 @@ export default function Board({ boardId }: BoardProps) {
         onError={(_, msg) => toast.error(msg)}
         onlyRenderVisibleElements
         connectionRadius={10}
+        className="grainy-light"
         // deleteKeyCode={null}
       >
         <Background variant={BackgroundVariant.Dots} bgColor="#edf1f5" />

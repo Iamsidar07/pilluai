@@ -13,9 +13,11 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.vers
 const PdfViewer = ({ url, name }: { url: string; name: string }) => {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
     setNumPages(numPages);
+    setIsLoaded(true);
   }
 
   const handleGoToPreviousPage = () => {
@@ -34,38 +36,40 @@ const PdfViewer = ({ url, name }: { url: string; name: string }) => {
 
   return (
     <div className="w-full h-full flex flex-col items-center bg-white/10 gap-1">
-      <div className="flex items-center justify-between gap-2 px-4 py-1.5 w-full max-w-2xl mx-auto bg-white/75 rounded-lg shadow-sm">
-        <div className="flex items-center gap-2">
-          <div className="truncate">{name}</div>
-          <div className="flex items-center gap-2 !text-xs">
-            <Button
-              disabled={pageNumber === 1}
-              onClick={handleGoToPreviousPage}
-              variant="outline"
-              size={"sm"}
-            >
-              Previous
-            </Button>
-            {numPages === 0 ? (
-              <p>No pages</p>
-            ) : (
-              <p>
-                {pageNumber} of {numPages}
-              </p>
-            )}
+      {isLoaded && (
+        <div className="flex items-center justify-between gap-2 px-4 py-1.5 w-full max-w-2xl mx-auto bg-white/75 rounded-lg shadow-sm">
+          <div className="flex items-center gap-2">
+            <div className="truncate">{name}</div>
+            <div className="flex items-center gap-2 !text-xs">
+              <Button
+                disabled={pageNumber === 1}
+                onClick={handleGoToPreviousPage}
+                variant="outline"
+                size={"sm"}
+              >
+                Previous
+              </Button>
+              {numPages === 0 ? (
+                <p>No pages</p>
+              ) : (
+                <p>
+                  {pageNumber} of {numPages}
+                </p>
+              )}
 
-            <Button
-              disabled={pageNumber === numPages || numPages === 0}
-              onClick={handleGoToNexPage}
-              variant="outline"
-              size="sm"
-            >
-              Next
-            </Button>
+              <Button
+                disabled={pageNumber === numPages || numPages === 0}
+                onClick={handleGoToNexPage}
+                variant="outline"
+                size="sm"
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="flex-1 p-6 overflow-y-auto">
+      )}
+      <div className="flex-1 overflow-auto">
         <Document
           loading={
             <div className="w-44 h-44 flex flex-col items-center justify-center mx-auto">
@@ -78,9 +82,8 @@ const PdfViewer = ({ url, name }: { url: string; name: string }) => {
           className="nowheel nodrag overflow-y-auto textselectable"
         >
           <Page
-            className="shadow-lg pb-8"
+            className="max-w-full"
             pageNumber={pageNumber}
-            scale={1.3}
           />
         </Document>
       </div>

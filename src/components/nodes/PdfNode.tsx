@@ -10,15 +10,15 @@ const PdfNode = ({ id, selected, data }: NodeProps) => {
   return (
     <div
       className={cn(
-        "ring-1 ring-gray-900/10 w-full h-full bg-white shadow-sm rounded"
+        "ring-1 ring-gray-900/10 w-full h-full bg-white rounded p-4"
       )}
     >
       <CustomHandle type="source" />
       <NodeResizeControl color="#008A00" />
       <NodeResizer color="#008A00" />
-      <div className="w-full h-full flex flex-col items-center justify-center gap-4 !text-xs">
+      <div className="w-full h-full flex flex-col items-center justify-center overflow-hidden gap-4 !text-xs">
         {data?.url && data?.name ? (
-          <div className="truncate w-full h-fit">
+          <div className="truncate w-full h-full overflow-hidden">
             <PdfViewer name={data.name as string} url={data.url as string} />
             {/* pdf preview */}
           </div>
