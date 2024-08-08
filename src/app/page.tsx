@@ -44,14 +44,14 @@ export default async function Home() {
       <div className="p-4 lg:p-8 grainy-light border-b">
         <div className="max-w-7xl mx-auto flex flex-col items-center py-24 lg:py-32">
           <div className="mx-auto max-w-4xl text-left sm:text-center">
-            <h2 className="font-bold text-gray-600 font-heading">
+            <h2 className="font-bold text-gray-600">
               Your interactive whiteboard comapanion
             </h2>
             <h1 className="text-3xl sm:text-5xl mt-2 font-bold capitalize font-heading">
               Your ultimate whiteboard... on{" "}
               <span className="font-extrabold text-primary">steroids</span>
             </h1>
-            <p className="mt-3 text-lg leading-6 text-gray-500 font-heading">
+            <p className="mt-3 text-lg leading-6 text-gray-500">
               Introducing{" "}
               <span className="text-primary font-bold">Pillu AI</span> <br />{" "}
               <br />
