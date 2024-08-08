@@ -14,8 +14,8 @@ const PdfNode = ({ id, selected, data }: NodeProps) => {
       )}
     >
       <CustomHandle type="source" />
-      <NodeResizeControl color="#008A00" keepAspectRatio />
-      <NodeResizer color="#008A00" keepAspectRatio />
+      <NodeResizeControl color="#008A00" />
+      <NodeResizer color="#008A00" />
       <div className="w-full h-full flex flex-col items-center justify-center gap-4 !text-xs">
         {data?.url && data?.name ? (
           <div className="truncate w-full h-fit">

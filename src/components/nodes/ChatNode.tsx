@@ -278,7 +278,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
       <div className="w-2/3 p-2 nodrag nowheel cursor-text flex flex-col">
         <div className="flex flex-col flex-1 space-y-1 overflow-auto h-full pb-24 nodrag nowheel cursor-text">
           {messages?.length === 0 && !isLoading && (
-            <div className="w-full flex-1 flex flex-col items-center justify-center gap-2">
+            <div className="w-full flex-1 flex flex-col items-center justify-center gap-2 text-zinc-400">
               <Bot />
               <h3>HI, How I can help you?</h3>
             </div>
