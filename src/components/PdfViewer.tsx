@@ -79,7 +79,7 @@ const PdfViewer = ({ url, name }: { url: string; name: string }) => {
           file={url}
           onLoadError={(e) => toast.error("Failed to load pdf")}
           onLoadSuccess={onDocumentLoadSuccess}
-          className="nowheel nodrag overflow-y-auto textselectable"
+          className="nowheel nodrag textselectable"
         >
           <Page
             className="max-w-full"

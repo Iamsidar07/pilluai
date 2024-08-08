@@ -1,6 +1,6 @@
 "use client";
 import CustomHandle from "@/components/CustomHandle";
-import { NodeProps, NodeResizeControl, NodeResizer } from "@xyflow/react";
+import { NodeProps, NodeResizer } from "@xyflow/react";
 
 import ShowMessage from "@/components/ShowMessage";
 import { Button } from "@/components/ui/button";
@@ -235,8 +235,11 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
 
   return (
     <div className="bg-white ring-1 ring-gray-900/15 rounded border overflow-hidden flex h-full w-full">
-      <NodeResizeControl color="#E00000" keepAspectRatio />
-      <NodeResizer color="#E00000" keepAspectRatio />
+      <NodeResizer
+        color="#E00000"
+        keepAspectRatio
+        handleStyle={{ width: 12, height: 12, zIndex: 1 }}
+      />
       <CustomHandle type="target" />
       <div className="w-1/3 border-r relative">
         <div className="p-2 bg-zinc-100 h-full ">

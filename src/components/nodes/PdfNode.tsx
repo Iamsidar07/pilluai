@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { NodeProps, NodeResizeControl, NodeResizer } from "@xyflow/react";
+import { NodeProps, NodeResizer } from "@xyflow/react";
 import CustomHandle from "../CustomHandle";
 import FileUploader from "../PdfFileUploader";
 import PdfViewer from "../PdfViewer";
@@ -14,8 +14,7 @@ const PdfNode = ({ id, selected, data }: NodeProps) => {
       )}
     >
       <CustomHandle type="source" />
-      <NodeResizeControl color="#008A00" />
-      <NodeResizer color="#008A00" />
+      <NodeResizer color="#008A00" handleStyle={{ width: 12, height: 12 }} />
       <div className="w-full h-full flex flex-col items-center justify-center overflow-hidden gap-4 !text-xs">
         {data?.url && data?.name ? (
           <div className="truncate w-full h-full overflow-hidden">

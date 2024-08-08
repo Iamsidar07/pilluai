@@ -43,7 +43,7 @@ export default function BoardPage({ params }: BoardProps) {
   return (
     <ErrorBoundary
       fallback={
-        <h1 className="text-2xl lg:text-5xl text-center">
+        <h1 className="text-2xl lg:text-5xl text-center mt-8">
           Something went wrong! Please refresh the page
         </h1>
       }
