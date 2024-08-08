@@ -17,6 +17,8 @@ const Navbar = () => {
               alt="Pillu AI"
               width={50}
               height={50}
+              placeholder="blur"
+              blurDataURL="/logo.png"
               className="object-contain"
             />
             Pillu <span className="text-primary">AI</span>

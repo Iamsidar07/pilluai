@@ -72,6 +72,9 @@ export default async function Home() {
                 width={2432}
                 height={1442}
                 quality={100}
+                placeholder="blur"
+                blurDataURL="/app.png"
+                priority
                 className="mb-[-0%] rounded-xl shadow-2xl ring-1 ring-gray-900/10"
               />
               <div aria-hidden={true}>
@@ -105,6 +108,8 @@ export default async function Home() {
                   width={2432}
                   height={1442}
                   className="rounded-2xl"
+                  placeholder="blur"
+                  blurDataURL={image}
                 />
               </div>
               <div
