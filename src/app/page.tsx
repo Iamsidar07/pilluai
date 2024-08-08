@@ -1,3 +1,4 @@
+import Footer from "@/components/Footer";
 import GetStartedButton from "@/components/GetStartedButton";
 import Pricing from "@/components/Pricing";
 
@@ -40,9 +41,8 @@ const FEATURES = [
 export default async function Home() {
   return (
     <main className="w-full overflow-y-auto flex-1">
-      <div className="p-4 lg:p-8 grainy-light  bg-pink-50">
-        <div className="max-w-7xl mx-auto flex flex-col items-center py-24 lg:py-32 relative z-[1]">
-          <div className="absolute w-full h-80 bg-gradient-to-b from-pink-300 z-[-1] blur-[20rem]" />
+      <div className="p-4 lg:p-8 grainy-light border-b">
+        <div className="max-w-7xl mx-auto flex flex-col items-center py-24 lg:py-32">
           <div className="mx-auto max-w-2xl text-left sm:text-center">
             <h2 className="font-bold text-gray-600">
               Your interactive whiteboard comapanion
@@ -84,7 +84,7 @@ export default async function Home() {
           </div>
         </div>
       </div>
-      <div className="bg-teal-100 grainy-light p-4 lg:p-8">
+      <div className="bg-zinc-50 p-4 lg:p-8">
         <div className="pt-12 flex flex-col items-center gap-8 md:gap-24 max-w-7xl mx-auto">
           {FEATURES.map(({ description, title, image }, i) => (
             <div key={i} className="flex flex-col items-center">
@@ -120,9 +120,10 @@ export default async function Home() {
           ))}
         </div>
       </div>
-      <div className="bg-green-100 grainy-light">
+      <div className="bg-zinc-50 grainy-light border-y">
         <Pricing />
       </div>
+      <Footer />
     </main>
   );
 }
