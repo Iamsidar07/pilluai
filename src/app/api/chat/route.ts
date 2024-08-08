@@ -110,9 +110,19 @@ export const POST = async (req: NextRequest) => {
     if (!userId) return new Response("Unauthorized", { status: 401 });
     // @ts-ignore
     const lastMessage = messages[messages?.length - 1];
-    const imageAndWebScraperNodes = knowledgeBaseNodes.filter(
+
+    const namespaceNodes = knowledgeBaseNodes.filter(
+      // @ts-ignore
+      (node) => node.data?.namespace
+    );
+    const imageNodes = knowledgeBaseNodes.filter(
       (node) => node.type === "imageNode" || node.type === "webScrapperNode"
     );
+    const textNodes = knowledgeBaseNodes.filter(
+      // @ts-ignore
+      (node) => node.type !== "imageNode" && !node.data?.namespace
+    );
+
     const addMessageToDb = async (role: string, content: string) => {
       await adminDb
         .collection("users")
@@ -132,37 +142,22 @@ export const POST = async (req: NextRequest) => {
         });
     };
 
-    addMessageToDb("user", lastMessage.content);
-
-    const imagePrompt = imageAndWebScraperNodes.map((node) => {
-      if (node.type === "webScrapperNode") {
-        return {
-          type: "image",
-          image: node.data.screenshotUrl as string,
-        } as ImagePart;
-      }
+    const imagePrompt = imageNodes.map((node) => {
       // @ts-ignore
       return { type: "image", image: node.data.url as string } as ImagePart;
     });
 
-    const textPromise = knowledgeBaseNodes?.map(async (node) => {
+    const namespacePromises = namespaceNodes.map((node) =>
       // @ts-ignore
-      if (node.data && node.data?.namespace) {
-        // @ts-ignore
-        const namespace = node.data.namespace;
-        return await handleVectorQuery(
-          namespace,
-          messages,
-          lastMessage.content
-        );
-      }
-      // @ts-ignore
-      return node.data.text;
-    });
-    console.log("textPromise:", await Promise.all(textPromise));
+      handleVectorQuery(node.data.namespace, messages, lastMessage.content)
+    );
 
-    const text = (await Promise.all(textPromise)).join("\n");
-    console.log("text:", text);
+    // @ts-ignore
+    const textContents = textNodes.map((node) => node.data.text);
+
+    const vectorResults = await Promise.all(namespacePromises);
+
+    const text = [...vectorResults, ...textContents].join("\n");
 
     const prompt: UserContent = [
       {
@@ -189,6 +184,7 @@ export const POST = async (req: NextRequest) => {
       ],
       onFinish: async ({ text }) => {
         try {
+          addMessageToDb("user", lastMessage.content);
           addMessageToDb("assistant", text);
           if (!currentChat.title) {
             console.log("Updating chat title...");

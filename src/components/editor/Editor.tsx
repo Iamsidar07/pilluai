@@ -102,7 +102,7 @@ const TailwindEditor = ({
           console.log("onUpdate", editor.getJSON());
           const onUpdateDebounced = debounce(
             async () => await onUpdate(editor.getJSON()),
-            700,
+            500
           );
           onUpdateDebounced();
         }}

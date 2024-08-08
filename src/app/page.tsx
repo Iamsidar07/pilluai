@@ -16,7 +16,7 @@ const FEATURES = [
     title: "Dive Deep into Your Interests",
     description:
       "Whether you're binge-watching Kurzgesagt at 2 AM, uncovering the mysteries of the universe, finishing up your research paper, or working on your next billion-dollar product idea, PilluAI has you covered.",
-    image: "/a.png",
+    image: "/chat_with_youtube_video.png",
   },
   {
     title: "Optimize Your Podcast Listening",
@@ -76,7 +76,7 @@ export default async function Home() {
               />
               <div aria-hidden={true}>
                 <div
-                  className="absolute bottom-0 top-0 -inset-x-32 bg-gradient-to-t from-white/95 pt-[5%]"
+                  className="absolute bottom-0 top-0 -inset-x-32 bg-gradient-to-t from-blue-50 pt-[5%]"
                   aria-hidden={true}
                 ></div>
               </div>
