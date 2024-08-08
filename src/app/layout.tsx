@@ -1,13 +1,13 @@
 import "../styles/globals.css";
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { Questrial } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import Provider from "@/components/Provider";
 
-const inter = Manrope({
+const inter = Questrial({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400"],
   variable: "--heading-font",
 });
 
