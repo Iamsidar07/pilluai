@@ -47,7 +47,7 @@ export default async function Home() {
             <h2 className="font-bold text-gray-600">
               Your interactive whiteboard comapanion
             </h2>
-            <h1 className="text-3xl sm:text-5xl mt-2 font-bold capitalize font-heading">
+            <h1 className="text-3xl sm:text-5xl mt-2 font-bold capitalize">
               Your ultimate whiteboard... on{" "}
               <span className="font-extrabold text-primary">steroids</span>
             </h1>
