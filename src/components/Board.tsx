@@ -82,7 +82,7 @@ export default function Board({ boardId }: BoardProps) {
   );
 
   return (
-    <div className="w-full h-full overflow-hidden">
+    <div className="w-full h-[calc(100vh-50px)] sm:h-[calc(100vh-56px)] overflow-hidden">
       <GradientEdge />
       <ReactFlow
         nodes={nodes}
