@@ -24,6 +24,7 @@ const generateEmbeddings = async (url: string) => {
     console.log("Stored docs in Upstash", namespace);
     return { success: true, namespace };
   } catch (e) {
+    console.log(e);
     return { success: false };
   }
 };

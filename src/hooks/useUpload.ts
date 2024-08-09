@@ -34,7 +34,7 @@ function useUpload(nodeId: string) {
       const fileIdToUpload = nanoid();
       const storageRef = ref(
         storage,
-        `/users/${user.id}/files/${fileIdToUpload}`,
+        `/users/${user.id}/files/${fileIdToUpload}`
       );
       // limit file size
       if (!hasActiveMembership && file.size >= freePdfSize * 10 ** 6) {
@@ -54,7 +54,8 @@ function useUpload(nodeId: string) {
           setStatus(StatusText.UPLOADING);
         },
         (e) => {
-          console.log("Error uploading file", e);
+          toast.error("Error uploading file");
+          console.log(e)
         },
         async () => {
           // Upload completed successfully
@@ -83,10 +84,10 @@ function useUpload(nodeId: string) {
               namespace,
             },
           });
-        },
+        }
       );
     },
-    [hasActiveMembership, nodeId, updateNode, user],
+    [hasActiveMembership, nodeId, updateNode, user]
   );
   return { progress, status, handleUpload };
 }

@@ -113,8 +113,9 @@ export const POST = async (req: NextRequest) => {
 
     const namespaceNodes = knowledgeBaseNodes.filter(
       // @ts-ignore
-      (node) => node.data?.namespace
+      (node) => node.data?.namespace && node.data?.namespace !== ""
     );
+    console.log(namespaceNodes);
     const imageNodes = knowledgeBaseNodes.filter(
       (node) => node.type === "imageNode" || node.type === "webScrapperNode"
     );
@@ -158,6 +159,7 @@ export const POST = async (req: NextRequest) => {
     const vectorResults = await Promise.all(namespacePromises);
 
     const text = [...vectorResults, ...textContents].join("\n");
+    console.log("text: ", text);
 
     const prompt: UserContent = [
       {
