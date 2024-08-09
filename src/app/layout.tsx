@@ -9,16 +9,21 @@ export const metadata: Metadata = {
   title: "PilluAI",
   description: "PilluAI: Your ultimate whiteboard on steroid.",
   openGraph: {
-    images: ["/og.png"],
+    images: ["/og.png"], // Open Graph image
     type: "website",
-    url: "https://www.pilluai.vercel.com",
-    siteName: "Pillu AI",
+    url: "https://www.pilluai.vercel.app",
+    siteName: "PilluAI",
   },
   twitter: {
     card: "summary_large_image",
     title: "PilluAI",
     description: "PilluAI: Your ultimate whiteboard on steroid.",
-    images: ["/og.png"],
+    images: [
+      {
+        url: "/og.png", // Twitter-specific OG image
+        alt: "PilluAI - Your ultimate whiteboard on steroid.",
+      },
+    ],
     site: "@pilluai",
   },
 };
