@@ -112,7 +112,7 @@ export default function Board({ boardId }: BoardProps) {
         connectionRadius={10}
         className="grainy-light"
       >
-        <Background  variant={BackgroundVariant.Lines} bgColor="#edf1f5" />
+        <Background variant={BackgroundVariant.Dots} bgColor="#edf1f5" />
         <Controls />
         <ResizablePane />
       </ReactFlow>
