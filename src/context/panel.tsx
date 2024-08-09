@@ -63,8 +63,6 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
   const boardId = params.boardId as string;
   const { hasActiveMembership } = useSubscription();
   const { user } = useUser();
-  const [boardData, setBoardData] = useState<Board | undefined>(undefined);
-
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
 
@@ -74,7 +72,6 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
       const docRef = doc(db, `users/${userId}/boards`, boardId);
       const docSnap = await getDoc(docRef);
       const data = docSnap.data();
-      console.log("data", data);
       setNodes(data?.nodes);
       setEdges(data?.edges);
     };

@@ -8,7 +8,7 @@ const GetStartedButton = () => {
   const { user } = useUser();
   return (
     <Button className="mt-4 rounded-2xl px-6 font-bold" asChild>
-      <Link href={user ? "/boards" : "/signup"}>Get started</Link>
+      <Link href={user ? "/boards" : "/sign-up"}>Get started</Link>
     </Button>
   );
 };
