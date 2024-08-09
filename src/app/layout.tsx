@@ -9,22 +9,29 @@ export const metadata: Metadata = {
   title: "PilluAI",
   description: "PilluAI: Your ultimate whiteboard on steroid.",
   openGraph: {
-    images: ["/og.png"], // Open Graph image
-    type: "website",
-    url: "https://www.pilluai.vercel.app",
-    siteName: "PilluAI",
-  },
-  twitter: {
-    card: "summary_large_image",
     title: "PilluAI",
     description: "PilluAI: Your ultimate whiteboard on steroid.",
+    type: "website",
+    url: "https://pilluai.vercel.app",
     images: [
       {
-        url: "/og.png", // Twitter-specific OG image
-        alt: "PilluAI - Your ultimate whiteboard on steroid.",
+        url: "https://pilluai.vercel.app/og.png",
+        width: 1920,
+        height: 1080,
       },
     ],
-    site: "@pilluai",
+  },
+  twitter: {
+    title: "PilluAI",
+    description: "PilluAI: Your ultimate whiteboard on steroid.",
+    card: "summary_large_image",
+    images: [
+      {
+        url: "https://pilluai.vercel.app/og.png",
+        width: 1920,
+        height: 1080,
+      },
+    ],
   },
 };
 
