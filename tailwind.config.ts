@@ -18,7 +18,8 @@ const config = {
     },
     extend: {
       fontFamily: {
-        heading: ["var(--font-heading)"],
+        sans: ["var(--font-geist-sans)"],
+        mono: ["var(--font-geist-mono)"],
       },
       colors: {
         border: "hsl(var(--border))",

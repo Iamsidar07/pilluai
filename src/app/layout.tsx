@@ -1,14 +1,10 @@
 import "../styles/globals.css";
 import type { Metadata } from "next";
-import { Questrial } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import Provider from "@/components/Provider";
-
-const inter = Questrial({
-  subsets: ["latin"],
-  weight: ["400"],
-});
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 
 export const metadata: Metadata = {
   title: "PilluAI",
@@ -23,7 +19,7 @@ export default function RootLayout({
   return (
     <Provider>
       <html lang="en" className="light">
-        <body className={inter.className}>
+        <body className={`${GeistSans.variable} ${GeistMono.variable}`}>
           <Navbar />
           {children}
           <Toaster position="top-center" />
