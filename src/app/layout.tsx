@@ -4,7 +4,6 @@ import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import Provider from "@/components/Provider";
 import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
 
 export const metadata: Metadata = {
   title: "PilluAI",
@@ -19,7 +18,7 @@ export default function RootLayout({
   return (
     <Provider>
       <html lang="en" className="light">
-        <body className={`${GeistSans.variable} ${GeistMono.variable}`}>
+        <body className={`${GeistSans.className}`}>
           <Navbar />
           {children}
           <Toaster position="top-center" />
