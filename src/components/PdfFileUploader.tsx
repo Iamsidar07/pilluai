@@ -20,7 +20,7 @@ const FileUploader = ({ nodeId }: { nodeId: string }) => {
         await handleUpload(file);
       }
     },
-    [handleUpload],
+    [handleUpload]
   );
   const { getRootProps, getInputProps, isDragActive, isFocused, isDragAccept } =
     useDropzone({
@@ -42,7 +42,7 @@ const FileUploader = ({ nodeId }: { nodeId: string }) => {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col items-center justify-center gap-4 !text-xs">
+    <div className="w-full h-fit flex flex-col items-center justify-center gap-4 !text-xs">
       {/* Loading */}
       {uploadProgress && status && (
         <div className="flex flex-col gap-1 items-center justify-center">
@@ -58,7 +58,7 @@ const FileUploader = ({ nodeId }: { nodeId: string }) => {
             {
               "bg-blue-100 text-blue-600 border-blue-800":
                 isFocused || isDragAccept,
-            },
+            }
           )}
         >
           <input {...getInputProps()} />
