@@ -82,7 +82,7 @@ export default function Board({ boardId }: BoardProps) {
   );
 
   return (
-    <div className="w-full h-[calc(100vh-56px)] overflow-hidden">
+    <div className="w-full h-full overflow-hidden">
       <GradientEdge />
       <ReactFlow
         nodes={nodes}
@@ -113,7 +113,7 @@ export default function Board({ boardId }: BoardProps) {
         className="grainy-light"
       >
         <Background variant={BackgroundVariant.Dots} bgColor="#edf1f5" />
-        <Controls />
+        <Controls showFitView showInteractive />
         <ResizablePane />
       </ReactFlow>
     </div>

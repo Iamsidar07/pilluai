@@ -18,9 +18,9 @@ export default function RootLayout({
   return (
     <Provider>
       <html lang="en" className="light">
-        <body className={`${GeistSans.className}`}>
+        <body className={`${GeistSans.className} flex flex-col`}>
           <Navbar />
-          {children}
+          <div className="flex-1">{children}</div>
           <Toaster position="top-center" />
         </body>
       </html>

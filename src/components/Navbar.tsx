@@ -22,16 +22,22 @@ const Navbar = () => {
             Pillu <span className="text-primary">AI</span>
           </Link>
         </div>
-        <div className="flex items-center gap-1">
-          <Button asChild variant={"link"} className="text-black">
+        <div className="flex">
+          <Button
+            asChild
+            variant={"link"}
+            className="text-black hidden sm:block"
+          >
             <Link href="/pricing">Pricing</Link>
           </Button>
           <SignedIn>
-            <Button asChild variant={"link"} className="text-black">
-              <Link href="/boards">Boards</Link>
-            </Button>
-            <UpgradeButton />
-            <UserButton />
+            <div className="flex items-center gap-2 h-full">
+              <Button asChild variant={"link"} className="text-black">
+                <Link href="/boards">Boards</Link>
+              </Button>
+              <UpgradeButton />
+              <UserButton />
+            </div>
           </SignedIn>
           <SignedOut>
             <Button asChild variant={"link"} className="text-black">
