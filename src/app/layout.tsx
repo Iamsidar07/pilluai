@@ -8,6 +8,19 @@ import { GeistSans } from "geist/font/sans";
 export const metadata: Metadata = {
   title: "PilluAI",
   description: "PilluAI: Your ultimate whiteboard on steroid.",
+  openGraph: {
+    images: ["/og.png"],
+    type: "website",
+    url: "https://www.pilluai.vercel.com",
+    siteName: "Pillu AI",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PilluAI",
+    description: "PilluAI: Your ultimate whiteboard on steroid.",
+    images: ["/og.png"],
+    site: "@pilluai",
+  },
 };
 
 export default function RootLayout({
