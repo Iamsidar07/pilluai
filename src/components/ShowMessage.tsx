@@ -24,7 +24,7 @@ const ShowMessage = ({ role, content }: Message) => {
         ) : (
           <Avatar className="w-5 h-5">
             <AvatarImage src="/logo.png" />
-            <AvatarFallback>Pillu AI</AvatarFallback>
+            <AvatarFallback>P</AvatarFallback>
           </Avatar>
         )}
         {role === "user" ? (
