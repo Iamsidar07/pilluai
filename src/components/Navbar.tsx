@@ -9,7 +9,7 @@ import UpgradeButton from "./UpgradeButton";
 const Navbar = () => {
   return (
     <div className="sticky top-0 z-30 bg-white/75 backdrop-blur border-b">
-      <header className="flex items-center justify-between w-full max-w-7xl mx-auto h-14 px-4 lg:px-0">
+      <header className="flex items-center justify-between w-full h-14 px-4 lg:px-12">
         <div className="flex items-center gap-6">
           <Link href="/" className="text-2xl font-bold flex items-center gap-1">
             <Image

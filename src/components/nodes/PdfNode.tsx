@@ -22,12 +22,10 @@ const PdfNode = ({ id, selected, data }: NodeProps) => {
         {data?.url && data?.name ? (
           <div className="truncate w-full h-full overflow-hidden">
             <PdfViewer name={data.name as string} url={data.url as string} />
-            {/* pdf preview */}
           </div>
         ) : (
           <div className="p-2">
             <FileUploader nodeId={id} />
-            {/* file uploader */}
           </div>
         )}
       </div>
