@@ -19,7 +19,7 @@ const PdfNode = ({ id, selected, data }: NodeProps) => {
       <CustomHandle type="source" />
       <NodeResizer color="#008A00" handleStyle={{ width: 12, height: 12 }} />
       <div className="w-full h-full flex flex-col items-center justify-center overflow-hidden gap-4 !text-xs">
-        {data?.url && data?.name ? (
+        {data?.url && data?.name && data?.namespace ? (
           <div className="truncate w-full h-full overflow-hidden">
             <PdfViewer name={data.name as string} url={data.url as string} />
           </div>
