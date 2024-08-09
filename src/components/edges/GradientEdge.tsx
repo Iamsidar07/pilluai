@@ -4,7 +4,7 @@ interface GradientEdgeProps {
 }
 export default function GradientEdge({
   color1 = "gold",
-  color2 = "red",
+  color2 = "pink",
 }: GradientEdgeProps) {
   return (
     <svg viewBox="0 0 10 10" style={{ height: 0, width: 0 }}>
