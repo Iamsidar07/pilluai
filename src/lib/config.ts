@@ -1,4 +1,4 @@
-const maxFreeBoards = 1;
+const maxFreeBoards = 2;
 const maxFreeMessage = 3;
 const maxFreeChatInOneChatNode = 2;
 const maxProBoards = 20;
