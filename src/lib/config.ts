@@ -13,6 +13,7 @@ const NODE_LIMITS = {
   webScrapperNode: { free: 1, active: 7 },
   youtubeNode: { free: 1, active: 7 },
   chatNode: { free: 1, active: 5 },
+  textNode: { free: 10000, active: 5000 },
 };
 export {
   freePdfSize,
