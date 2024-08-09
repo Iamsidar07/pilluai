@@ -10,7 +10,10 @@ const PdfNode = ({ id, selected, data }: NodeProps) => {
   return (
     <div
       className={cn(
-        "ring-1 ring-gray-900/10 w-full h-full bg-white rounded p-4"
+        "ring-1 ring-gray-900/10 w-full h-fit bg-white rounded p-4",
+        {
+          "h-full": data?.url && data?.name,
+        }
       )}
     >
       <CustomHandle type="source" />
