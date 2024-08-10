@@ -1,6 +1,5 @@
 "use client";
 
-import getVideoTranscription from "@/actions/getVideoTranscription";
 import getYoutubeVideoInfo from "@/actions/getYoutubeVideoInfo";
 import storeYoutubeVideoEmbeddings from "@/actions/storeYoutubeVideoEmbeddings";
 import { TYoutubeNode } from "@/components/nodes";
@@ -23,8 +22,9 @@ const useYoutubeNode = () => {
       return;
     }
     startTransition(async () => {
-      const { success, description, title } =
-        await getYoutubeVideoInfo(videoUrl);
+      const { success, description, title } = await getYoutubeVideoInfo(
+        videoUrl
+      );
       console.log(success, description, title);
       if (!success) {
         toast.error("Failed to get video details");
@@ -43,11 +43,6 @@ const useYoutubeNode = () => {
       };
       addNode(node);
       setOpen(false);
-      const { success: isTranscriptionSuccess, text } =
-        await getVideoTranscription(videoUrl);
-      if (!isTranscriptionSuccess) {
-        toast.error("Failed to get transcription.");
-      }
       const { success: isEmbeddingsFailed, namespace } =
         await storeYoutubeVideoEmbeddings(videoUrl);
       if (!isEmbeddingsFailed) {
@@ -59,7 +54,6 @@ const useYoutubeNode = () => {
         type: "youtubeNode",
         data: {
           namespace,
-          text,
         },
       });
     });

@@ -1,3 +1,4 @@
+import Demo from "@/components/Demo";
 import Footer from "@/components/Footer";
 import GetStartedButton from "@/components/GetStartedButton";
 import Pricing from "@/components/Pricing";
@@ -64,26 +65,8 @@ export default async function Home() {
             </p>
             <GetStartedButton />
           </div>
-          <div className="relative pt-16 overflow-hidden my-12 rounded-2xl">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8">
-              <Image
-                src="/app.png"
-                alt="App screenshot"
-                width={2432}
-                height={1442}
-                quality={100}
-                placeholder="blur"
-                blurDataURL="/app.png"
-                priority
-                className="mb-[-0%] rounded-xl shadow-2xl ring-1 ring-gray-900/10"
-              />
-              <div aria-hidden={true}>
-                <div
-                  className="absolute bottom-0 top-0 -inset-x-32 bg-gradient-to-t from-blue-50 pt-[5%]"
-                  aria-hidden={true}
-                ></div>
-              </div>
-            </div>
+          <div className="p-2 overflow-hidden my-12 rounded-2xl w-full h-full border bg-white">
+            <Demo />
           </div>
         </div>
       </div>
