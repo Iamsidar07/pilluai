@@ -31,7 +31,7 @@ const AddImageNode = () => {
         data,
       });
     },
-    [updateNode],
+    [updateNode]
   );
 
   const handleSelectFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,9 +49,21 @@ const AddImageNode = () => {
         url: "",
         title: "Uploading...",
         tempUrl: URL.createObjectURL(file),
+        base64: "",
       },
       type: "imageNode",
     };
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      newNode.data.url = base64String; // Set the base64 string to the url field
+      console.log("Base64 image string:", base64String);
+      updateImageNode(newNode.id, {
+        base64: base64String,
+      });
+    };
+    reader.readAsDataURL(file);
 
     try {
       addNode(newNode);

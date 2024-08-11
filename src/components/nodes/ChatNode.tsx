@@ -255,7 +255,9 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
           </div>
           <h3 className="mt-4 mb-2 text-zinc-400">Previous Chats</h3>
           <div className="flex flex-col">
-            {loading && <Loader2 className="w-5 h-5 mt-4 mx-auto animate-spin" />}
+            {loading && (
+              <Loader2 className="w-5 h-5 mt-4 mx-auto animate-spin" />
+            )}
             {chats?.map(
               (chat) =>
                 chat.title && (

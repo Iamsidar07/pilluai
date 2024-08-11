@@ -145,7 +145,7 @@ export const POST = async (req: NextRequest) => {
 
     const imagePrompt = imageNodes.map((node) => {
       // @ts-ignore
-      return { type: "image", image: node.data.url as string } as ImagePart;
+      return { type: "image", image: node.data.base64 as string } as ImagePart;
     });
 
     const namespacePromises = namespaceNodes.map((node) =>

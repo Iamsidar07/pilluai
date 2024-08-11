@@ -45,6 +45,7 @@ export type TImageNode = Node<
     tempUrl: string;
     title: string;
     url: string;
+    base64: string;
     type: "imageNode";
   },
   "imageNode"
