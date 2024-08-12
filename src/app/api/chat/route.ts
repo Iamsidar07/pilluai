@@ -1,21 +1,20 @@
-import { NextRequest } from "next/server";
-import {
-  CoreMessage,
-  ImagePart,
-  Message,
-  streamText,
-  UserContent,
-  LanguageModel,
-} from "ai";
-import { AppNode } from "@/components/nodes";
+import { AppNode, TImageNode, TPdfNode, TTextNode, TWebScrapperNode, TYoutubeNode } from "@/components/nodes";
+import { adminDb } from "@/firebaseAdmin";
 import { google } from "@ai-sdk/google";
-import { Index } from "@upstash/vector";
+import { auth } from "@clerk/nextjs/server";
 import { CohereEmbeddings } from "@langchain/cohere";
 import { UpstashVectorStore } from "@langchain/community/vectorstores/upstash";
+import { Index } from "@upstash/vector";
+import {
+    CoreMessage,
+    ImagePart,
+    Message,
+    streamText,
+    UserContent
+} from "ai";
 import { nanoid } from "nanoid";
+import { NextRequest } from "next/server";
 import { Chat } from "../../../../typing";
-import { adminDb } from "@/firebaseAdmin";
-import { auth } from "@clerk/nextjs/server";
 
 const vectorStoreCache: Record<string, UpstashVectorStore> = {};
 const index = new Index({
@@ -67,19 +66,20 @@ export const POST = async (req: NextRequest) => {
     if (!userId) return new Response("Unauthorized", { status: 401 });
     const lastMessage = messages[messages?.length - 1];
 
-    const namespaceNodes: AppNode[] = [];
-    const imageNodes: AppNode[] = [];
-    const textNodes: AppNode[] = [];
+    const namespaceNodes: (TYoutubeNode | TWebScrapperNode | TPdfNode)[] = [];
+    const imageNodes: TImageNode[] = [];
+    const textNodes: TTextNode[] = [];
 
     knowledgeBaseNodes.forEach((node) => {
+      if (node.type === "chatNode") return;
       if (
         node.type === "youtubeNode" ||
         node.type === "webScrapperNode" ||
         node.type === "pdfNode"
       ) {
         namespaceNodes.push(node);
-        // @ts-ignore
-      } else if (node.type === "imageNode" || node.type === "webScrapperNode") {
+        
+      } else if (node.type === "imageNode") {
         imageNodes.push(node);
       } else if (node.type === "textNode") {
         textNodes.push(node);
@@ -106,19 +106,16 @@ export const POST = async (req: NextRequest) => {
     };
 
     const imagePrompt = imageNodes?.map((node) => {
-      // @ts-ignore
       return { type: "image", image: node.data.base64 as string } as ImagePart;
     });
 
     const namespacePromises = namespaceNodes?.map((node) =>
       getContextFromVectorStore(
-        // @ts-ignore
         node.data.namespace,
         lastMessage.content
       )
     );
 
-    // @ts-ignore
     const textContents = textNodes?.map((node) => node.data.text);
 
     const vectorResults = await Promise.all(namespacePromises);
@@ -150,11 +147,11 @@ export const POST = async (req: NextRequest) => {
       ],
       onFinish: async ({ text }) => {
         try {
-          const writeOperations = [
+          const saveMessages = [
             addMessageToDb("user", lastMessage.content),
             addMessageToDb("assistant", text),
           ];
-          await Promise.all(writeOperations);
+          await Promise.all(saveMessages);
           if (!currentChat.title) {
             console.log("Updating chat title...");
             adminDb
