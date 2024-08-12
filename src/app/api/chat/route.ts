@@ -1,5 +1,12 @@
 import { NextRequest } from "next/server";
-import { CoreMessage, ImagePart, Message, streamText, UserContent } from "ai";
+import {
+  CoreMessage,
+  ImagePart,
+  Message,
+  streamText,
+  UserContent,
+  LanguageModel,
+} from "ai";
 import { AppNode } from "@/components/nodes";
 import { google } from "@ai-sdk/google";
 import { Index } from "@upstash/vector";
@@ -7,15 +14,10 @@ import { CohereEmbeddings } from "@langchain/cohere";
 import { UpstashVectorStore } from "@langchain/community/vectorstores/upstash";
 import { nanoid } from "nanoid";
 import { Chat } from "../../../../typing";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import { createHistoryAwareRetriever } from "langchain/chains/history_aware_retriever";
-import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
-import { createRetrievalChain } from "langchain/chains/retrieval";
 import { adminDb } from "@/firebaseAdmin";
 import { auth } from "@clerk/nextjs/server";
 
+const vectorStoreCache: Record<string, UpstashVectorStore> = {};
 const index = new Index({
   url: process.env.UPSTASH_INDEX_URL as string,
   token: process.env.UPSTASH_API_KEY as string,
@@ -26,68 +28,23 @@ const embeddings = new CohereEmbeddings({
   batchSize: 48,
 });
 
-const model = new ChatGoogleGenerativeAI({
-  apiKey: process.env.GOOGLE_GENERATIVE_API_KEY as string,
-  model: "gemini-1.5-flash-latest",
-});
+async function getVectorStore(namespace: string) {
+  if (!vectorStoreCache[namespace]) {
+    vectorStoreCache[namespace] = await UpstashVectorStore.fromExistingIndex(
+      embeddings,
+      {
+        index,
+        namespace,
+      }
+    );
+  }
+  return vectorStoreCache[namespace];
+}
 
-const formatCoreMessage = (messages: Message[]) =>
-  messages.map((msg) =>
-    msg.role === "user"
-      ? new HumanMessage(msg.content)
-      : new AIMessage(msg.content)
-  );
-
-async function handleVectorQuery(
-  namespace: string,
-  messages: Message[],
-  query: string
-) {
-  const vectorStore = await UpstashVectorStore.fromExistingIndex(embeddings, {
-    index,
-    namespace,
-  });
-  const retriever = vectorStore.asRetriever();
-
-  const historyAwarePrompt = ChatPromptTemplate.fromMessages([
-    ...formatCoreMessage(messages),
-    ["user", "{input}"],
-    [
-      "user",
-      "Given the above conversation, generate a search query to look up in order to get information relevant to the conversation.",
-    ],
-  ]);
-
-  const historyAwareRetrieverChain = await createHistoryAwareRetriever({
-    llm: model,
-    retriever,
-    rephrasePrompt: historyAwarePrompt,
-  });
-
-  const historyAwareRetrievalPrompt = ChatPromptTemplate.fromMessages([
-    [
-      "system",
-      "Answer the user's question based on the context: \n\n{context}",
-    ],
-    ...formatCoreMessage(messages),
-    ["user", "{input}"],
-  ]);
-
-  const historyAwareCombineDocsChain = await createStuffDocumentsChain({
-    llm: model,
-    prompt: historyAwareRetrievalPrompt,
-  });
-
-  const conversationRetrievalChain = await createRetrievalChain({
-    retriever: historyAwareRetrieverChain,
-    combineDocsChain: historyAwareCombineDocsChain,
-  });
-  const reply = await conversationRetrievalChain.invoke({
-    chat_history: formatCoreMessage(messages),
-    input: query,
-  });
-  console.log("reply:", reply.answer);
-  return reply.answer;
+async function getContextFromVectorStore(namespace: string, query: string) {
+  const vectorStore = await getVectorStore(namespace);
+  const results = await vectorStore.similaritySearch(query, 1);
+  return results.map((doc) => doc.pageContent).join("\n");
 }
 
 export const POST = async (req: NextRequest) => {
@@ -108,21 +65,26 @@ export const POST = async (req: NextRequest) => {
     auth().protect();
     const { userId } = auth();
     if (!userId) return new Response("Unauthorized", { status: 401 });
-    // @ts-ignore
     const lastMessage = messages[messages?.length - 1];
 
-    const namespaceNodes = knowledgeBaseNodes.filter(
-      // @ts-ignore
-      (node) => node.data?.namespace && node.data?.namespace !== ""
-    );
-    console.log(namespaceNodes);
-    const imageNodes = knowledgeBaseNodes.filter(
-      (node) => node.type === "imageNode" || node.type === "webScrapperNode"
-    );
-    const textNodes = knowledgeBaseNodes.filter(
-      // @ts-ignore
-      (node) => node.type !== "imageNode" && !node.data?.namespace
-    );
+    const namespaceNodes: AppNode[] = [];
+    const imageNodes: AppNode[] = [];
+    const textNodes: AppNode[] = [];
+
+    knowledgeBaseNodes.forEach((node) => {
+      if (
+        node.type === "youtubeNode" ||
+        node.type === "webScrapperNode" ||
+        node.type === "pdfNode"
+      ) {
+        namespaceNodes.push(node);
+        // @ts-ignore
+      } else if (node.type === "imageNode" || node.type === "webScrapperNode") {
+        imageNodes.push(node);
+      } else if (node.type === "textNode") {
+        textNodes.push(node);
+      }
+    });
 
     const addMessageToDb = async (role: string, content: string) => {
       await adminDb
@@ -143,23 +105,25 @@ export const POST = async (req: NextRequest) => {
         });
     };
 
-    const imagePrompt = imageNodes.map((node) => {
+    const imagePrompt = imageNodes?.map((node) => {
       // @ts-ignore
       return { type: "image", image: node.data.base64 as string } as ImagePart;
     });
 
-    const namespacePromises = namespaceNodes.map((node) =>
-      // @ts-ignore
-      handleVectorQuery(node.data.namespace, messages, lastMessage.content)
+    const namespacePromises = namespaceNodes?.map((node) =>
+      getContextFromVectorStore(
+        // @ts-ignore
+        node.data.namespace,
+        lastMessage.content
+      )
     );
 
     // @ts-ignore
-    const textContents = textNodes.map((node) => node.data.text);
+    const textContents = textNodes?.map((node) => node.data.text);
 
     const vectorResults = await Promise.all(namespacePromises);
 
-    const text = [...vectorResults, ...textContents].join("\n");
-    console.log("text: ", text);
+    const contexts = [...vectorResults, ...textContents].join("\n");
 
     const prompt: UserContent = [
       {
@@ -169,7 +133,7 @@ export const POST = async (req: NextRequest) => {
         ${lastMessage.content}
         </question>
         <context>
-        ${text}
+        ${contexts}
         </context>
         `,
       },
@@ -179,15 +143,18 @@ export const POST = async (req: NextRequest) => {
     const result = await streamText({
       model: google("models/gemini-1.5-flash-latest"),
       system: `
-        Answer the user's question based on the context`,
+        Answer the user's question based on the context. Do not use the word context.`,
       messages: [
         ...(messages as CoreMessage[]),
         { role: "user", content: prompt },
       ],
       onFinish: async ({ text }) => {
         try {
-          addMessageToDb("user", lastMessage.content);
-          addMessageToDb("assistant", text);
+          const writeOperations = [
+            addMessageToDb("user", lastMessage.content),
+            addMessageToDb("assistant", text),
+          ];
+          await Promise.all(writeOperations);
           if (!currentChat.title) {
             console.log("Updating chat title...");
             adminDb

@@ -37,6 +37,7 @@ export type TWebScrapperNode = Node<
     type: "webScrapperNode";
     title: string;
     namespace: string;
+    base64: string;
   },
   "webScrapperNode"
 >;

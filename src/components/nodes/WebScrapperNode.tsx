@@ -45,7 +45,7 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
               src={
                 (data.screenshotUrl
                   ? data.screenshotUrl
-                  : data.tempUrl) as string
+                  : data.base64) as string
               }
               width={200}
               height={200}

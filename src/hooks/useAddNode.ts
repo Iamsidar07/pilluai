@@ -47,6 +47,7 @@ const useAddNode = () => {
         url: "",
         screenshotUrl: "",
         namespace: "",
+        base64: "",
       },
     };
     addNode(newNode);

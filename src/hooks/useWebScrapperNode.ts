@@ -25,7 +25,7 @@ const useWebScrapperNode = (nodeId: string) => {
         data,
       });
     },
-    [nodeId, updateNode],
+    [nodeId, updateNode]
   );
 
   const handleAddWebscrapperNode = useCallback(
@@ -45,13 +45,13 @@ const useWebScrapperNode = (nodeId: string) => {
         updateWebScrapperNode({
           url,
           title: scrapedData.title,
-          tempUrl: `data:image/png;base64,${scrapedData.base64}`,
+          base64: `data:image/png;base64,${scrapedData.base64}`,
         });
         const imageRef = ref(storage, `users/${userId}/files/${nanoid()}`);
 
         const uploadTask = await uploadBytesResumable(
           imageRef,
-          Buffer.from(scrapedData?.base64!, "base64"),
+          Buffer.from(scrapedData?.base64!, "base64")
         );
         const uploadedImageUrl = await getDownloadURL(uploadTask.ref);
         console.log("uploadedImage: ", uploadedImageUrl);
@@ -62,7 +62,6 @@ const useWebScrapperNode = (nodeId: string) => {
         }
         updateWebScrapperNode({
           screenshotUrl: uploadedImageUrl as string,
-          tempUrl: null,
           namespace,
         });
       } catch (error: any) {
@@ -72,7 +71,7 @@ const useWebScrapperNode = (nodeId: string) => {
         setIsLoading(false);
       }
     },
-    [updateWebScrapperNode, setIsLoading, url, userId],
+    [updateWebScrapperNode, setIsLoading, url, userId]
   );
 
   return { handleAddWebscrapperNode, url, setUrl, isLoading };
