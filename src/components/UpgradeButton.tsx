@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
-import { isPaymentEnabled } from "@/lib/config";
 import { useUser } from "@clerk/nextjs";
 
 const UpgradeButton = () => {
@@ -19,10 +18,6 @@ const UpgradeButton = () => {
 
   const handleAccount = () => {
     if (!user) return;
-    if (!isPaymentEnabled) {
-      toast.info("Payment is not enabled right now.");
-      return;
-    }
     startTransition(async () => {
       const { success, message, sessionUrl } = await createStripePortal();
       if (!success && message) {
