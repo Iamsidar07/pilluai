@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import React, { useTransition } from "react";
 import { UserDetails } from "../../typing";
 import { toast } from "sonner";
-import { isPaymentEnabled } from "@/lib/config";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "./ui/skeleton";
 import { useUser } from "@clerk/nextjs";
@@ -36,10 +35,6 @@ const Pricing = () => {
     };
 
     startTransition(async () => {
-      if (!isPaymentEnabled) {
-        toast.info("Payment is not enabled");
-        return;
-      }
       const stripe = await getStripe();
       if (hasActiveMembership) {
         // manage
@@ -52,8 +47,9 @@ const Pricing = () => {
         if (!sessionUrl) return;
         return router.push(sessionUrl);
       }
-      const { success, message, sessionId } =
-        await createCheckoutSession(userDetails);
+      const { success, message, sessionId } = await createCheckoutSession(
+        userDetails
+      );
       if (!success && message) {
         toast.error(message);
         return;
