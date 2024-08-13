@@ -42,7 +42,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
   const { nodes, edges } = usePanel();
   const { boardId } = useParams();
   const { user } = useUser();
-  const { hasUserProPlanSubscribe } = useSubscription();
+  const { hasActiveMembership } = useSubscription();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
@@ -114,7 +114,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
   }, [messages, messagesEndRef]);
 
   const handleCreateNewChat = useCallback(async () => {
-    if (!hasUserProPlanSubscribe && chats.length >= maxChatInOneChatNode) {
+    if (!hasActiveMembership && chats.length >= maxChatInOneChatNode) {
       toast.info("You've reached the limit of new chats.");
       return;
     }
@@ -139,7 +139,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
   }, [
     boardId,
     chats.length,
-    hasUserProPlanSubscribe,
+    hasActiveMembership,
     nodeId,
     setInput,
     setMessages,

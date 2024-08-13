@@ -22,7 +22,7 @@ interface Props {
 
 const RenameBoard = ({ name, boardId }: Props) => {
   const { userId } = useAuth();
-  const { hasUserProPlanSubscribe } = useSubscription();
+  const { hasActiveMembership } = useSubscription();
   const [newBoardName, setNewBoardName] = useState(name ?? "");
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
@@ -32,7 +32,7 @@ const RenameBoard = ({ name, boardId }: Props) => {
       toast.info("Please login to continue.");
       return;
     }
-    if (!newBoardName || !boardId || !hasUserProPlanSubscribe) return;
+    if (!newBoardName || !boardId || !hasActiveMembership) return;
     startTransition(async () => {
       const { success } = await renameBoard(newBoardName, boardId);
       if (success) {
@@ -46,13 +46,13 @@ const RenameBoard = ({ name, boardId }: Props) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <Button
-        disabled={!hasUserProPlanSubscribe}
+        disabled={!hasActiveMembership}
         className="w-full"
         variant="outline"
       >
         <DialogTrigger asChild>
           <div className="flex items-center gap-1">
-            {hasUserProPlanSubscribe ? (
+            {hasActiveMembership ? (
               <Pencil className="w-4 h-4" />
             ) : (
               <Sparkles className="w-4 h-4" />

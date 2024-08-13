@@ -23,7 +23,7 @@ interface Props {
 
 const DeleteBoard = ({ boardId }: Props) => {
   const { userId } = useAuth();
-  const { hasUserProPlanSubscribe } = useSubscription();
+  const { hasActiveMembership } = useSubscription();
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const handleDeleteBoard = () => {
@@ -31,7 +31,7 @@ const DeleteBoard = ({ boardId }: Props) => {
       toast.info("Please login to continue.");
       return;
     }
-    if (!boardId || !hasUserProPlanSubscribe) return;
+    if (!boardId || !hasActiveMembership) return;
     startTransition(async () => {
       try {
         await deleteDoc(doc(db, `users/${userId}/boards/${boardId}`));
@@ -45,13 +45,13 @@ const DeleteBoard = ({ boardId }: Props) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <Button
-        disabled={!hasUserProPlanSubscribe}
+        disabled={!hasActiveMembership}
         className="w-full"
         variant="outline"
       >
         <DialogTrigger asChild>
           <div className="flex items-center gap-1">
-            {hasUserProPlanSubscribe ? (
+            {hasActiveMembership ? (
               <Archive className="w-4 h-4" />
             ) : (
               <Sparkles className="w-4 h-4" />

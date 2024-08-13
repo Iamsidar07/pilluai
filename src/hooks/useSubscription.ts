@@ -38,9 +38,7 @@ function useSubscription() {
     setIsOverBoardLimit(boards.length >= userLimit);
   }, [boardsSnapshot, hasActiveMembership]);
 
-  const hasUserProPlanSubscribe = true;
   return {
-    hasUserProPlanSubscribe,
     isOverBoardLimit,
     hasActiveMembership,
     loading,
