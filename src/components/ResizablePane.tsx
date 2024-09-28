@@ -29,7 +29,7 @@ const ResizablePane = () => {
       )}
       <Panel minSize={25} defaultSize={30}>
         {showNotes ? (
-          <div className="h-full w-full z-50 nodrag bg-red-800 relative">
+          <div className="h-full w-full z-50 nodrag relative">
             <Notes />
           </div>
         ) : null}

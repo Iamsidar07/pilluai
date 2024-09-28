@@ -59,7 +59,7 @@ export default function CustomEdge({
             className="nodrag nopan"
           >
             <button
-              className="w-12 h-12 rounded-full bg-red-500 text-white border-2 border-white shadow-lg hover:border-3 hover:shadow-2xl grid place-content-center hover:scale-125 transition-transform"
+              className="w-12 h-12 rounded-full bg-red-500 text-white ring-4 ring-white shadow-lg hover:border-3 hover:shadow-2xl grid place-content-center hover:scale-125 transition-transform"
               onClick={onEdgeClick}
             >
               <RxCross1 className="w-4 h-4" />

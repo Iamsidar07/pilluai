@@ -1,3 +1,4 @@
+import { AppNode } from "@/components/nodes";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -34,4 +35,15 @@ export const debounce = (fn: Function, ms = 800) => {
 export const isValidYoutubeUrl = (url: string) => {
   const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
   return pattern.test(url);
+};
+
+export const getNewNodePosition = (nodes: AppNode[]) => {
+  const existingNodes =
+    nodes.length > 0 ? nodes : [{ position: { x: 0, y: 0 } }]; // Fallback if no nodes exist
+  const lastNode = existingNodes[0]; // Get the last node
+  const newPosition = {
+    x: lastNode.position.x + 100, // Offset the new node by 100px to the right
+    y: lastNode.position.y, // Keep the same y-coordinate
+  };
+  return newPosition;
 };

@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import Provider from "@/components/Provider";
-import { GeistSans } from "geist/font/sans";
 
 export const metadata: Metadata = {
   title: "PilluAI",
@@ -43,7 +42,7 @@ export default function RootLayout({
   return (
     <Provider>
       <html lang="en" className="light">
-        <body className={`${GeistSans.className} flex flex-col`}>
+        <body className={`flex flex-col`}>
           <Navbar />
           <div className="flex-1">{children}</div>
           <Toaster position="top-center" />

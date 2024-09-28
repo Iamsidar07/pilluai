@@ -25,7 +25,7 @@ const useWebScrapperNode = (nodeId: string) => {
         data,
       });
     },
-    [nodeId, updateNode]
+    [nodeId, updateNode],
   );
 
   const handleAddWebscrapperNode = useCallback(
@@ -51,11 +51,20 @@ const useWebScrapperNode = (nodeId: string) => {
 
         const uploadTask = await uploadBytesResumable(
           imageRef,
-          Buffer.from(scrapedData?.base64!, "base64")
+          Buffer.from(scrapedData?.base64!, "base64"),
         );
         const uploadedImageUrl = await getDownloadURL(uploadTask.ref);
         console.log("uploadedImage: ", uploadedImageUrl);
-        const { namespace, success } = await storeWebsiteEmbeddings(url);
+        const { namespace, success } = await fetch("/api/generateEmbedding", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            url,
+            type: "website",
+          }),
+        }).then((res) => res.json());
         if (!success) {
           toast.error("Failed to generate embedding.");
           return;
@@ -71,7 +80,7 @@ const useWebScrapperNode = (nodeId: string) => {
         setIsLoading(false);
       }
     },
-    [updateWebScrapperNode, setIsLoading, url, userId]
+    [updateWebScrapperNode, setIsLoading, url, userId],
   );
 
   return { handleAddWebscrapperNode, url, setUrl, isLoading };

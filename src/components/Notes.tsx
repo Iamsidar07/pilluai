@@ -7,10 +7,16 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import { JSONContent } from "novel";
 import React, { useEffect, useState } from "react";
-import Editor from "./editor/Editor";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { Skeleton } from "./ui/skeleton";
+import dynamic from "next/dynamic";
+
+const Editor = dynamic(() => import("./editor/Editor"), {
+  ssr: false,
+  loading: () => <Loader2 className="w-4 h-4 animate-spin mx-auto mt-4" />,
+});
 
 const getBoard = async (userId: string, boardId: string) => {
   const docRef = doc(db, `users/${userId}/boards/${boardId}`);
@@ -64,9 +70,11 @@ const Notes = () => {
   return (
     <Panel
       position="top-right"
-      className="bg-white p-2 w-full border-l overflow-auto h-[calc(100vh-56px)] !m-0"
+      className="relative bg-white px-2 w-full border-l overflow-auto h-[calc(100vh-56px)] !m-0"
     >
-      <div className="border-b">
+      <div className="border-b bg-white sticky top-0 z-10">
+        {isLoading && <Skeleton className="h-6 w-32" />}
+        {error && <p className="text-red-500">Failed to load notes</p>}
         <input
           className="bg-transparent py-2 outline-none w-full font-bold"
           placeholder="Board Name"

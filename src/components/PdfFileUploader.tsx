@@ -3,10 +3,8 @@
 import useUpload, { StatusText } from "@/hooks/useUpload";
 import { cn } from "@/lib/utils";
 import { CircleArrowDown, Rocket, RocketIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { toast } from "sonner";
 
 const FileUploader = ({ nodeId }: { nodeId: string }) => {
   const { progress, status, handleUpload } = useUpload(nodeId);
@@ -20,7 +18,7 @@ const FileUploader = ({ nodeId }: { nodeId: string }) => {
         await handleUpload(file);
       }
     },
-    [handleUpload]
+    [handleUpload],
   );
   const { getRootProps, getInputProps, isDragActive, isFocused, isDragAccept } =
     useDropzone({
@@ -58,7 +56,7 @@ const FileUploader = ({ nodeId }: { nodeId: string }) => {
             {
               "bg-blue-100 text-blue-600 border-blue-800":
                 isFocused || isDragAccept,
-            }
+            },
           )}
         >
           <input {...getInputProps()} />

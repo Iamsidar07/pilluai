@@ -1,7 +1,7 @@
 "use client";
 import { edgeTypes } from "@/components/edges";
 import GradientEdge from "@/components/edges/GradientEdge";
-import { nodeTypes } from "@/components/nodes";
+import { AppNode, nodeTypes } from "@/components/nodes";
 import ResizablePane from "@/components/ResizablePane";
 import { usePanel } from "@/context/panel";
 import { db } from "@/firebase";
@@ -19,12 +19,18 @@ import {
   NodeChange,
   ReactFlow,
   SelectionMode,
+  useEdgesState,
+  useNodesState,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { doc, updateDoc } from "firebase/firestore";
-import { useCallback } from "react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { useCallback, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
+
+interface BoardProps {
+  boardId: string;
+}
 
 const debouncedSaveNodes = debounce(
   async (userId: string, boardId: string, nodes: Node[]) => {
@@ -38,7 +44,7 @@ const debouncedSaveNodes = debounce(
       return;
     }
   },
-  1000
+  500,
 );
 
 const debouncedSaveEdges = debounce(
@@ -53,68 +59,79 @@ const debouncedSaveEdges = debounce(
       return;
     }
   },
-  1000
+  500,
 );
-
-interface BoardProps {
-  boardId: string;
-}
 
 export default function Board({ boardId }: BoardProps) {
   const { user } = useUser();
-  const { onConnect, edges, nodes, setEdges, setNodes } = usePanel();
+  const { onConnect } = usePanel();
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  useEffect(() => {
+    const getBoard = async () => {
+      const docRef = doc(db, `users/${user?.id}/boards`, boardId);
+      const docSnap = await getDoc(docRef);
+      const data = docSnap.data();
+      setNodes(data?.nodes);
+      setEdges(data?.edges);
+    };
+    getBoard();
+  }, [boardId, setNodes, setEdges, user?.id]);
 
   const handleNodeChange = useCallback(
-    (changes: NodeChange[]) => {
-      // @ts-ignore
-      setNodes((nds) => applyNodeChanges(changes, nds));
+    (changes) => {
+      onNodesChange(changes);
       debouncedSaveNodes(user?.id as string, boardId, nodes);
     },
-    [boardId, nodes, setNodes, user?.id]
+    [onNodesChange, user?.id, boardId, nodes],
+  );
+  const handleEdgeChange = useCallback(
+    (changes) => {
+      onEdgesChange(changes);
+      debouncedSaveEdges(user?.id as string, boardId, nodes);
+    },
+    [onEdgesChange, user?.id, boardId, nodes],
   );
 
-  const handleEdgeChange = useCallback(
-    (changes: EdgeChange[]) => {
-      setEdges((eds) => applyEdgeChanges(changes, eds));
-      debouncedSaveEdges(user?.id as string, boardId, edges);
-    },
-    [boardId, edges, setEdges, user?.id]
+  const memoizedFlow = useMemo(
+    () => (
+      <div className="w-full h-[calc(100vh-52px)] sm:h-[calc(100vh-57px)] overflow-hidden">
+        <GradientEdge />
+        <ReactFlow
+          nodes={nodes}
+          nodeTypes={nodeTypes}
+          onNodesChange={handleNodeChange}
+          edges={edges}
+          edgeTypes={edgeTypes}
+          onEdgesChange={handleEdgeChange}
+          fitView
+          onConnect={onConnect}
+          panOnScroll
+          selectionOnDrag
+          selectionMode={SelectionMode.Partial}
+          connectionMode={ConnectionMode.Loose}
+          connectionLineType={ConnectionLineType.SmoothStep}
+          elevateEdgesOnSelect
+          elevateNodesOnSelect
+          nodesDraggable={true}
+          onError={(_, msg) => toast.error(msg)}
+          connectionRadius={10}
+          zoomOnPinch
+        >
+          <Background variant={BackgroundVariant.Dots} bgColor="#edf1f5" />
+          <Controls showFitView showInteractive />
+          <ResizablePane />
+        </ReactFlow>
+      </div>
+    ),
+    [edges, handleEdgeChange, handleNodeChange, nodes, onConnect],
   );
 
   return (
-    <div className="w-full h-[calc(100vh-50px)] sm:h-[calc(100vh-56px)] overflow-hidden">
+    <div className="w-full h-[calc(100vh-52px)] sm:h-[calc(100vh-57px)] overflow-hidden">
       <GradientEdge />
-      <ReactFlow
-        nodes={nodes}
-        nodeTypes={nodeTypes}
-        onNodesChange={handleNodeChange}
-        edges={edges}
-        edgeTypes={edgeTypes}
-        onEdgesChange={handleEdgeChange}
-        fitView
-        onConnect={onConnect}
-        panOnScroll
-        selectionOnDrag
-        selectionMode={SelectionMode.Partial}
-        colorMode="light"
-        autoPanOnConnect
-        autoPanOnNodeDrag
-        autoPanSpeed={0.5}
-        connectOnClick
-        connectionMode={ConnectionMode.Strict}
-        connectionLineType={ConnectionLineType.SmoothStep}
-        defaultMarkerColor="yellow"
-        elevateEdgesOnSelect
-        elevateNodesOnSelect
-        nodesDraggable
-        onError={(_, msg) => toast.error(msg)}
-        connectionRadius={10}
-        className="grainy-light"
-      >
-        <Background variant={BackgroundVariant.Dots} bgColor="#edf1f5" />
-        <Controls showFitView showInteractive />
-        <ResizablePane />
-      </ReactFlow>
+      {memoizedFlow}
     </div>
   );
 }

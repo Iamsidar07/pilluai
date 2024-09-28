@@ -6,7 +6,6 @@ import { useCallback, useState } from "react";
 import { nanoid } from "nanoid";
 
 import { usePanel } from "@/context/panel";
-import generateEmbeddings from "@/actions/generateEmbeddings";
 import { toast } from "sonner";
 import useSubscription from "./useSubscription";
 import { freePdfSize, proPdfSize } from "@/lib/config";
@@ -34,7 +33,7 @@ function useUpload(nodeId: string) {
       const fileIdToUpload = nanoid();
       const storageRef = ref(
         storage,
-        `/users/${user.id}/files/${fileIdToUpload}`
+        `/users/${user.id}/files/${fileIdToUpload}`,
       );
       // limit file size
       if (!hasActiveMembership && file.size >= freePdfSize * 10 ** 6) {
@@ -55,7 +54,7 @@ function useUpload(nodeId: string) {
         },
         (e) => {
           toast.error("Error uploading file");
-          console.log(e)
+          console.log(e);
         },
         async () => {
           // Upload completed successfully
@@ -72,7 +71,16 @@ function useUpload(nodeId: string) {
 
           setStatus(StatusText.GENERATING);
           // Generate embeddings
-          const { success, namespace } = await generateEmbeddings(downloadUrl);
+          const { namespace, success } = await fetch("/api/generateEmbedding", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              url: downloadUrl,
+              type: "pdf",
+            }),
+          }).then((res) => res.json());
           if (!success) {
             toast.error("Failed to generate embeddings");
             return;
@@ -84,10 +92,10 @@ function useUpload(nodeId: string) {
               namespace,
             },
           });
-        }
+        },
       );
     },
-    [hasActiveMembership, nodeId, updateNode, user]
+    [hasActiveMembership, nodeId, updateNode, user],
   );
   return { progress, status, handleUpload };
 }

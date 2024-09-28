@@ -7,7 +7,7 @@ const maxProChatInOneChatNode = 7;
 const freePdfSize = 4; // in mb
 const proPdfSize = 16; // in mb
 const NODE_LIMITS = {
-  pdfNode: { free: 1, active: 7 },
+  pdfNode: { free: 11, active: 7 },
   imageNode: { free: 2, active: 15 },
   webScrapperNode: { free: 1, active: 7 },
   youtubeNode: { free: 1, active: 7 },

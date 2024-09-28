@@ -8,7 +8,7 @@ if (!serviceKeyBase64) {
   throw new Error("Missing SECRET_KEY_JSON environment variable");
 }
 const serviceKeyJson = Buffer.from(serviceKeyBase64, "base64").toString(
-  "utf-8"
+  "utf-8",
 );
 const serviceKey = JSON.parse(serviceKeyJson);
 
@@ -22,5 +22,4 @@ if (getApps().length === 0) {
 }
 
 const adminDb = getFirestore(app);
-
 export { adminDb, app as adminApp };

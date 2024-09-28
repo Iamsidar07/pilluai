@@ -42,7 +42,7 @@ const FEATURES = [
 export default async function Home() {
   return (
     <main className="w-full overflow-y-auto flex-1">
-      <div className="p-4 lg:p-8 grainy-light border-b">
+      <div className="p-4 lg:p-8 bg-zinc-50 border-b">
         <div className="max-w-7xl mx-auto flex flex-col items-center py-24 lg:py-32">
           <div className="mx-auto max-w-4xl text-left sm:text-center">
             <h2 className="font-bold text-gray-600">
@@ -66,11 +66,11 @@ export default async function Home() {
             <GetStartedButton />
           </div>
           <div className="p-2 overflow-hidden my-12 rounded-2xl w-full h-full border bg-white">
-            <Demo />
+            {/* <Demo /> */}
           </div>
         </div>
       </div>
-      <div className="bg-zinc-50 p-4 lg:p-8">
+      <div className="grainy-light  p-4 lg:p-8">
         <div className="pt-12 flex flex-col items-center gap-8 md:gap-24 max-w-7xl mx-auto">
           {FEATURES.map(({ description, title, image }, i) => (
             <div key={i} className="flex flex-col items-center">
@@ -82,7 +82,7 @@ export default async function Home() {
                     "bg-green-50": i === 1,
                     "bg-blue-50": i === 2,
                     "bg-purple-50": i === 3,
-                  }
+                  },
                 )}
               >
                 <Image
@@ -108,7 +108,7 @@ export default async function Home() {
           ))}
         </div>
       </div>
-      <div className="bg-zinc-50 grainy-light border-y">
+      <div className="bg-zinc-50 border-y">
         <Pricing />
       </div>
       <Footer />

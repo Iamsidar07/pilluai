@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import PanelItem from "./panels/PanelItem";
 import { ImageIcon } from "lucide-react";
-import { useKeyPress } from "@xyflow/react";
+import { useKeyPress, useReactFlow } from "@xyflow/react";
 import { nanoid } from "nanoid";
 import { TImageNode } from "./nodes";
 import { usePanel } from "@/context/panel";
@@ -10,10 +10,12 @@ import { toast } from "sonner";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "@/firebase";
 import { useAuth } from "@clerk/nextjs";
+import { getNewNodePosition } from "@/lib/utils";
 
 const AddImageNode = () => {
   const { userId } = useAuth();
-  const { addNode, updateNode } = usePanel();
+  const { addNode, updateNode, nodes } = usePanel();
+  const { fitView } = useReactFlow();
   const isIPressed = useKeyPress("i" || "I");
   const selectImageRef = useRef<HTMLLabelElement | null>(null);
 
@@ -31,7 +33,7 @@ const AddImageNode = () => {
         data,
       });
     },
-    [updateNode]
+    [updateNode],
   );
 
   const handleSelectFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,10 +42,10 @@ const AddImageNode = () => {
     const file = files[0];
     console.log("adding image node", file);
     const newNode: TImageNode = {
-      position: { x: 0, y: 0 },
+      position: getNewNodePosition(nodes),
       id: nanoid(),
-      width: 300,
-      height: 200,
+      width: 150,
+      height: 100,
       data: {
         type: "imageNode",
         url: "",
@@ -67,6 +69,7 @@ const AddImageNode = () => {
 
     try {
       addNode(newNode);
+      fitView();
       const imageRef = ref(storage, `users/${userId}/files/${nanoid()}`);
       const blob = await file.arrayBuffer();
       const uploadTask = await uploadBytesResumable(imageRef, blob);

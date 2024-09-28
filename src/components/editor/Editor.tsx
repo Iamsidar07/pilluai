@@ -15,7 +15,7 @@ import {
   JSONContent,
 } from "novel";
 import { handleCommandNavigation } from "novel/extensions";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { slashCommand, suggestionItems } from "./commands";
 import { ColorSelector } from "./selectors/color-selector";
 import { LinkSelector } from "./selectors/link-selector";
@@ -43,45 +43,52 @@ const TailwindEditor = ({
   const [openNode, setOpenNode] = useState(false);
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
-  const [content, setContent] = useState<JSONContent>({
-    type: "doc",
-    content: [],
-  });
-
-  const {
-    data: boardData,
-    isLoading,
-    error: errorWhileFetchingNotes,
-  } = useQuery({
-    queryKey: ["board", boardId, userId],
-    queryFn: () => getBoard(userId!, boardId),
-  });
-
-  useEffect(() => {
-    if (boardData && boardData.notes) {
-    }
-  }, [boardData, boardData?.notes]);
+  // const [content, setContent] = useState<JSONContent>({
+  //   type: "doc",
+  //   content: [],
+  // });
+  //
+  // const { data: boardData } = useQuery({
+  //   queryKey: ["board", boardId, userId],
+  //   queryFn: () => getBoard(userId!, boardId),
+  // });
 
   const extensions = useMemo(() => [...defaultExtensions, slashCommand], []);
 
-  const onUpdate = async (content: JSONContent) => {
-    if (!userId) return;
-    try {
-      setSaveStatus("Saving...");
-      const docRef = doc(db, `users/${userId}/boards`, boardId);
-      const docSnap = await updateDoc(docRef, {
-        notes: JSON.stringify(content),
-      });
-      console.log("Updated doc:", docSnap);
-    } catch (e) {
-      console.log(e);
-      console.log("Failed to update doc");
-      setSaveStatus("Failed");
-    } finally {
-      console.log("Saving done");
-      setSaveStatus("Save");
-    }
-  };
+  const onUpdate = useCallback(
+    async (content: JSONContent) => {
+      if (!userId) return;
+      try {
+        setSaveStatus("Saving...");
+        const docRef = doc(db, `users/${userId}/boards`, boardId);
+        await updateDoc(docRef, {
+          notes: JSON.stringify(content),
+        });
+        console.log("Updated doc:");
+      } catch (e) {
+        console.log(e);
+        console.log("Failed to update doc");
+        setSaveStatus("Failed");
+      } finally {
+        console.log("Saving done");
+        setSaveStatus("Save");
+      }
+    },
+    [boardId, setSaveStatus, userId],
+  );
+
+  const onUpdateDebounced = useMemo(() => {
+    return debounce((json: JSONContent) => {
+      onUpdate(json);
+    }, 400); // Adjusted timeout to 400ms for a better user experience
+  }, [onUpdate]);
+
+  const handleUpdate = useCallback(() => {
+    return (editor: any) => {
+      console.log("debouncing");
+      onUpdateDebounced(editor.getJSON());
+    };
+  }, [onUpdateDebounced]);
 
   return (
     <EditorRoot>
@@ -98,13 +105,7 @@ const TailwindEditor = ({
           },
         }}
         onUpdate={({ editor }) => {
-          setContent(editor.getJSON());
-          console.log("onUpdate", editor.getJSON());
-          const onUpdateDebounced = debounce(
-            async () => await onUpdate(editor.getJSON()),
-            500
-          );
-          onUpdateDebounced();
+          handleUpdate()(editor);
         }}
       >
         <EditorCommand className="z-50 h-auto max-h-[330px]  w-72 overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">

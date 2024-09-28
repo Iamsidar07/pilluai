@@ -1,16 +1,15 @@
 "use client";
 
 import getYoutubeVideoInfo from "@/actions/getYoutubeVideoInfo";
-import storeYoutubeVideoEmbeddings from "@/actions/storeYoutubeVideoEmbeddings";
 import { TYoutubeNode } from "@/components/nodes";
 import { usePanel } from "@/context/panel";
-import { isValidYoutubeUrl } from "@/lib/utils";
+import { getNewNodePosition, isValidYoutubeUrl } from "@/lib/utils";
 import { nanoid } from "nanoid";
 import { FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 const useYoutubeNode = () => {
-  const { addNode, updateNode } = usePanel();
+  const { addNode, updateNode, nodes } = usePanel();
   const [open, setOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -22,9 +21,8 @@ const useYoutubeNode = () => {
       return;
     }
     startTransition(async () => {
-      const { success, description, title } = await getYoutubeVideoInfo(
-        videoUrl
-      );
+      const { success, description, title } =
+        await getYoutubeVideoInfo(videoUrl);
       console.log(success, description, title);
       if (!success) {
         toast.error("Failed to get video details");
@@ -32,7 +30,7 @@ const useYoutubeNode = () => {
       }
       const node: TYoutubeNode = {
         id: nanoid(),
-        position: { x: 0, y: 0 },
+        position: getNewNodePosition(nodes),
         type: "youtubeNode",
         data: {
           url: videoUrl,
@@ -43,19 +41,36 @@ const useYoutubeNode = () => {
       };
       addNode(node);
       setOpen(false);
-      const { success: isEmbeddingsFailed, namespace } =
-        await storeYoutubeVideoEmbeddings(videoUrl);
-      if (!isEmbeddingsFailed) {
-        toast.error("Failed to index video.");
-        return;
+      try {
+        const { namespace, success: isEmbeddingsFailed } = await fetch(
+          "/api/generateEmbedding",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              url: videoUrl,
+              type: "youtubeVideo",
+            }),
+          },
+        ).then((res) => res.json());
+
+        if (!isEmbeddingsFailed) {
+          toast.error("Failed to index video.");
+          return;
+        }
+        updateNode({
+          id: node.id,
+          type: "youtubeNode",
+          data: {
+            namespace,
+          },
+        });
+      } catch (error: any) {
+        console.log(error);
+        toast.error(error.message);
       }
-      updateNode({
-        id: node.id,
-        type: "youtubeNode",
-        data: {
-          namespace,
-        },
-      });
     });
   };
   return { handleSubmit, videoUrl, setVideoUrl, open, setOpen, isPending };

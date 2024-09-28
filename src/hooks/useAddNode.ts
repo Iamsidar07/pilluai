@@ -1,45 +1,51 @@
 "use client";
 import { TTextNode, TChatNode, TWebScrapperNode } from "@/components/nodes";
 import { usePanel } from "@/context/panel";
+import { getNewNodePosition } from "@/lib/utils";
+import { useReactFlow } from "@xyflow/react";
 import { nanoid } from "nanoid";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 const useAddNode = () => {
-  const { addNode } = usePanel();
+  const { addNode, nodes } = usePanel();
+  const { fitView } = useReactFlow();
+  const newNodePosition = useMemo(() => getNewNodePosition(nodes), [nodes]);
 
   const addTextNode = useCallback(() => {
     const newNode: TTextNode = {
       id: nanoid(),
-      position: { x: 0, y: 0 },
+      position: newNodePosition,
       type: "textNode",
-      width: 250,
-      height: 100,
+      width: 240,
+      height: 50,
       data: {
         text: "",
         type: "textNode",
       },
     };
     addNode(newNode);
-  }, [addNode]);
+    fitView();
+  }, [addNode, fitView]);
 
   const addChatNode = useCallback(() => {
     const newNode: TChatNode = {
       id: nanoid(),
-      position: { x: 0, y: 0 },
-      width: 700,
-      height: 600,
+      position: getNewNodePosition(nodes),
+      width: 400,
+      height: 350,
       type: "chatNode",
       data: {
         type: "chatNode",
       },
     };
     addNode(newNode);
-  }, [addNode]);
+    fitView();
+  }, [addNode, fitView]);
 
   const addWebScrapperNode = useCallback(() => {
     const newNode: TWebScrapperNode = {
       id: nanoid(),
-      position: { x: 0, y: 0 },
+      position: newNodePosition,
       type: "webScrapperNode",
       data: {
         title: "Website",
@@ -51,7 +57,8 @@ const useAddNode = () => {
       },
     };
     addNode(newNode);
-  }, [addNode]);
+    fitView();
+  }, [addNode, fitView]);
 
   return { addTextNode, addWebScrapperNode, addChatNode };
 };

@@ -1,7 +1,6 @@
 "use client";
 import { Message } from "ai";
 import { Copy } from "lucide-react";
-import { useMemo } from "react";
 import { toast } from "sonner";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -9,10 +8,6 @@ import { useUser } from "@clerk/nextjs";
 
 const ShowMessage = ({ role, content }: Message) => {
   const { user } = useUser();
-
-  const MemoizedMarkdownRenderer = useMemo(() => {
-    return <MarkdownRenderer content={content} />;
-  }, [content]);
   return (
     <div className="nowheel nodrag textselectable">
       <div className="flex items-center gap-1">
@@ -36,7 +31,7 @@ const ShowMessage = ({ role, content }: Message) => {
         )}
       </div>
       <div className="w-full pr-10 relative">
-        {MemoizedMarkdownRenderer}
+        <MarkdownRenderer content={content} />
         <Copy
           className="absolute top-2 right-2 w-3 h-3 cursor-pointer"
           onClick={() => {

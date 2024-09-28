@@ -69,11 +69,17 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!user || !boardId) return;
     const getBoard = async (userId: string, boardId: string) => {
-      const docRef = doc(db, `users/${userId}/boards`, boardId);
-      const docSnap = await getDoc(docRef);
-      const data = docSnap.data();
-      setNodes(data?.nodes);
-      setEdges(data?.edges);
+      console.log("get board");
+      try {
+        const docRef = doc(db, `users/${userId}/boards`, boardId);
+        const docSnap = await getDoc(docRef);
+        const data = docSnap.data();
+        setNodes(data?.nodes);
+        setEdges(data?.edges);
+      } catch (error) {
+        toast.error("Please check your network connection.");
+        console.log("error while getting docs: ", error);
+      }
     };
     getBoard(user?.id, boardId);
   }, [user, boardId, setNodes, setEdges]);
@@ -89,10 +95,11 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
           edges: edges,
         });
       } catch (e) {
+        toast.error("Please check your network connection.");
         console.log(e);
       }
     },
-    [boardId, user]
+    [boardId, user],
   );
 
   const onConnect: OnConnect = useCallback(
@@ -107,11 +114,11 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
       setEdges((edges) => addEdge(edge, edges));
       const saveEdgesDebounced = debounce(
         () => saveEdges([...edges, edge]),
-        1000
+        1000,
       );
       saveEdgesDebounced();
     },
-    [saveEdges, setEdges]
+    [saveEdges, setEdges],
   );
 
   const addNode = useCallback(
@@ -131,7 +138,7 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
         return [...nds, node];
       });
     },
-    [hasActiveMembership, setNodes]
+    [hasActiveMembership, setNodes],
   );
 
   const updateNode = useCallback(
@@ -148,10 +155,10 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
             };
           }
           return node;
-        })
+        }),
       );
     },
-    [setNodes]
+    [setNodes],
   );
 
   return (

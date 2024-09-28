@@ -6,13 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "deploy-backend": "wrangler deploy --minify src/app/api/[[...route]]/route.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^0.0.27",
     "@clerk/elements": "^0.12.3",
     "@clerk/nextjs": "^5.2.14",
     "@google/generative-ai": "^0.14.1",
+    "@hono/node-server": "^1.12.2",
     "@hookform/resolvers": "^3.9.0",
     "@langchain/cohere": "^0.0.10",
     "@langchain/community": "^0.2.5",
@@ -45,6 +47,7 @@
     "firebase": "^10.12.3",
     "firebase-admin": "^12.3.0",
     "geist": "^1.3.1",
+    "hono": "^4.5.6",
     "langchain": "^0.2.4",
     "lucide-react": "^0.383.0",
     "nanoid": "^5.0.7",
@@ -71,6 +74,7 @@
     "stripe": "^16.6.0",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
+    "wrangler": "^3.74.0",
     "youtube-transcript": "^1.2.1",
     "youtubei.js": "^10.1.0",
     "ytdl-core": "^4.11.5",

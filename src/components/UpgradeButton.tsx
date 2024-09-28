@@ -31,7 +31,7 @@ const UpgradeButton = () => {
 
   if (!hasActiveMembership && !loading)
     return (
-      <Button asChild className="font-bold">
+      <Button size={"sm"} asChild className="font-bold">
         <Link href="/pricing" className="font-bold">
           Upgrade <StarsIcon className="ml-2 h-4 w-4" />
         </Link>
@@ -40,13 +40,13 @@ const UpgradeButton = () => {
 
   if (loading)
     return (
-      <Button>
+      <Button size={"sm"}>
         <Loader2 className="animate-spin" />
       </Button>
     );
 
   return (
-    <Button onClick={handleAccount} disabled={isPending}>
+    <Button size={"sm"} onClick={handleAccount} disabled={isPending}>
       {isPending ? (
         <Loader2 className="animate-spin" />
       ) : (
