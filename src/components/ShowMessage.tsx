@@ -9,7 +9,7 @@ import { useUser } from "@clerk/nextjs";
 const ShowMessage = ({ role, content }: Message) => {
   const { user } = useUser();
   return (
-    <div className="nowheel nodrag textselectable">
+    <div className="textselectable pt-1">
       <div className="flex items-center gap-1">
         {role === "user" ? (
           <Avatar className="w-5 h-5">

@@ -18,7 +18,7 @@ const YoutubeNode = ({ data, selected }: NodeProps) => {
 
   const youtubeNodeWithMemo = useMemo(
     () => (
-      <div className="fixed-dimension overflow-hidden bg-red-100 rounded shadow ring-1 ring-gray-900/15">
+      <div className="fixed-dimension overflow-hidden bg-red-100 rounded shadow ring-1 ring-red-100">
         <CustomHandle type="source" />
         <div
           className={cn(
@@ -27,10 +27,7 @@ const YoutubeNode = ({ data, selected }: NodeProps) => {
         >
           <div
             className={cn(
-              "flex items-center rounded py-2 gap-2 px-2 truncate bg-red-100 text-red-500 transition-all w-fit max-w-full",
-              {
-                "bg-red-600 text-white": selected,
-              },
+              "flex items-center rounded py-2 gap-2 px-2 truncate bg-[#FF0000] text-white transition-all w-fit max-w-full",
             )}
           >
             <div className="w-6 h-6 grid place-items-center">

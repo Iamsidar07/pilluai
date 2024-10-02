@@ -104,12 +104,14 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
 
   const onConnect: OnConnect = useCallback(
     (connection) => {
+      console.log("onConnect", connection);
       if (!connection.source || !connection.target) return;
+      console.log("Saving...");
       const edge = {
         ...connection,
         animated: true,
         type: "customEdge",
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#00ff00" },
+        markerEnd: { type: MarkerType.ArrowClosed },
       };
       setEdges((edges) => addEdge(edge, edges));
       const saveEdgesDebounced = debounce(

@@ -7,6 +7,7 @@ import { usePanel } from "@/context/panel";
 import { db } from "@/firebase";
 import { debounce } from "@/lib/utils";
 import {
+  addEdge,
   applyEdgeChanges,
   applyNodeChanges,
   Background,
@@ -16,7 +17,9 @@ import {
   Controls,
   Edge,
   EdgeChange,
+  MarkerType,
   NodeChange,
+  OnConnect,
   ReactFlow,
   SelectionMode,
   useEdgesState,
@@ -64,9 +67,26 @@ const debouncedSaveEdges = debounce(
 
 export default function Board({ boardId }: BoardProps) {
   const { user } = useUser();
-  const { onConnect } = usePanel();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  const saveEdges = useCallback(
+    // @ts-ignore
+    async (edges) => {
+      console.log("saveEdges");
+      if (!user) return;
+      try {
+        const boardRef = doc(db, `users/${user?.id}/boards`, boardId as string);
+        updateDoc(boardRef, {
+          edges: edges,
+        });
+      } catch (e) {
+        toast.error("Please check your network connection.");
+        console.log(e);
+      }
+    },
+    [boardId, user],
+  );
 
   useEffect(() => {
     const getBoard = async () => {
@@ -81,6 +101,7 @@ export default function Board({ boardId }: BoardProps) {
 
   const handleNodeChange = useCallback(
     (changes) => {
+      console.log("handleNodeChange", changes);
       onNodesChange(changes);
       debouncedSaveNodes(user?.id as string, boardId, nodes);
     },
@@ -88,42 +109,67 @@ export default function Board({ boardId }: BoardProps) {
   );
   const handleEdgeChange = useCallback(
     (changes) => {
+      console.log("handleEdgeChange", changes);
       onEdgesChange(changes);
       debouncedSaveEdges(user?.id as string, boardId, nodes);
     },
     [onEdgesChange, user?.id, boardId, nodes],
   );
 
+  // const onConnect = useCallback(
+  //   (params) => setEdges((eds) => addEdge(params, eds)),
+  //   [setEdges],
+  // );
+
+  const onConnect: OnConnect = useCallback(
+    (connection) => {
+      console.log("onConnect", connection);
+      if (!connection.source || !connection.target) return;
+      console.log("Saving...");
+      const edge = {
+        ...connection,
+        animated: true,
+        type: "customEdge",
+        markerEnd: { type: MarkerType.ArrowClosed },
+      };
+      setEdges((edges) => addEdge(edge, edges));
+      const saveEdgesDebounced = debounce(
+        () => saveEdges([...edges, edge]),
+        1000,
+      );
+      saveEdgesDebounced();
+    },
+    [saveEdges, setEdges],
+  );
   const memoizedFlow = useMemo(
     () => (
-      <div className="w-full h-[calc(100vh-52px)] sm:h-[calc(100vh-57px)] overflow-hidden">
-        <GradientEdge />
-        <ReactFlow
-          nodes={nodes}
-          nodeTypes={nodeTypes}
-          onNodesChange={handleNodeChange}
-          edges={edges}
-          edgeTypes={edgeTypes}
-          onEdgesChange={handleEdgeChange}
-          fitView
-          onConnect={onConnect}
-          panOnScroll
-          selectionOnDrag
-          selectionMode={SelectionMode.Partial}
-          connectionMode={ConnectionMode.Loose}
-          connectionLineType={ConnectionLineType.SmoothStep}
-          elevateEdgesOnSelect
-          elevateNodesOnSelect
-          nodesDraggable={true}
-          onError={(_, msg) => toast.error(msg)}
-          connectionRadius={10}
-          zoomOnPinch
-        >
-          <Background variant={BackgroundVariant.Dots} bgColor="#edf1f5" />
-          <Controls showFitView showInteractive />
-          <ResizablePane />
-        </ReactFlow>
-      </div>
+      <ReactFlow
+        nodes={nodes}
+        nodeTypes={nodeTypes}
+        onNodesChange={handleNodeChange}
+        edges={edges}
+        edgeTypes={edgeTypes}
+        onEdgesChange={handleEdgeChange}
+        fitView
+        onConnect={onConnect}
+        panOnScroll
+        selectionOnDrag
+        selectionMode={SelectionMode.Partial}
+        connectionMode={ConnectionMode.Strict}
+        connectionLineType={ConnectionLineType.SmoothStep}
+        elevateEdgesOnSelect
+        elevateNodesOnSelect
+        nodesDraggable={true}
+        onError={(e, msg) => {
+          console.log(e, msg);
+        }}
+        connectionRadius={10}
+        zoomOnPinch
+      >
+        <Background variant={BackgroundVariant.Dots} bgColor="#edf1f5" />
+        <Controls showFitView showInteractive />
+        <ResizablePane />
+      </ReactFlow>
     ),
     [edges, handleEdgeChange, handleNodeChange, nodes, onConnect],
   );

@@ -1,14 +1,42 @@
-import { CohereEmbeddings } from "@langchain/cohere";
+import { MistralAIEmbeddings } from "@langchain/mistralai";
+import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/cheerio";
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { YoutubeLoader } from "@langchain/community/document_loaders/web/youtube";
 import { Index } from "@upstash/vector";
 
-const index = new Index({
-  url: process.env.UPSTASH_INDEX_URL as string,
-  token: process.env.UPSTASH_API_KEY as string,
+type LoaderType = "website" | "pdf" | "youtube";
+
+interface LoaderArgs {
+  url: string;
+  type: LoaderType;
+}
+
+export const embeddings = new MistralAIEmbeddings({
+  apiKey: process.env.MISTRAL_API_KEY,
 });
 
-const embeddings = new CohereEmbeddings({
-  apiKey: process.env.COHERENCE_API_KEY as string,
-  batchSize: 48,
+export const index = new Index({
+  url: process.env.UPSTASH_INDEX_URL,
+  token: process.env.UPSTASH_API_KEY,
 });
 
-export { embeddings, index };
+export const getLoader = async ({ url, type }: LoaderArgs) => {
+  switch (type) {
+    case "website":
+      return new CheerioWebBaseLoader(url);
+    case "pdf":
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new PDFLoader(blob);
+    case "youtube":
+      return new YoutubeLoader({ addVideoInfo: true, videoId: url });
+    default:
+      throw "Invalid type";
+  }
+};
+
+export const isNamespaceExists = (namespace: string, index: Index) => {
+  if (!namespace) throw new Error("Namespace not found");
+  const allNamespace = index.namespace(namespace);
+  return allNamespace != undefined;
+};

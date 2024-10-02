@@ -7,8 +7,9 @@ export const addMessageToDb = async (
   nodeId: string,
   chatId: string,
   role: string,
-  content: string,
+  content: string
 ) => {
+  console.log("addMessageToDb", userId, boardId, nodeId, chatId, role, content);
   await adminDb
     .collection("users")
     .doc(userId)

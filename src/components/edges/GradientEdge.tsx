@@ -3,7 +3,7 @@ interface GradientEdgeProps {
   color2?: string;
 }
 export default function GradientEdge({
-  color1 = "gold",
+  color1 = "green",
   color2 = "pink",
 }: GradientEdgeProps) {
   return (

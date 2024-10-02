@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { NodeProps, NodeResizer } from "@xyflow/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import CustomHandle from "../CustomHandle";
+import CustomNodeResizer from "../CustomNodeResizer";
 
 const TextNode = ({ id, selected, data }: NodeProps) => {
   const { updateNode } = usePanel();
@@ -33,7 +34,7 @@ const TextNode = ({ id, selected, data }: NodeProps) => {
           },
         )}
       >
-        <NodeResizer />
+        <CustomNodeResizer />
         <CustomHandle type="source" />
         <div className="h-full border rounded">
           <textarea

@@ -10,7 +10,14 @@ import useSubscription from "@/hooks/useSubscription";
 import { maxChatInOneChatNode } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { Message, useChat } from "ai/react";
-import { collection, doc, orderBy, query, setDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  orderBy,
+  query,
+  setDoc,
+} from "firebase/firestore";
 import { ArrowRightIcon, Bot, Loader2 } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useParams } from "next/navigation";
@@ -21,6 +28,7 @@ import { toast } from "sonner";
 import { Chat } from "../../../typing";
 import { useUser } from "@clerk/nextjs";
 import CustomNodeResizer from "../CustomNodeResizer";
+import { addMessageToDb } from "@/lib/db";
 
 const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
   const [isAIThinking, setIsAIThinking] = useState(false);
@@ -33,13 +41,23 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
     messages,
     setMessages,
   } = useChat({
-    onResponse() {
+    onResponse(response) {
+      console.log("on response", response);
       setIsAIThinking(false);
     },
-    onError() {
+    onError(err) {
+      console.log("onError", err);
       toast.error("Something went wrong");
     },
     async onFinish(message) {
+      console.log("onFinish", message);
+      addDoc(
+        collection(
+          db,
+          `users/${user.id}/boards/${boardId}/chatNodes/${nodeId}/chats/${currentChat.id}/messages`,
+        ),
+        message,
+      );
       // TODO: Add message to db
     },
   });
@@ -205,15 +223,14 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
             createdAt: new Date(),
           });
         }
-
+        console.log({ currentChatId });
         handleSubmit(e, {
           options: {
             body: {
-              knowledgeBaseNodes: getKnowledgeBaseNodes(nodeId),
-              userId: user?.id,
+              knowledgeBase: getKnowledgeBaseNodes(nodeId),
               boardId,
               nodeId,
-              currentChat,
+              currentChatId: currentChatId,
             },
           },
         });
@@ -258,13 +275,13 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
         <CustomNodeResizer />
         <div className="w-1/3 border-r relative">
           <div className="p-2 h-full">
-            <div className=" flex items-center justify-end sticky">
+            <div className="flex items-center justify-end sticky">
               <Button
-                size={"icon"}
+                size={"sm"}
                 onClick={() => handleCreateNewChat()}
-                className="rounded cursor-pointer"
+                className="rounded-mmd cursor-pointer"
               >
-                <IoCreateOutline className="w-4 h-4" />
+                <IoCreateOutline className="w-5 h-5" />
               </Button>
             </div>
             <h3 className="mt-4 mb-2 text-zinc-400">Previous Chats</h3>
@@ -295,7 +312,7 @@ const ChatNode = ({ id: nodeId, selected }: NodeProps) => {
             </div>
           </div>
         </div>
-        <div className="w-2/3 p-2 nodrag nowheel cursor-text flex flex-col">
+        <div className="w-2/3 pl-2 pb-2 nodrag nowheel cursor-text flex flex-col">
           <div className="flex flex-col flex-1 space-y-1 overflow-auto h-full pb-24 nodrag nowheel cursor-text">
             {messages?.length === 0 && !isLoading && (
               <div className="w-full flex-1 flex flex-col items-center justify-center gap-2 text-zinc-400">
