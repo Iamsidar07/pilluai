@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { Button } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { useUser } from "@clerk/nextjs";
 
 const UpgradeButton = () => {
@@ -31,11 +31,15 @@ const UpgradeButton = () => {
 
   if (!hasActiveMembership && !loading)
     return (
-      <Button size={"sm"} asChild className="font-bold">
-        <Link href="/pricing" className="font-bold">
-          Upgrade <StarsIcon className="ml-2 h-4 w-4" />
-        </Link>
-      </Button>
+      <Link
+        href="/pricing"
+        className={buttonVariants({
+          variant: "default",
+          size: "sm",
+        })}
+      >
+        Upgrade <StarsIcon className="ml-2 h-4 w-4" />
+      </Link>
     );
 
   if (loading)

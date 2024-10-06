@@ -20,7 +20,7 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
           {
             "bg-blue-300": selected,
             "!h-auto": !data.url,
-          }
+          },
         )}
       >
         <CustomHandle type="source" />
@@ -29,7 +29,7 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
             "flex items-center gap-2 mb-2 truncate transition-all text-blue-500",
             {
               "text-white": selected,
-            }
+            },
           )}
         >
           {isLoading ? (
@@ -43,11 +43,7 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
           {data.url ? (
             <AspectRatio ratio={16 / 9} className="h-full w-full rounded">
               <Image
-                src={
-                  (data.screenshotUrl
-                    ? data.screenshotUrl
-                    : data.base64) as string
-                }
+                src={data.screenshotUrl as string}
                 width={200}
                 height={200}
                 alt="image"
@@ -83,7 +79,6 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
       </div>
     ),
     [
-      data.base64,
       data.screenshotUrl,
       data.title,
       data.url,
@@ -92,7 +87,7 @@ const WebScrapperNode = ({ id, selected, data }: NodeProps) => {
       selected,
       setUrl,
       url,
-    ]
+    ],
   );
   return webScrapperNodeWithMemo;
 };

@@ -10,10 +10,11 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Pencil, Sparkles } from "lucide-react";
-import renameBoard from "@/actions/renameBoard";
 import { toast } from "sonner";
 import useSubscription from "@/hooks/useSubscription";
 import { useAuth } from "@clerk/nextjs";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase";
 
 interface Props {
   name: string;
@@ -34,12 +35,15 @@ const RenameBoard = ({ name, boardId }: Props) => {
     }
     if (!newBoardName || !boardId || !hasActiveMembership) return;
     startTransition(async () => {
-      const { success } = await renameBoard(newBoardName, boardId);
-      if (success) {
+      try {
+        await updateDoc(doc(db, `users/${userId}/boards/${boardId}`), {
+          name: newBoardName,
+        });
         toast.success("Successfully renamed board.");
         setIsOpen(false);
-      } else {
-        toast.error("Failed to rename");
+      } catch (e) {
+        console.log("failed to rename board", e);
+        toast.error("failed to rename board");
       }
     });
   };

@@ -41,7 +41,7 @@ const TextNode = ({ id, selected, data }: NodeProps) => {
             value={textContent}
             onChange={onChange}
             placeholder="Double click to start typing..."
-            className="resize-none outline-none p-2 w-full h-full bg-transparent text-sm"
+            className="resize-none outline-none p-2 w-full h-full bg-transparent text-sm nowheel"
           />
         </div>
       </div>

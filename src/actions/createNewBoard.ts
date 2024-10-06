@@ -8,7 +8,6 @@ import { auth } from "@clerk/nextjs/server";
 const createNewBoard = async (name: string) => {
   auth().protect();
   const { userId } = auth();
-  console.log({ userId });
   if (!userId) {
     return { success: false, message: "You are not signed in." };
   }

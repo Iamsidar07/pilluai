@@ -44,7 +44,7 @@ const YoutubeNode = ({ data, selected }: NodeProps) => {
         </div>
       </div>
     ),
-    [data.title, selected, videoId],
+    [data.title, videoId],
   );
 
   return youtubeNodeWithMemo;

@@ -3,8 +3,9 @@ import { CheerioWebBaseLoader } from "@langchain/community/document_loaders/web/
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { YoutubeLoader } from "@langchain/community/document_loaders/web/youtube";
 import { Index } from "@upstash/vector";
+import ytdl from "ytdl-core";
 
-type LoaderType = "website" | "pdf" | "youtube";
+export type LoaderType = "website" | "pdf" | "youtube";
 
 interface LoaderArgs {
   url: string;
@@ -27,9 +28,14 @@ export const getLoader = async ({ url, type }: LoaderArgs) => {
     case "pdf":
       const response = await fetch(url);
       const blob = await response.blob();
-      return new PDFLoader(blob);
+      return new PDFLoader(blob, {
+        splitPages: true,
+      });
     case "youtube":
-      return new YoutubeLoader({ addVideoInfo: true, videoId: url });
+      return new YoutubeLoader({
+        videoId: ytdl.getURLVideoID(url),
+        addVideoInfo: true,
+      });
     default:
       throw "Invalid type";
   }

@@ -15,7 +15,7 @@ const Boards = () => {
     setIsLoading(true);
     const q = query(
       collection(db, `users/${userId}/boards`),
-      orderBy("createdAt", "desc")
+      orderBy("createdAt", "desc"),
     );
 
     return onSnapshot(q, (boardsSnapshot) => {
@@ -24,7 +24,7 @@ const Boards = () => {
           ({
             ...board.data(),
             id: board.id,
-          } as Board)
+          }) as Board,
       );
       setBoards(boardsData);
       setIsLoading(false);
@@ -41,9 +41,7 @@ const Boards = () => {
   return (
     <div className="mt-4 w-full flex flex-col gap-4 px-4">
       {isLoading && <BoardsLoading />}
-      {boards?.map((board) => (
-        <BoardItem key={board.id} board={board} />
-      ))}
+      {boards?.map((board) => <BoardItem key={board.id} board={board} />)}
     </div>
   );
 };

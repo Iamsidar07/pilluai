@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import useSubscription from "./useSubscription";
 import { freePdfSize, proPdfSize } from "@/lib/config";
 import { useUser } from "@clerk/nextjs";
+import axios from "axios";
 
 export enum StatusText {
   UPLOADING = "Uploading file...",
@@ -20,7 +21,7 @@ export enum StatusText {
 
 export type Status = (typeof StatusText)[keyof typeof StatusText];
 
-function useUpload(nodeId: string) {
+function useUpload() {
   const { hasActiveMembership } = useSubscription();
   const [progress, setProgress] = useState<number | null>(null);
   const [status, setStatus] = useState<Status | null>(null);
@@ -28,7 +29,7 @@ function useUpload(nodeId: string) {
   const { updateNode } = usePanel();
 
   const handleUpload = useCallback(
-    async (file: File) => {
+    async (file: File, nodeId: string) => {
       if (!file || !user) return;
       const fileIdToUpload = nanoid();
       const storageRef = ref(
@@ -66,36 +67,34 @@ function useUpload(nodeId: string) {
             data: {
               url: downloadUrl,
               name: file.name,
+              metadata: `This is pdf file. Type: pdf, URL: ${downloadUrl}, Name: ${file.name}`,
             },
           });
 
           setStatus(StatusText.GENERATING);
-          // Generate embeddings
-          const { namespace, success } = await fetch("/api/generateEmbedding", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              url: downloadUrl,
-              type: "pdf",
-            }),
-          }).then((res) => res.json());
-          if (!success) {
-            toast.error("Failed to generate embeddings");
-            return;
+          try {
+            const embeddingResponse = await axios.post(
+              "/api/generateEmbeddings",
+              {
+                type: "pdf",
+                url: downloadUrl,
+              },
+            );
+            updateNode({
+              id: nodeId,
+              type: "pdfNode",
+              data: {
+                namespace: embeddingResponse.data.namespace,
+              },
+            });
+          } catch (error) {
+            console.log(error);
+            toast.error("Failed to generate embedding");
           }
-          updateNode({
-            id: nodeId,
-            type: "pdfNode",
-            data: {
-              namespace,
-            },
-          });
         },
       );
     },
-    [hasActiveMembership, nodeId, updateNode, user],
+    [hasActiveMembership, updateNode, user],
   );
   return { progress, status, handleUpload };
 }

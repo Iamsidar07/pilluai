@@ -1,5 +1,6 @@
 import type { BuiltInNode, Node, NodeTypes } from "@xyflow/react";
-import ChatNode from "./ChatNode";
+// import ChatNode from "./ChatNode";
+import ChatNode from "../chat";
 import ImageNode from "./ImageNode";
 import PdfNode from "./PdfNode";
 import TextNode from "./TextNode";
@@ -9,6 +10,7 @@ import YoutubeNode from "./YoutubeNode";
 export type TTextNode = Node<
   {
     text: string;
+    metadata: string;
     type: "textNode";
   },
   "textNode"
@@ -20,6 +22,7 @@ export type TPdfNode = Node<
     type: "pdfNode";
     name: string;
     namespace: string;
+    metadata: string;
   },
   "pdfNode"
 >;
@@ -36,8 +39,9 @@ export type TWebScrapperNode = Node<
     screenshotUrl: string;
     type: "webScrapperNode";
     title: string;
-    namespace: string;
-    base64: string;
+    metadata: string;
+    text: string;
+    namespace?: string;
   },
   "webScrapperNode"
 >;
@@ -47,6 +51,8 @@ export type TImageNode = Node<
     title: string;
     url: string;
     base64: string;
+    metadata: string;
+    text: string;
     type: "imageNode";
   },
   "imageNode"
@@ -57,6 +63,8 @@ export type TYoutubeNode = Node<
     url: string;
     type: "youtubeNode";
     namespace: string;
+    text: string;
+    metadata: string;
   },
   "youtubeNode"
 >;

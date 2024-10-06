@@ -2,21 +2,22 @@ import { db } from "@/firebase";
 import { auth } from "@clerk/nextjs/server";
 import { doc, getDoc } from "firebase/firestore";
 import { Metadata, ResolvingMetadata } from "next";
-import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import Loader from "@/components/Loader";
 
-const Loader = () => (
-  <div className="absolute inset-0 bg-zinc-200 flex flex-col items-center justify-center">
-    <h1 className="text-[20vw] font-bold text-white animate-pulse">
-      Loading...
-    </h1>
+const LoaderAnimation = () => (
+  <div className="absolute inset-0 bg-white flex flex-col items-center justify-center">
+    <Loader />
+    <p className="mt-4 text-gray-500 opacity-90">
+      Preparing your whiteboard...
+    </p>
   </div>
 );
 
 const Board = dynamic(() => import("@/components/Board"), {
   ssr: false,
-  loading: () => <Loader />,
+  loading: () => <LoaderAnimation />,
 });
 
 interface BoardProps {
@@ -34,21 +35,18 @@ export async function generateMetadata(
   const boardRef = doc(db, `users/${userId}/boards`, boardId);
   const previousImages = (await parent).openGraph?.images || [];
   const board = await getDoc(boardRef);
-
   return {
     title: board?.data()?.name || "My Board",
     openGraph: {
-      images: ["/og.png", ...previousImages],
+      images: ["https://pilluai.vercel.app/og.png", ...previousImages],
     },
   };
 }
 
-export default function BoardPage({ params }: BoardProps) {
-  auth().protect();
-  const { boardId } = params;
+export default function BoardPage() {
   return (
-    <Suspense fallback={<Loader />}>
-      <Board boardId={boardId} />
+    <Suspense fallback={<LoaderAnimation />}>
+      <Board />
     </Suspense>
   );
 }

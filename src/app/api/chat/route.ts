@@ -1,3 +1,4 @@
+import { AppNode } from "@/components/nodes";
 import { adminDb } from "@/firebaseAdmin";
 import {
   embeddings,
@@ -10,20 +11,28 @@ import { UpstashVectorStore } from "@langchain/community/vectorstores/upstash";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { ChatMistralAI } from "@langchain/mistralai";
-import { createStreamDataTransformer, StreamingTextResponse } from "ai";
+import {
+  createStreamDataTransformer,
+  Message,
+  StreamingTextResponse,
+} from "ai";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
+import { Document } from "langchain/document";
 import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
+import { Chat } from "../../../../typing";
+
+type RequestBody = {
+  messages: Message[];
+  boardId: string;
+  nodeId: string;
+  currentChat: Chat | null;
+  knowledgeBase: AppNode[];
+};
 
 export const runtime = "nodejs";
-// export const dynamic = "force-dynamic";
-
-const llm = new ChatMistralAI({
-  model: "mistral-large-latest",
-  temperature: 0,
-});
 
 const customTemplate = `Use the following pieces of context to answer the question at the end.
 If you don't know the answer, just say that you don't know, don't try to make up an answer.
@@ -36,11 +45,44 @@ Question: {question}
 
 Helpful Answer:`;
 
+const vectorStoreCache: Record<string, UpstashVectorStore> = {};
+
+const llm = new ChatMistralAI({
+  model: "mistral-large-latest",
+  temperature: 0,
+  maxTokens: 1000,
+});
+
+const addMessageToDB = async (
+  userId: string,
+  boardId: string,
+  nodeId: string,
+  currentChatId: string,
+  role: "user" | "assistant",
+  content: string,
+) =>
+  adminDb
+    .collection("users")
+    .doc(userId)
+    .collection("boards")
+    .doc(boardId)
+    .collection("chatNodes")
+    .doc(nodeId)
+    .collection("chats")
+    .doc(currentChatId)
+    .collection("messages")
+    .add({
+      id: nanoid(),
+      role,
+      content,
+      createdAt: new Date(),
+    });
+
 export const POST = async (req: NextRequest) => {
   try {
-    const requestBody = await req.json();
+    const requestBody = (await req.json()) as RequestBody;
     const { userId } = auth();
-    const { messages, knowledgeBase, boardId, nodeId, currentChatId } =
+    const { messages, knowledgeBase, boardId, nodeId, currentChat } =
       requestBody;
     if (!userId) {
       return NextResponse.json(
@@ -48,16 +90,16 @@ export const POST = async (req: NextRequest) => {
         { status: 401 },
       );
     }
-
     const question = messages[messages?.length - 1].content;
     let rawContext = "";
-    let firstKbWithNamespace;
+    let firstKbWithNamespace: AppNode | undefined;
     knowledgeBase?.map((kb) => {
+      // @ts-ignore
       if (kb?.data.namespace && !firstKbWithNamespace) {
         firstKbWithNamespace = kb;
       } else {
-        // rowContext += `metadata: ${kb.metadata} \n\n ${kb.context} \n\n`;
-        rawContext += `${kb.data.text} \n\n`;
+        // @ts-ignore
+        rowContext += `${kb?.metadata && `metadata: ${kb.metadata}`} \n\n context: ${kb.text} \n\n`;
       }
     });
     const constructedMessages = messages.map((message) =>
@@ -65,19 +107,52 @@ export const POST = async (req: NextRequest) => {
         ? new HumanMessage(message.content)
         : new AIMessage(message.content),
     );
+    const customRagPrompt = PromptTemplate.fromTemplate(customTemplate);
+
+    const customRagChain = await createStuffDocumentsChain({
+      llm: llm,
+      prompt: customRagPrompt,
+      outputParser: new HttpResponseOutputParser(),
+    });
+    addMessageToDB(
+      userId,
+      boardId,
+      nodeId,
+      currentChat?.id as string,
+      "user",
+      question,
+    );
+
+    // @ts-ignore
+    if (!firstKbWithNamespace || !firstKbWithNamespace?.data?.namespace) {
+      const stream = await customRagChain.stream({
+        question,
+        context: [new Document({ pageContent: rawContext })],
+        history: constructedMessages,
+      });
+      return new StreamingTextResponse(
+        stream.pipeThrough(createStreamDataTransformer()),
+      );
+    }
 
     let vectorStore: UpstashVectorStore;
-    if (
-      firstKbWithNamespace?.data?.namespace &&
-      isNamespaceExists(firstKbWithNamespace?.data.namespace || "", index)
-    ) {
-      vectorStore = await UpstashVectorStore.fromExistingIndex(embeddings, {
-        index,
-        namespace: firstKbWithNamespace.data.namespace,
-      });
+    // @ts-ignore
+    const namespace = firstKbWithNamespace?.data.namespace;
+    if (isNamespaceExists(namespace, index)) {
+      if (!vectorStoreCache[namespace]) {
+        vectorStoreCache[namespace] =
+          await UpstashVectorStore.fromExistingIndex(embeddings, {
+            index,
+            namespace,
+          });
+        vectorStore = vectorStoreCache[namespace];
+      }
+      vectorStore = vectorStoreCache[namespace];
     } else {
       const loader = await getLoader({
+        // @ts-ignore
         url: firstKbWithNamespace.data.url,
+        // @ts-ignore
         type: firstKbWithNamespace.data.type,
       });
       const docs = await loader.load();
@@ -87,63 +162,19 @@ export const POST = async (req: NextRequest) => {
       });
       const splits = await textSplitter.splitDocuments(docs);
       vectorStore = new UpstashVectorStore(embeddings, {
-        namespace: firstKbWithNamespace.data.namespace,
+        namespace,
         index,
       });
       await vectorStore.addDocuments(splits);
     }
-
-    // Retrieve and generate using the relevant snippets of the blog.
     const retriever = vectorStore.asRetriever();
-    const customRagPrompt = PromptTemplate.fromTemplate(customTemplate);
 
-    const customRagChain = await createStuffDocumentsChain({
-      llm: llm,
-      prompt: customRagPrompt,
-      outputParser: new HttpResponseOutputParser(),
-    });
     const context = await retriever.invoke(question);
-    // const ragChain = await createStuffDocumentsChain({
-    //   llm,
-    //   prompt,
-    //   outputParser: new StringOutputParser(),
-    // });
-    // const response = await ragChain.invoke({
-    //   question: constructedQuestion,
-    //   context: retrievedDocs,
-    // });
-
     const stream = await customRagChain.stream({
       question,
-      context: context,
+      context,
       history: constructedMessages,
     });
-    // for await (const chunk of stream) {
-    // }
-    // addMessageToDb(
-    //   userId,
-    //   boardId,
-    //   nodeId,
-    //   currentChatId,
-    //   "assistant",
-    //   question
-    // );
-    adminDb
-      .collection("users")
-      .doc(userId)
-      .collection("boards")
-      .doc(boardId)
-      .collection("chatNodes")
-      .doc(nodeId)
-      .collection("chats")
-      .doc(currentChatId)
-      .collection("messages")
-      .add({
-        id: nanoid(),
-        role: "user",
-        content: question,
-        createdAt: new Date(),
-      });
     return new StreamingTextResponse(
       stream.pipeThrough(createStreamDataTransformer()),
     );
@@ -152,24 +183,3 @@ export const POST = async (req: NextRequest) => {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 };
-
-/* Please analyze the attached content and provide the output in the following object format:
-
-json
-
-{
-  "title": "your_title_here 🌐",
-  "description": "your_detailed_description_here"
-}
-
-    Title: Create a concise title that includes the type of content and an appropriate emoji. For example:
-        web_app_overview 🌐
-        project_management_tool 📊
-
-    Description: Include the following elements in your description:
-        Overview: Briefly introduce the main theme or purpose of the content.
-        Key Features: Identify and describe important components or sections.
-        Context: Provide relevant background information.
-        User Interaction: Discuss user engagement and input mechanisms.
-        Conclusion: Summarize the overall implications or uses.
-*/

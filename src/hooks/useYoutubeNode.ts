@@ -1,9 +1,8 @@
 "use client";
-
-import getYoutubeVideoInfo from "@/actions/getYoutubeVideoInfo";
 import { TYoutubeNode } from "@/components/nodes";
 import { usePanel } from "@/context/panel";
 import { getNewNodePosition, isValidYoutubeUrl } from "@/lib/utils";
+import axios from "axios";
 import { nanoid } from "nanoid";
 import { FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -21,55 +20,40 @@ const useYoutubeNode = () => {
       return;
     }
     startTransition(async () => {
-      const { success, description, title } =
-        await getYoutubeVideoInfo(videoUrl);
-      console.log(success, description, title);
-      if (!success) {
-        toast.error("Failed to get video details");
-        return;
-      }
-      const node: TYoutubeNode = {
-        id: nanoid(),
-        position: getNewNodePosition(nodes),
-        type: "youtubeNode",
-        data: {
-          url: videoUrl,
-          type: "youtubeNode",
-          namespace: "",
-          title: title || "",
-        },
-      };
-      addNode(node);
-      setOpen(false);
       try {
-        const { namespace, success: isEmbeddingsFailed } = await fetch(
-          "/api/generateEmbedding",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              url: videoUrl,
-              type: "youtubeVideo",
-            }),
+        const [videoInfo, embedding] = await Promise.all([
+          axios.post("/api/yt", { url: videoUrl }),
+          axios.post("/api/generateEmbeddings", {
+            url: videoUrl,
+            type: "youtube",
+          }),
+        ]);
+        const node: TYoutubeNode = {
+          id: nanoid(),
+          position: getNewNodePosition(nodes),
+          type: "youtubeNode",
+          data: {
+            url: videoUrl,
+            type: "youtubeNode",
+            namespace: "",
+            title: videoInfo.data.videoDetails.title,
+            text: videoInfo.data.transcription,
+            metadata: `This is an Youtube video. Type: youtubeVideo, Title: ${videoInfo.data.videoDetails.title}, URL: ${videoUrl}`,
           },
-        ).then((res) => res.json());
-
-        if (!isEmbeddingsFailed) {
-          toast.error("Failed to index video.");
-          return;
-        }
+        };
+        addNode(node);
         updateNode({
           id: node.id,
           type: "youtubeNode",
           data: {
-            namespace,
+            namespace: embedding.data.namespace,
           },
         });
-      } catch (error: any) {
-        console.log(error);
-        toast.error(error.message);
+      } catch (error) {
+        toast.error("Something went wrong.");
+        console.log("Failed to add yt node: ", error);
+      } finally {
+        setOpen(false);
       }
     });
   };

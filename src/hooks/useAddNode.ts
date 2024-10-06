@@ -21,16 +21,18 @@ const useAddNode = () => {
       data: {
         text: "",
         type: "textNode",
+        metadata:
+          "You are a prompt or information source. If you are a prompt, use all the knowledge bases you have access to.",
       },
     };
     addNode(newNode);
     fitView();
-  }, [addNode, fitView]);
+  }, [addNode, fitView, newNodePosition]);
 
   const addChatNode = useCallback(() => {
     const newNode: TChatNode = {
       id: nanoid(),
-      position: getNewNodePosition(nodes),
+      position: newNodePosition,
       width: 400,
       height: 350,
       type: "chatNode",
@@ -40,7 +42,7 @@ const useAddNode = () => {
     };
     addNode(newNode);
     fitView();
-  }, [addNode, fitView]);
+  }, [addNode, fitView, newNodePosition]);
 
   const addWebScrapperNode = useCallback(() => {
     const newNode: TWebScrapperNode = {
@@ -52,13 +54,15 @@ const useAddNode = () => {
         type: "webScrapperNode",
         url: "",
         screenshotUrl: "",
+        text: "",
+        // TODO: Add metadata
+        metadata: "",
         namespace: "",
-        base64: "",
       },
     };
     addNode(newNode);
     fitView();
-  }, [addNode, fitView]);
+  }, [addNode, fitView, newNodePosition]);
 
   return { addTextNode, addWebScrapperNode, addChatNode };
 };

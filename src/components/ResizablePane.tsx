@@ -17,7 +17,7 @@ const ResizablePane = () => {
       {showNotes && (
         <div
           onClick={() => setShowNotes(false)}
-          className="w-10 z-50 h-10 mt-2 mr-2 p-2 border rounded-full bg-white flex items-center justify-center cursor-pointer group nodrag"
+          className="w-10 z-[9999] h-10 mt-2 mr-2 p-2 border rounded-full bg-white flex items-center justify-center cursor-pointer group nodrag"
         >
           <ChevronRight className="text-gray-500 w-5 h-5  group-hover:text-gray-600 " />
         </div>
@@ -29,7 +29,7 @@ const ResizablePane = () => {
       )}
       <Panel minSize={25} defaultSize={30}>
         {showNotes ? (
-          <div className="h-full w-full z-50 nodrag relative">
+          <div className="h-full w-full z-[99] nodrag relative">
             <Notes />
           </div>
         ) : null}

@@ -1,11 +1,16 @@
 "use client";
 import { AppNode } from "@/components/nodes";
 import { db } from "@/firebase";
+import useSubscription from "@/hooks/useSubscription";
+import { NODE_LIMITS } from "@/lib/config";
 import { debounce } from "@/lib/utils";
+import { useUser } from "@clerk/nextjs";
 import {
   addEdge,
   Edge,
+  EdgeChange,
   MarkerType,
+  NodeChange,
   OnConnect,
   OnEdgesChange,
   OnNodesChange,
@@ -14,11 +19,8 @@ import {
 } from "@xyflow/react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useParams } from "next/navigation";
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import useSubscription from "@/hooks/useSubscription";
+import React, { useCallback, useContext, useEffect } from "react";
 import { toast } from "sonner";
-import { NODE_LIMITS } from "@/lib/config";
-import { useUser } from "@clerk/nextjs";
 
 interface IPanelContext {
   nodes: AppNode[] | [];
@@ -27,6 +29,8 @@ interface IPanelContext {
   setEdges: React.Dispatch<React.SetStateAction<Edge[]>>;
   onEdgesChange: OnEdgesChange<Edge>;
   onNodesChange: OnNodesChange<AppNode>;
+  handleNodeChange: (changes: NodeChange<AppNode>[]) => void;
+  handleEdgeChange: (changes: EdgeChange<Edge>[]) => void;
   onConnect: OnConnect;
   addNode: (node: AppNode) => void;
   updateNode: ({
@@ -56,7 +60,39 @@ export const PanelContext = React.createContext<IPanelContext>({
   onConnect: () => {},
   addNode: () => {},
   updateNode: () => {},
+  handleNodeChange: () => {},
+  handleEdgeChange: () => {},
 });
+
+const debouncedSaveNodes = debounce(
+  async (userId: string, boardId: string, nodes: Node[]) => {
+    if (!boardId || !nodes || nodes.length === 0 || !userId) return;
+    try {
+      const boardRef = doc(db, `users/${userId}/boards`, boardId);
+      await updateDoc(boardRef, { nodes });
+    } catch (e) {
+      console.log(e);
+      toast.error("Failed to save nodes");
+      return;
+    }
+  },
+  500
+);
+
+const debouncedSaveEdges = debounce(
+  async (userId: string, boardId: string, edges: Edge[]) => {
+    if (!boardId || !edges || edges.length === 0 || !userId) return;
+    const boardRef = doc(db, `users/${userId}/boards`, boardId as string);
+    try {
+      await updateDoc(boardRef, { edges });
+    } catch (e) {
+      console.log(e);
+      toast.error("Failed to save edges");
+      return;
+    }
+  },
+  500
+);
 
 const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
   const params = useParams();
@@ -69,7 +105,6 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!user || !boardId) return;
     const getBoard = async (userId: string, boardId: string) => {
-      console.log("get board");
       try {
         const docRef = doc(db, `users/${userId}/boards`, boardId);
         const docSnap = await getDoc(docRef);
@@ -99,7 +134,7 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
         console.log(e);
       }
     },
-    [boardId, user],
+    [boardId, user]
   );
 
   const onConnect: OnConnect = useCallback(
@@ -116,11 +151,11 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
       setEdges((edges) => addEdge(edge, edges));
       const saveEdgesDebounced = debounce(
         () => saveEdges([...edges, edge]),
-        1000,
+        1000
       );
       saveEdgesDebounced();
     },
-    [saveEdges, setEdges],
+    [saveEdges, setEdges]
   );
 
   const addNode = useCallback(
@@ -140,7 +175,7 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
         return [...nds, node];
       });
     },
-    [hasActiveMembership, setNodes],
+    [hasActiveMembership, setNodes]
   );
 
   const updateNode = useCallback(
@@ -157,12 +192,26 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
             };
           }
           return node;
-        }),
+        })
       );
     },
-    [setNodes],
+    [setNodes]
   );
 
+  const handleNodeChange = useCallback(
+    (changes: NodeChange<AppNode>[]) => {
+      onNodesChange(changes);
+      debouncedSaveNodes(user?.id as string, boardId, nodes);
+    },
+    [onNodesChange, user?.id, boardId, nodes]
+  );
+  const handleEdgeChange = useCallback(
+    (changes: EdgeChange<Edge>[]) => {
+      onEdgesChange(changes);
+      debouncedSaveEdges(user?.id as string, boardId, nodes);
+    },
+    [onEdgesChange, user?.id, boardId, nodes]
+  );
   return (
     <PanelContext.Provider
       value={{
@@ -175,6 +224,8 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
         onConnect,
         addNode,
         updateNode,
+        handleNodeChange,
+        handleEdgeChange,
       }}
     >
       {children}

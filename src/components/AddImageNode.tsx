@@ -11,6 +11,7 @@ import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage } from "@/firebase";
 import { useAuth } from "@clerk/nextjs";
 import { getNewNodePosition } from "@/lib/utils";
+import axios from "axios";
 
 const AddImageNode = () => {
   const { userId } = useAuth();
@@ -52,6 +53,8 @@ const AddImageNode = () => {
         title: "Uploading...",
         tempUrl: URL.createObjectURL(file),
         base64: "",
+        metadata: "",
+        text: "",
       },
       type: "imageNode",
     };
@@ -59,8 +62,7 @@ const AddImageNode = () => {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
-      newNode.data.url = base64String; // Set the base64 string to the url field
-      console.log("Base64 image string:", base64String);
+      newNode.data.url = base64String;
       updateImageNode(newNode.id, {
         base64: base64String,
       });
@@ -75,7 +77,17 @@ const AddImageNode = () => {
       const uploadTask = await uploadBytesResumable(imageRef, blob);
       const url = await getDownloadURL(uploadTask.ref);
       console.log("from add image node", { url });
-      updateImageNode(newNode.id, { url, tempUrl: null, title: file.name });
+      const res = await axios.post("/api/generateMetadataForImage", {
+        url,
+      });
+      console.log(res.data);
+      updateImageNode(newNode.id, {
+        url,
+        tempUrl: null,
+        title: res.data.title,
+        text: res.data.description,
+        metadata: `This is a Image. Title: ${res.data.title}, Type: imageNode, URL: ${url}`,
+      });
     } catch (error: any) {
       console.log("Something went wrong!", error);
       toast.error("Something went wrong");

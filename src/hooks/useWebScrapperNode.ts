@@ -1,21 +1,17 @@
 "use client";
 
-import scrapeWebsite from "@/actions/scrapeWebsite";
-import storeWebsiteEmbeddings from "@/actions/storeWebsiteEmbeddings";
 import { usePanel } from "@/context/panel";
-import { storage } from "@/firebase";
 import { isValidURL } from "@/lib/utils";
 import { useAuth } from "@clerk/nextjs";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { nanoid } from "nanoid";
-import { useCallback, useState } from "react";
+import axios from "axios";
+import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 const useWebScrapperNode = (nodeId: string) => {
   const { userId } = useAuth();
   const { updateNode } = usePanel();
   const [url, setUrl] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const updateWebScrapperNode = useCallback(
     (data: {}) => {
@@ -31,59 +27,41 @@ const useWebScrapperNode = (nodeId: string) => {
   const handleAddWebscrapperNode = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
+      if (isPending) return;
       if (!isValidURL(url)) {
         toast.error("Please enter a valid url");
         return;
       }
-      try {
-        setIsLoading(true);
-        const scrapedData = await scrapeWebsite(url);
-        if (!scrapedData?.success) {
-          toast.error("Failed to scrape.");
-          return;
-        }
-        updateWebScrapperNode({
-          url,
-          title: scrapedData.title,
-          base64: `data:image/png;base64,${scrapedData.base64}`,
-        });
-        const imageRef = ref(storage, `users/${userId}/files/${nanoid()}`);
-
-        const uploadTask = await uploadBytesResumable(
-          imageRef,
-          Buffer.from(scrapedData?.base64!, "base64"),
-        );
-        const uploadedImageUrl = await getDownloadURL(uploadTask.ref);
-        console.log("uploadedImage: ", uploadedImageUrl);
-        const { namespace, success } = await fetch("/api/generateEmbedding", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+      startTransition(async () => {
+        try {
+          const scrapedResponse = await axios.post("/api/scrape", { url });
+          updateWebScrapperNode({
             url,
-            type: "website",
-          }),
-        }).then((res) => res.json());
-        if (!success) {
-          toast.error("Failed to generate embedding.");
-          return;
+            title: scrapedResponse.data.title,
+            screenshotUrl: scrapedResponse.data.imageURL,
+            text: scrapedResponse.data.content,
+            metadata: `This is a Website. Title: ${scrapedResponse.data.title},Type: webScrapperNode, URL: ${url},`,
+          });
+          const embeddingResponse = await axios.post(
+            "/api/generateEmbeddings",
+            {
+              url,
+              type: "website",
+            },
+          );
+          updateWebScrapperNode({
+            namespace: embeddingResponse.data?.namespace,
+          });
+        } catch (error: any) {
+          console.log("error:", error);
+          toast.error("Something went wrong");
         }
-        updateWebScrapperNode({
-          screenshotUrl: uploadedImageUrl as string,
-          namespace,
-        });
-      } catch (error: any) {
-        console.log("error:", error);
-        toast.error("Something went wrong");
-      } finally {
-        setIsLoading(false);
-      }
+      });
     },
-    [updateWebScrapperNode, setIsLoading, url, userId],
+    [updateWebScrapperNode, url, isPending],
   );
 
-  return { handleAddWebscrapperNode, url, setUrl, isLoading };
+  return { handleAddWebscrapperNode, url, setUrl, isLoading: isPending };
 };
 
 export default useWebScrapperNode;

@@ -52,7 +52,7 @@ export default async function Home() {
               Your ultimate whiteboard... on{" "}
               <span className="font-extrabold text-primary">steroids</span>
             </h1>
-            <p className="mt-3 text-lg leading-6 text-gray-500">
+            <p className="mt-3 text-lg leading-6 text-gray-500 max-w-2xl mx-auto">
               Introducing{" "}
               <span className="text-primary font-bold">Pillu AI</span> <br />{" "}
               <br />
@@ -66,7 +66,7 @@ export default async function Home() {
             <GetStartedButton />
           </div>
           <div className="p-2 overflow-hidden my-12 rounded-2xl w-full h-full border bg-white">
-            {/* <Demo /> */}
+            <Demo />
           </div>
         </div>
       </div>

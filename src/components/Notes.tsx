@@ -53,18 +53,26 @@ const Notes = () => {
     }
   }, [boardData, boardData?.name]);
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!userId) {
-      toast.error("Please login to continue");
-      return;
+  const handleTitleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!userId) {
+        toast.error("Please login to continue");
+        return;
+      }
+      setSaveStatus("Saving...");
+      const docRef = doc(
+        db,
+        `users/${userId}/boards/${params.boardId as string}`,
+      );
+      await updateDoc(docRef, {
+        name: e.target.value,
+      });
+    } catch (e) {
+      console.log("failed to update title", e);
+      toast.error("Failed to update title");
+    } finally {
+      setSaveStatus("Save");
     }
-    const docRef = doc(
-      db,
-      `users/${userId}/boards/${params.boardId as string}`,
-    );
-    updateDoc(docRef, {
-      name: e.target.value,
-    });
   };
 
   return (
@@ -73,21 +81,23 @@ const Notes = () => {
       className="relative bg-white px-2 w-full border-l overflow-auto h-[calc(100vh-56px)] !m-0"
     >
       <div className="border-b bg-white sticky top-0 z-10">
-        {isLoading && <Skeleton className="h-6 w-32" />}
+        {isLoading && <Skeleton className="h-6 w-3/4 bg-white/80" />}
         {error && <p className="text-red-500">Failed to load notes</p>}
-        <input
-          className="bg-transparent py-2 outline-none w-full font-bold"
-          placeholder="Board Name"
-          value={title}
-          onChange={(e) => {
-            setTitle(e.target.value);
-            const handleTitleChangeDebounced = debounce(
-              () => handleTitleChange(e),
-              200,
-            );
-            handleTitleChangeDebounced();
-          }}
-        />
+        {!isLoading && !error ? (
+          <input
+            className="bg-transparent py-2 outline-none w-full font-bold"
+            placeholder="My Board"
+            value={title}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              const handleTitleChangeDebounced = debounce(
+                () => handleTitleChange(e),
+                200,
+              );
+              handleTitleChangeDebounced();
+            }}
+          />
+        ) : null}
         <p className="ml-auto text-right text-sm text-zinc-400">{saveStatus}</p>
       </div>
       {initialContent ? (

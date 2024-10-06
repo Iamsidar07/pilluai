@@ -42,8 +42,8 @@ export const getNewNodePosition = (nodes: AppNode[]) => {
     nodes.length > 0 ? nodes : [{ position: { x: 0, y: 0 } }]; // Fallback if no nodes exist
   const lastNode = existingNodes[0]; // Get the last node
   const newPosition = {
-    x: lastNode.position.x + 100, // Offset the new node by 100px to the right
-    y: lastNode.position.y, // Keep the same y-coordinate
+    x: lastNode.position.x + 20, // Offset the new node by 100px to the right
+    y: lastNode.position.y - 10, // Keep the same y-coordinate
   };
   return newPosition;
 };
