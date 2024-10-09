@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 125 125" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="14" y="14" width="97" height="97" fill="white"/>
+<path d="M96.9118 60.5162C97.4557 68.1612 95.4751 75.7735 91.2742 82.1839C87.0732 88.5944 80.8842 93.4488 73.6575 96.0016C66.4308 98.5543 58.5659 98.6644 51.2706 96.3148C43.9752 93.9653 37.6528 89.2861 33.2741 82.9956C28.8955 76.7052 26.7027 69.1514 27.0324 61.4942C27.3622 53.8369 30.1963 46.4996 35.0995 40.6089C40.0027 34.7182 46.704 30.5998 54.1743 28.8861C61.6446 27.1724 69.4709 27.9582 76.4514 31.1228" stroke="#3F3F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M81 62.768C82.3333 63.5378 82.3333 65.4623 81 66.2321L53.25 82.2535C51.9167 83.0233 50.25 82.0611 50.25 80.5215V48.4785C50.25 46.9389 51.9167 45.9767 53.25 46.7465L81 62.768Z" fill="url(#paint0_linear)"/>
+<path d="M80.25 64.933L52.5 80.9545C52.1667 81.1469 51.75 80.9064 51.75 80.5215V48.4785C51.75 48.0936 52.1667 47.8531 52.5 48.0455L80.25 64.067C80.5833 64.2594 80.5833 64.7406 80.25 64.933Z" stroke="#3F3F3F" stroke-width="3"/>
+<defs>
+<linearGradient id="paint0_linear" x1="78" y1="57" x2="39" y2="79" gradientUnits="userSpaceOnUse">
+<stop offset="0.117083" stop-color="#34ECE1" stop-opacity="0"/>
+<stop offset="1" stop-color="#34F0E5"/>
+</linearGradient>
+</defs>
+</svg>

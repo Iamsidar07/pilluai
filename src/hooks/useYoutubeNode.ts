@@ -42,6 +42,7 @@ const useYoutubeNode = () => {
           },
         };
         addNode(node);
+        setOpen(false);
         updateNode({
           id: node.id,
           type: "youtubeNode",

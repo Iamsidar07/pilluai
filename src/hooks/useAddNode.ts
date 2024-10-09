@@ -27,7 +27,7 @@ const useAddNode = () => {
     };
     addNode(newNode);
     fitView();
-  }, [addNode, fitView, newNodePosition]);
+  }, [addNode, fitView]);
 
   const addChatNode = useCallback(() => {
     const newNode: TChatNode = {
@@ -42,7 +42,7 @@ const useAddNode = () => {
     };
     addNode(newNode);
     fitView();
-  }, [addNode, fitView, newNodePosition]);
+  }, [addNode, fitView]);
 
   const addWebScrapperNode = useCallback(() => {
     const newNode: TWebScrapperNode = {
@@ -55,14 +55,13 @@ const useAddNode = () => {
         url: "",
         screenshotUrl: "",
         text: "",
-        // TODO: Add metadata
         metadata: "",
         namespace: "",
       },
     };
     addNode(newNode);
     fitView();
-  }, [addNode, fitView, newNodePosition]);
+  }, [addNode, fitView]);
 
   return { addTextNode, addWebScrapperNode, addChatNode };
 };

@@ -10,11 +10,11 @@ const CustomHandle = ({ type }: CustomHandleProps) => {
   return (
     <div
       className={cn(
-        "react-flow__edge-path z-10 group hover:scale-110 transition-all hover:shadow-white hover:shadow-xl w-6 h-6 bg-pink-400 absolute rounded-full -right-3 top-1/2 -translate-y-1/2 shadow-lg grid place-content-center",
+        "react-flow__edge-path z-10  group hover:scale-110 transition-all hover:shadow-white hover:shadow-xl bg-pink-400 absolute rounded-full -right-3 top-1/2 -translate-y-1/2 shadow-lg grid place-items-center w-5 h-5",
         { "-left-[12px]": type === "target" },
       )}
     >
-      <div className="w-full h-full relative">
+      <div className="w-full h-full relative grid place-content-center">
         <Handle
           type={type ? type : "source"}
           position={type === "source" ? Position.Right : Position.Left}

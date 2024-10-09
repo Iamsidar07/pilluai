@@ -43,15 +43,6 @@ const TailwindEditor = ({
   const [openNode, setOpenNode] = useState(false);
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
-  // const [content, setContent] = useState<JSONContent>({
-  //   type: "doc",
-  //   content: [],
-  // });
-  //
-  // const { data: boardData } = useQuery({
-  //   queryKey: ["board", boardId, userId],
-  //   queryFn: () => getBoard(userId!, boardId),
-  // });
 
   const extensions = useMemo(() => [...defaultExtensions, slashCommand], []);
 
@@ -64,13 +55,10 @@ const TailwindEditor = ({
         await updateDoc(docRef, {
           notes: JSON.stringify(content),
         });
-        console.log("Updated doc:");
       } catch (e) {
         console.log(e);
-        console.log("Failed to update doc");
         setSaveStatus("Failed");
       } finally {
-        console.log("Saving done");
         setSaveStatus("Save");
       }
     },
@@ -80,12 +68,11 @@ const TailwindEditor = ({
   const onUpdateDebounced = useMemo(() => {
     return debounce((json: JSONContent) => {
       onUpdate(json);
-    }, 400); // Adjusted timeout to 400ms for a better user experience
+    }, 400);
   }, [onUpdate]);
 
   const handleUpdate = useCallback(() => {
     return (editor: any) => {
-      console.log("debouncing");
       onUpdateDebounced(editor.getJSON());
     };
   }, [onUpdateDebounced]);
@@ -95,20 +82,20 @@ const TailwindEditor = ({
       <EditorContent
         extensions={extensions}
         initialContent={initialContent ?? { type: "doc", content: [] }}
-        className="p-4"
+        className="px-2 py-4"
         editorProps={{
           handleDOMEvents: {
             keydown: (_view, event) => handleCommandNavigation(event),
           },
           attributes: {
-            class: `prose prose-headings:font-title focus:outline-none max-w-full h-full `,
+            class: `prose-sm prose-headings:font-title focus:outline-none max-w-full h-full`,
           },
         }}
         onUpdate={({ editor }) => {
           handleUpdate()(editor);
         }}
       >
-        <EditorCommand className="z-50 h-auto max-h-[330px]  w-72 overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
+        <EditorCommand className="z-50 h-auto max-h-[330px] w-72 overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
           <EditorCommandEmpty className="px-2 text-muted-foreground">
             No results
           </EditorCommandEmpty>
@@ -117,14 +104,14 @@ const TailwindEditor = ({
               <EditorCommandItem
                 value={item.title}
                 onCommand={(val) => item.command && item.command(val)}
-                className={`flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm hover:bg-accent aria-selected:bg-accent `}
+                className={`flex w-full items-center space-x-1 rounded-md px-2 py-1 text-left text-xs hover:bg-accent aria-selected:bg-accent`}
                 key={item.title}
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-md border border-muted bg-background">
+                <div className="flex h-5 w-5 items-center justify-center rounded-md border border-muted bg-background">
                   {item.icon}
                 </div>
                 <div>
-                  <p className="font-medium">{item.title}</p>
+                  <p className="font-normal">{item.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {item.description}
                   </p>
@@ -137,7 +124,7 @@ const TailwindEditor = ({
           tippyOptions={{
             placement: false ? "bottom-start" : "top",
           }}
-          className="flex w-fit max-w-[90vw] overflow-hidden rounded border border-muted bg-background shadow-xl"
+          className="flex w-fit max-w-[80vw] overflow-hidden rounded border border-muted bg-background shadow-xl"
         >
           <NodeSelector open={openNode} onOpenChange={setOpenNode} />
           <LinkSelector open={openLink} onOpenChange={setOpenLink} />

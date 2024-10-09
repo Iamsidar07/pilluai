@@ -36,6 +36,7 @@ const UpgradeButton = () => {
         className={buttonVariants({
           variant: "default",
           size: "sm",
+          className: "font-bold main-font",
         })}
       >
         Upgrade <StarsIcon className="ml-2 h-4 w-4" />
@@ -50,12 +51,17 @@ const UpgradeButton = () => {
     );
 
   return (
-    <Button size={"sm"} onClick={handleAccount} disabled={isPending}>
+    <Button
+      size={"sm"}
+      onClick={handleAccount}
+      disabled={isPending}
+      className="main-font"
+    >
       {isPending ? (
         <Loader2 className="animate-spin" />
       ) : (
         <p>
-          <span className="font-bold">PRO</span> Account
+          <span className="font-semibold">PRO</span> Account
         </p>
       )}
       Upgrade <StarsIcon className="ml-2 h-4 w-4" />

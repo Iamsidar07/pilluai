@@ -62,7 +62,7 @@ const Pricing = () => {
   };
 
   return (
-    <div className="min-h-screen p-8 py-24 md:py-32">
+    <div className="min-h-screen p-8 py-24 md:py-32 bg-white">
       <div className="flex flex-col items-center space-y-4 max-w-5xl mx-auto">
         <p className="text-sm font-semibold text-primary">Pricing</p>
         <h1 className="text-4xl sm:text-5xl font-bold text-center">

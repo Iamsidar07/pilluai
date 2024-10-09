@@ -41,7 +41,7 @@ export default function RootLayout({
 }>) {
   return (
     <Provider>
-      <html lang="en" className="light">
+      <html lang="en" className="light antialiased">
         <body className={`flex flex-col`}>
           <Navbar />
           <div className="flex-1">{children}</div>

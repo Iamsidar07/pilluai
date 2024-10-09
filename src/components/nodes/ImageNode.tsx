@@ -11,7 +11,7 @@ const ImageNode = ({ id, data, selected }: NodeProps) => {
     () => (
       <div
         className={cn(
-          "p-1 pb-0 ring-1 ring-gray-900/10 overflow-hidden fixed-dimension bg-[var(--novel-highlight-gray)] rounded",
+          "p-1 pb-0 ring-1 ring-gray-900/10 w-[320px] overflow-hidden bg-[var(--novel-highlight-gray)] rounded",
           {
             "ring-blue-100": selected,
           },

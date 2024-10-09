@@ -45,7 +45,7 @@ const AddImageNode = () => {
     const newNode: TImageNode = {
       position: getNewNodePosition(nodes),
       id: nanoid(),
-      width: 150,
+      width: 320,
       height: 100,
       data: {
         type: "imageNode",

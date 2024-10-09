@@ -3,15 +3,15 @@ interface GradientEdgeProps {
   color2?: string;
 }
 export default function GradientEdge({
-  color1 = "green",
-  color2 = "pink",
+  color1 = "red",
+  color2 = "green",
 }: GradientEdgeProps) {
   return (
     <svg viewBox="0 0 10 10" style={{ height: 0, width: 0 }}>
       <defs>
         <linearGradient id="edgegradient" gradientTransform="rotate(90)">
-          <stop offset="5%" stopColor={color1} />
-          <stop offset="95%" stopColor={color2} />
+          <stop offset="35%" stopColor={color1} />
+          <stop offset="65%" stopColor={color2} />
         </linearGradient>
       </defs>
 

@@ -99,7 +99,7 @@ export const POST = async (req: NextRequest) => {
         firstKbWithNamespace = kb;
       } else {
         // @ts-ignore
-        rowContext += `${kb?.metadata && `metadata: ${kb.metadata}`} \n\n context: ${kb.text} \n\n`;
+        rawContext += `${kb.data?.metadata && `metadata: ${kb.data.metadata}`} \n\n context: ${kb.data?.text} \n\n`;
       }
     });
     const constructedMessages = messages.map((message) =>
@@ -114,7 +114,7 @@ export const POST = async (req: NextRequest) => {
       prompt: customRagPrompt,
       outputParser: new HttpResponseOutputParser(),
     });
-    addMessageToDB(
+    await addMessageToDB(
       userId,
       boardId,
       nodeId,
@@ -172,7 +172,7 @@ export const POST = async (req: NextRequest) => {
     const context = await retriever.invoke(question);
     const stream = await customRagChain.stream({
       question,
-      context,
+      context: [...context, new Document({ pageContent: rawContext })],
       history: constructedMessages,
     });
     return new StreamingTextResponse(
