@@ -32,7 +32,7 @@ const createCheckoutSession = async (userDetails: UserDetails) => {
     }
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card", "amazon_pay"],
+      payment_method_types: ["card"],
       line_items: [
         {
           price: process.env.PRODUCT_PRICE_ID,
@@ -40,6 +40,7 @@ const createCheckoutSession = async (userDetails: UserDetails) => {
         },
       ],
       customer: stripeCustomerId,
+      // life time payment
       mode: "subscription",
       success_url: `${getBaseURL()}/boards?upgrade=true`,
       cancel_url: `${getBaseURL()}/pricing`,

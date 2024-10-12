@@ -11,7 +11,6 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Pencil, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import useSubscription from "@/hooks/useSubscription";
 import { useAuth } from "@clerk/nextjs";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase";
@@ -23,7 +22,6 @@ interface Props {
 
 const RenameBoard = ({ name, boardId }: Props) => {
   const { userId } = useAuth();
-  const { hasActiveMembership } = useSubscription();
   const [newBoardName, setNewBoardName] = useState(name ?? "");
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +31,7 @@ const RenameBoard = ({ name, boardId }: Props) => {
       toast.info("Please login to continue.");
       return;
     }
-    if (!newBoardName || !boardId || !hasActiveMembership) return;
+    if (!newBoardName || !boardId) return;
     startTransition(async () => {
       try {
         await updateDoc(doc(db, `users/${userId}/boards/${boardId}`), {
@@ -49,18 +47,10 @@ const RenameBoard = ({ name, boardId }: Props) => {
   };
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <Button
-        disabled={!hasActiveMembership}
-        className="w-full"
-        variant="outline"
-      >
+      <Button className="w-full" variant="outline">
         <DialogTrigger asChild>
           <div className="flex items-center gap-1">
-            {hasActiveMembership ? (
-              <Pencil className="w-4 h-4" />
-            ) : (
-              <Sparkles className="w-4 h-4" />
-            )}
+            <Pencil className="w-4 h-4" />
             Rename
           </div>
         </DialogTrigger>

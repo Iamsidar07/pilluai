@@ -47,9 +47,8 @@ const Pricing = () => {
         if (!sessionUrl) return;
         return router.push(sessionUrl);
       }
-      const { success, message, sessionId } = await createCheckoutSession(
-        userDetails
-      );
+      const { success, message, sessionId } =
+        await createCheckoutSession(userDetails);
       if (!success && message) {
         toast.error(message);
         return;
@@ -138,10 +137,12 @@ const Pricing = () => {
               <Skeleton className="h-6 w-20" />
             ) : (
               <span className="text-4xl sm:text-5xl font-bold">
-                {data?.country === "IN" ? "₹599" : "$5.99"}
+                {data?.country === "IN" ? "₹3999" : "$47"}
               </span>
             )}
-            <span className="text-sm font-semibold text-gray-400">/month</span>
+            <span className="text-sm font-semibold text-gray-400">
+              for lifetime!
+            </span>
           </div>
 
           <Button

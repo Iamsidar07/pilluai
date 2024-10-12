@@ -11,10 +11,10 @@ export const metadata: Metadata = {
     title: "PilluAI",
     description: "PilluAI: Your ultimate whiteboard on steroid.",
     type: "website",
-    url: "https://pilluai.vercel.app",
+    url: "https://pilluai.onrender.com",
     images: [
       {
-        url: "https://pilluai.vercel.app/og.png",
+        url: "https://pilluai.onrender.com/og.png",
         width: 1920,
         height: 1080,
       },
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     images: [
       {
-        url: "https://pilluai.vercel.app/og.png",
+        url: "https://pilluai.onrender.com/og.png",
         width: 1920,
         height: 1080,
       },
@@ -41,8 +41,8 @@ export default function RootLayout({
 }>) {
   return (
     <Provider>
-      <html lang="en" className="light antialiased">
-        <body className={`flex flex-col`}>
+      <html lang="en" className="light ">
+        <body className={`flex flex-col antialiased`}>
           <Navbar />
           <div className="flex-1">{children}</div>
           <Toaster position="top-center" />

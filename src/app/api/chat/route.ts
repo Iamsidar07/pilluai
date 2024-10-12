@@ -138,7 +138,7 @@ export const POST = async (req: NextRequest) => {
     let vectorStore: UpstashVectorStore;
     // @ts-ignore
     const namespace = firstKbWithNamespace?.data.namespace;
-    if (isNamespaceExists(namespace, index)) {
+    if (await isNamespaceExists(namespace, index)) {
       if (!vectorStoreCache[namespace]) {
         vectorStoreCache[namespace] =
           await UpstashVectorStore.fromExistingIndex(embeddings, {

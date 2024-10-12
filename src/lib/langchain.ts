@@ -41,8 +41,9 @@ export const getLoader = async ({ url, type }: LoaderArgs) => {
   }
 };
 
-export const isNamespaceExists = (namespace: string, index: Index) => {
+export const isNamespaceExists = async (namespace: string, index: Index) => {
   if (!namespace) throw new Error("Namespace not found");
-  const allNamespace = index.namespace(namespace);
-  return allNamespace != undefined;
+  const allNamespaces = await index.listNamespaces();
+  const result = allNamespaces.find((ns) => ns === namespace);
+  return !!result;
 };

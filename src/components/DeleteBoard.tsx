@@ -14,7 +14,6 @@ import { Archive, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/firebase";
-import useSubscription from "@/hooks/useSubscription";
 import { useAuth } from "@clerk/nextjs";
 
 interface Props {
@@ -23,7 +22,6 @@ interface Props {
 
 const DeleteBoard = ({ boardId }: Props) => {
   const { userId } = useAuth();
-  const { hasActiveMembership } = useSubscription();
   const [isPending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const handleDeleteBoard = () => {
@@ -31,7 +29,7 @@ const DeleteBoard = ({ boardId }: Props) => {
       toast.info("Please login to continue.");
       return;
     }
-    if (!boardId || !hasActiveMembership) return;
+    if (!boardId) return;
     startTransition(async () => {
       try {
         await deleteDoc(doc(db, `users/${userId}/boards/${boardId}`));
@@ -44,18 +42,10 @@ const DeleteBoard = ({ boardId }: Props) => {
   };
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <Button
-        disabled={!hasActiveMembership}
-        className="w-full"
-        variant="outline"
-      >
+      <Button className="w-full" variant="outline">
         <DialogTrigger asChild>
           <div className="flex items-center gap-1">
-            {hasActiveMembership ? (
-              <Archive className="w-4 h-4" />
-            ) : (
-              <Sparkles className="w-4 h-4" />
-            )}
+            <Archive className="w-4 h-4" />
             Archive
           </div>
         </DialogTrigger>

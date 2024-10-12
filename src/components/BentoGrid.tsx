@@ -2,14 +2,14 @@ import Image from "next/image";
 
 export default function BentoGrid() {
   return (
-    <div className="bg-gray-50 py-24 sm:py-32">
+    <div className="bg-white py-24 sm:py-32">
       <div className="mx-auto max-w-2xl px-6 lg:max-w-7xl lg:px-8">
-        <h2 className="text-center text-base/7 font-semibold text-primary">
+        <p className="text-center text-base/7 font-semibold text-primary">
           Explore PilluAI Features
-        </h2>
-        <p className="mx-auto mt-2 max-w-lg text-pretty text-center text-4xl font-medium tracking-tight text-gray-950 sm:text-5xl">
-          Supercharge your productivity with AI-powered tools.
         </p>
+        <h2 className="mx-auto mt-2 max-w-lg text-pretty text-center text-4xl font-medium tracking-tight text-gray-950 sm:text-5xl">
+          Supercharge your productivity with AI-powered tools.
+        </h2>
 
         {/* Grid container */}
         <div className="mt-10 grid gap-4 sm:mt-16 lg:grid-cols-2 lg:auto-rows-min">
@@ -18,9 +18,9 @@ export default function BentoGrid() {
             <div className="absolute inset-0 rounded-lg bg-[#edf1f5]"></div>
             <div className="relative flex h-full flex-col overflow-hidden rounded-lg">
               <div className="px-8 pb-3 pt-8">
-                <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
+                <h3 className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
                   Chat with YouTube Videos
-                </p>
+                </h3>
                 <p className="mt-2 text-sm text-gray-600 text-center">
                   Instantly interact with YouTube videos, ask questions, and get
                   insights from any video content.
@@ -43,9 +43,9 @@ export default function BentoGrid() {
             <div className="absolute inset-0 rounded-lg bg-[#edf1f5]"></div>
             <div className="relative flex h-full flex-col overflow-hidden rounded-lg">
               <div className="px-8 pt-8">
-                <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
+                <h3 className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
                   Chat with PDF Documents
-                </p>
+                </h3>
                 <p className="mt-2 text-sm text-gray-600 text-center">
                   Upload your PDFs and interact with them using AI to find
                   important details or summaries in seconds.
@@ -68,9 +68,9 @@ export default function BentoGrid() {
             <div className="absolute inset-0 rounded-lg bg-[#edf1f5]"></div>
             <div className="relative flex h-full flex-col overflow-hidden rounded-lg">
               <div className="px-8 pt-8">
-                <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
+                <h3 className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
                   Chat with Images
-                </p>
+                </h3>
                 <p className="mt-2 text-sm text-gray-600 text-center">
                   Extract insights, analyze, or ask questions about your
                   uploaded images with AI assistance.
@@ -93,9 +93,9 @@ export default function BentoGrid() {
             <div className="absolute inset-0 rounded-lg bg-[#edf1f5]"></div>
             <div className="relative flex h-full flex-col overflow-hidden rounded-lg">
               <div className="px-8 pb-3 pt-8">
-                <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
+                <h3 className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
                   Chat with Websites
-                </p>
+                </h3>
                 <p className="mt-2 text-sm text-gray-600 text-center">
                   Input any website and let the AI provide summaries,
                   information, or answers from the page content.
@@ -114,13 +114,13 @@ export default function BentoGrid() {
           </div>
 
           {/* Notion-like Text Editor */}
-          <div className="relative lg:col-span-2">
-            <div className="absolute inset-0 rounded-lg bg-white"></div>
+          <div className="relative lg:col-span-2 ">
+            <div className="absolute inset-0 rounded-lg border bg-white"></div>
             <div className="relative flex h-full flex-col overflow-hidden rounded-lg">
               <div className="px-8 pt-8">
-                <p className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
+                <h3 className="mt-2 text-lg font-medium tracking-tight text-gray-950 text-center">
                   Notion-like Text Editor
-                </p>
+                </h3>
                 <p className="mt-2 max-w-lg mx-auto text-sm text-gray-600 text-center">
                   Write notes, organize thoughts, and collaborate with our
                   powerful, minimalistic text editor.

@@ -15,7 +15,7 @@ export const runtime = "nodejs";
 
 async function getNamespaceByUrl(
   url: string,
-  type: LoaderType
+  type: LoaderType,
 ): Promise<string | null> {
   // const res = await index.query({
   //   filter: `url = ${url}`,
@@ -37,7 +37,7 @@ export const POST = async (req: NextRequest) => {
     if (existingNamespace) {
       return NextResponse.json(
         { namespace: existingNamespace },
-        { status: 200 }
+        { status: 200 },
       );
     }
     // return NextResponse.json("hello");
@@ -51,7 +51,7 @@ export const POST = async (req: NextRequest) => {
     });
     const splits = await textSplitter.splitDocuments(docs);
     let vectorStore: UpstashVectorStore;
-    if (isNamespaceExists(namespace, index)) {
+    if (await isNamespaceExists(namespace, index)) {
       vectorStore = await UpstashVectorStore.fromExistingIndex(embeddings, {
         index,
         namespace,

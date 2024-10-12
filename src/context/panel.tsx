@@ -1,7 +1,6 @@
 "use client";
 import { AppNode } from "@/components/nodes";
 import { db } from "@/firebase";
-import useSubscription from "@/hooks/useSubscription";
 import { NODE_LIMITS } from "@/lib/config";
 import { debounce } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
@@ -76,7 +75,7 @@ const debouncedSaveNodes = debounce(
       return;
     }
   },
-  500
+  500,
 );
 
 const debouncedSaveEdges = debounce(
@@ -91,13 +90,12 @@ const debouncedSaveEdges = debounce(
       return;
     }
   },
-  500
+  500,
 );
 
 const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
   const params = useParams();
   const boardId = params.boardId as string;
-  const { hasActiveMembership } = useSubscription();
   const { user } = useUser();
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
@@ -134,7 +132,7 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
         console.log(e);
       }
     },
-    [boardId, user]
+    [boardId, user],
   );
 
   const onConnect: OnConnect = useCallback(
@@ -151,31 +149,18 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
       setEdges((edges) => addEdge(edge, edges));
       const saveEdgesDebounced = debounce(
         () => saveEdges([...edges, edge]),
-        1000
+        1000,
       );
       saveEdgesDebounced();
     },
-    [saveEdges, setEdges]
+    [saveEdges, setEdges],
   );
 
   const addNode = useCallback(
     (node: AppNode) => {
-      setNodes((nds) => {
-        const nodeType = node.type as keyof typeof NODE_LIMITS;
-        const limit = hasActiveMembership
-          ? NODE_LIMITS[nodeType].active
-          : NODE_LIMITS[nodeType].free;
-
-        const nodeCount = nds.filter((nd) => nd.type === nodeType).length;
-
-        if (nodeCount >= limit) {
-          toast.error(`Reached the limit of ${nodeType}`);
-          return nds;
-        }
-        return [...nds, node];
-      });
+      setNodes((nds) => [...nds, node]);
     },
-    [hasActiveMembership, setNodes]
+    [setNodes],
   );
 
   const updateNode = useCallback(
@@ -192,10 +177,10 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
             };
           }
           return node;
-        })
+        }),
       );
     },
-    [setNodes]
+    [setNodes],
   );
 
   const handleNodeChange = useCallback(
@@ -203,14 +188,14 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
       onNodesChange(changes);
       debouncedSaveNodes(user?.id as string, boardId, nodes);
     },
-    [onNodesChange, user?.id, boardId, nodes]
+    [onNodesChange, user?.id, boardId, nodes],
   );
   const handleEdgeChange = useCallback(
     (changes: EdgeChange<Edge>[]) => {
       onEdgesChange(changes);
       debouncedSaveEdges(user?.id as string, boardId, nodes);
     },
-    [onEdgesChange, user?.id, boardId, nodes]
+    [onEdgesChange, user?.id, boardId, nodes],
   );
   return (
     <PanelContext.Provider

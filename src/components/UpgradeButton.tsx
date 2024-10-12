@@ -55,7 +55,7 @@ const UpgradeButton = () => {
       size={"sm"}
       onClick={handleAccount}
       disabled={isPending}
-      className="main-font"
+      className="font-bold font-[sora]"
     >
       {isPending ? (
         <Loader2 className="animate-spin" />

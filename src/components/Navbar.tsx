@@ -30,9 +30,11 @@ const Navbar = () => {
           >
             Pricing
           </Link>
-          <Feedback />
+          <span className="hidden sm:inline-flex">
+            <Feedback />
+          </span>
         </div>
-        <div >
+        <div>
           <SignedIn>
             <div className="flex items-center gap-2 h-full lowercase">
               <Link
@@ -45,9 +47,7 @@ const Navbar = () => {
                 Boards
               </Link>
               <UpgradeButton />
-              <span className="ml-1">
-                <UserButton />
-              </span>
+              <UserButton />
             </div>
           </SignedIn>
           <SignedOut>

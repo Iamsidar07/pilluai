@@ -1,9 +1,6 @@
-import Demo from "@/components/Demo";
 import Footer from "@/components/Footer";
 import GetStartedButton from "@/components/GetStartedButton";
 import Pricing from "@/components/Pricing";
-
-import { cn } from "@/lib/utils";
 import Image from "next/image";
 import BentoGrid from "../components/BentoGrid";
 
@@ -12,7 +9,7 @@ export default async function Home() {
     <main className="w-full overflow-y-auto flex-1  bg-white">
       <div className="p-4 lg:p-8 bg-dot-black/[0.2]">
         <div className="max-w-7xl mx-auto flex flex-col items-center py-24 lg:py-32 relative">
-          <div className="sm:flex items-center justify-center absolute left-0 top-[5%] animate-bounce rounded-2xl px-2 border bg-white rotate-12 hidden">
+          <div className="md:flex items-center justify-center absolute left-0 top-[5%] animate-bounce rounded-2xl px-2 border bg-white rotate-12 hidden">
             <Image
               src="/youtube.svg"
               alt="chat with youtube video"
@@ -22,7 +19,7 @@ export default async function Home() {
             />
           </div>
 
-          <div className="absolute right-0 top-[8%] w-32 aspect-square animate-bounce rounded-2xl px-2 border bg-white/90 hidden sm:flex items-center justify-center">
+          <div className="absolute right-0 top-[8%] w-32 aspect-square animate-bounce rounded-2xl px-2 border bg-white/90 hidden md:flex items-center justify-center">
             <Image
               src="/pdf-icon.png"
               alt="Chat with your pdf document"
@@ -32,7 +29,7 @@ export default async function Home() {
             />
           </div>
 
-          <div className="absolute left-[15%] bottom-[10%] w-32 aspect-square animate-bounce rounded-2xl px-2 border bg-white/90 hidden sm:flex items-center justify-center">
+          <div className="absolute left-[15%] bottom-[10%] w-32 aspect-square animate-bounce rounded-2xl px-2 border bg-white/90 hidden md:flex items-center justify-center">
             <Image
               src="/website-icon.png"
               alt="chat with website"
@@ -42,7 +39,7 @@ export default async function Home() {
             />
           </div>
 
-          <div className="hidden sm:flex absolute right-[15%] w-32 aspect-square bottom-1/3 animate-bounce rounded-2xl px-2 border bg-white/90 items-center justify-center">
+          <div className="hidden md:flex absolute right-[15%] w-32 aspect-square bottom-1/3 animate-bounce rounded-2xl px-2 border bg-white/90 items-center justify-center">
             <Image
               src="/image-icon.png"
               alt="chat with image"
@@ -56,7 +53,7 @@ export default async function Home() {
             <h2 className="font-semibold opacity-50">
               your interactive whiteboard comapanion
             </h2>
-            <h1 className="text-3xl md:text-7xl mt-2 font-bold text-primary sm:leading-5">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl mt-2 font-bold text-primary">
               Supercharge your <br />
               productivity
             </h1>

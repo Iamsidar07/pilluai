@@ -31,7 +31,7 @@ const MessageList = ({
   const messagesMemoized = useMemo(
     () =>
       messages?.map((message) => <ShowMessage key={message.id} {...message} />),
-    [messages],
+    [messages]
   );
   console.log("currentChat", currentChat?.id);
 
@@ -43,17 +43,17 @@ const MessageList = ({
         query(
           collection(
             db,
-            `users/${user?.id}/boards/${boardId}/chatNodes/${nodeId}/chats/${currentChat?.id}/messages`,
+            `users/${user?.id}/boards/${boardId}/chatNodes/${nodeId}/chats/${currentChat?.id}/messages`
           ),
-          orderBy("createdAt", "asc"),
-        ),
+          orderBy("createdAt", "asc")
+        )
       );
       const newMessages = messagesSnapshot.docs?.map(
         (doc) =>
           ({
             ...doc.data(),
             id: doc.id,
-          }) as Message,
+          } as Message)
       );
       setMessages(newMessages);
       console.log("new messages", newMessages);
@@ -83,24 +83,11 @@ const MessageList = ({
 
   return (
     <div className="flex flex-col flex-1 space-y-1 overflow-auto h-full pb-24 nodrag nowheel cursor-text">
-      {/* {messages?.length === 0 && !messagesLoading ? (
-        <div className="w-full flex-1 flex flex-col items-center justify-center gap-2 text-zinc-400">
-          <Image
-            src={"/logo.png"}
-            alt="logo"
-            className="object-contain"
-            width={100}
-            height={100}
-          />
-          <h3>HI, How can I help you?</h3>
-        </div>
-      ): messagesMemoized
-    } */}
       {messagesLoading ? (
         <div className="w-full h-full flex flex-col items-center justify-center">
           <Loader />
           <p className="mt-4 opacity-60 text-center text-xs">
-            Please wait a moment, your chat messages are loading... ⏳
+            Please wait a moment... ⏳
           </p>
         </div>
       ) : (

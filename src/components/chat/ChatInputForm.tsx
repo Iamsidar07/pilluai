@@ -1,13 +1,13 @@
-import { Button } from "@/components/ui/button";
-import { usePanel } from "@/context/panel";
-import { db } from "@/firebase";
-import { useUser } from "@clerk/nextjs";
-import { ChatRequestOptions } from "ai";
-import { doc, setDoc } from "firebase/firestore";
-import { ArrowRightIcon, LoaderIcon } from "lucide-react";
-import { nanoid } from "nanoid";
-import { ChangeEvent, FormEvent, useCallback } from "react";
-import { Chat } from "../../../typing";
+import {Button} from "@/components/ui/button";
+import {usePanel} from "@/context/panel";
+import {db} from "@/firebase";
+import {useUser} from "@clerk/nextjs";
+import {ChatRequestOptions} from "ai";
+import {doc, setDoc} from "firebase/firestore";
+import {ArrowRightIcon, LoaderIcon} from "lucide-react";
+import {nanoid} from "nanoid";
+import React, {ChangeEvent, FormEvent, useCallback} from "react";
+import {Chat} from "../../../typing";
 
 interface Props {
   handleInputChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
@@ -46,10 +46,9 @@ const ChatInputForm = ({
     (chatNodeId: string) => {
       const knowledgeEdges = edges.filter((edge) => edge.target === chatNodeId);
       const knowledgeBaseNodeIds = knowledgeEdges.map((edge) => edge.source);
-      const knowledgeBaseNodes = nodes.filter((node) =>
-        knowledgeBaseNodeIds.includes(node.id),
+      return nodes.filter((node) =>
+          knowledgeBaseNodeIds.includes(node.id),
       );
-      return knowledgeBaseNodes;
     },
     [edges, nodes],
   );

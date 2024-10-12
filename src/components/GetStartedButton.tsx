@@ -17,7 +17,7 @@ const GetStartedButton = () => {
         href={user ? "/boards" : "/sign-up"}
         className={"flex items-center gap-1"}
       >
-        Get started
+        Try for free
         <ChevronRightIcon
           className={"w-4 h-4 group-hover:translate-x-1 transition-transform"}
         />

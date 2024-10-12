@@ -46,7 +46,7 @@ const AddImageNode = () => {
       position: getNewNodePosition(nodes),
       id: nanoid(),
       width: 320,
-      height: 100,
+      height: 200,
       data: {
         type: "imageNode",
         url: "",
