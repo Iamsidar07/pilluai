@@ -31,29 +31,27 @@ const MessageList = ({
   const messagesMemoized = useMemo(
     () =>
       messages?.map((message) => <ShowMessage key={message.id} {...message} />),
-    [messages]
+    [messages],
   );
-  console.log("currentChat", currentChat?.id);
 
   const getMessages = useCallback(async () => {
-    console.log("getting messages");
     try {
       setMessagesLoading(true);
       const messagesSnapshot = await getDocs(
         query(
           collection(
             db,
-            `users/${user?.id}/boards/${boardId}/chatNodes/${nodeId}/chats/${currentChat?.id}/messages`
+            `users/${user?.id}/boards/${boardId}/chatNodes/${nodeId}/chats/${currentChat?.id}/messages`,
           ),
-          orderBy("createdAt", "asc")
-        )
+          orderBy("createdAt", "asc"),
+        ),
       );
       const newMessages = messagesSnapshot.docs?.map(
         (doc) =>
           ({
             ...doc.data(),
             id: doc.id,
-          } as Message)
+          }) as Message,
       );
       setMessages(newMessages);
       console.log("new messages", newMessages);
@@ -83,7 +81,7 @@ const MessageList = ({
 
   return (
     <div className="flex flex-col flex-1 space-y-1 overflow-auto h-full pb-24 nodrag nowheel cursor-text">
-      {messagesLoading ? (
+      {messagesLoading && !isAIThinking ? (
         <div className="w-full h-full flex flex-col items-center justify-center">
           <Loader />
           <p className="mt-4 opacity-60 text-center text-xs">
@@ -94,14 +92,14 @@ const MessageList = ({
         messagesMemoized
       )}
 
-      {isAIThinking && (
+      {/* {isAIThinking && (
         <ShowMessage
           role="assistant"
           content="AI is thinking..."
           id="thinking"
           createdAt={new Date()}
         />
-      )}
+      )} */}
       <div ref={messagesEndRef} />
     </div>
   );

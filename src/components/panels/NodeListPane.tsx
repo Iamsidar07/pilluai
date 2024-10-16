@@ -13,7 +13,7 @@ const NodeListPane = () => {
       <div>
         <Panel
           position="bottom-left"
-          className="!z-10 !bottom-1/2 translate-y-1/2 bg-white shadow-sm !rounded-lg flex flex-col items-center justify-center w-fit"
+          className="!z-10 !bottom-1/2 translate-y-1/2 bg-white shadow-2xl border !rounded-lg flex flex-col items-center justify-center w-fit"
         >
           <AddPdfNode />
           <AddImageNode />
@@ -24,7 +24,7 @@ const NodeListPane = () => {
         </Panel>
       </div>
     ),
-    []
+    [],
   );
   return nodeListWithMemo;
 };

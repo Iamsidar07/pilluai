@@ -11,7 +11,6 @@ import {
   useState,
   useTransition,
 } from "react";
-import { FaRegFilePdf } from "react-icons/fa";
 import { toast } from "sonner";
 import { TPdfNode } from "./nodes";
 import PanelItem from "./panels/PanelItem";
@@ -28,6 +27,7 @@ import {
 import { Input } from "./ui/input";
 import { Separator } from "./ui/separator";
 import useUpload from "@/hooks/useUpload";
+import { FileText } from "lucide-react";
 
 const AddPdfNode = () => {
   const { status } = useUpload();
@@ -101,7 +101,7 @@ const AddPdfNode = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <PanelItem text="Pdf" shortcutKey="P">
         <DialogTrigger asChild>
-          <FaRegFilePdf />
+          <FileText />
         </DialogTrigger>
       </PanelItem>
       <DialogContent>

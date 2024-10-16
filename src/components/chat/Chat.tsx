@@ -51,7 +51,7 @@ const ChatNode = ({ id, selected }: NodeProps) => {
       console.log("message added");
     },
   });
-  console.log("metadata: ", metadata);
+
   return (
     <div
       className={cn(
@@ -94,6 +94,8 @@ const ChatNode = ({ id, selected }: NodeProps) => {
           setChats={setChats}
           setIsAIThinking={setIsAIThinking}
           isAIThinking={isAIThinking}
+          setMessages={setMessages}
+          messages={messages}
         />
       </div>
     </div>

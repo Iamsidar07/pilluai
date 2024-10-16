@@ -9,15 +9,17 @@ import {
   BackgroundVariant,
   ConnectionLineType,
   ConnectionMode,
-  Controls, ReactFlow,
-  SelectionMode
+  Controls,
+  ReactFlow,
+  SelectionMode,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useMemo } from "react";
 import { toast } from "sonner";
 
 export default function Board() {
-  const {nodes, edges, handleNodeChange, handleEdgeChange, onConnect } = usePanel()
+  const { nodes, edges, handleNodeChange, handleEdgeChange, onConnect } =
+    usePanel();
   const memoizedFlow = useMemo(
     () => (
       <ReactFlow
@@ -43,8 +45,9 @@ export default function Board() {
         }}
         connectionRadius={10}
         zoomOnPinch
+        snapGrid={[20, 20]}
       >
-        <Background variant={BackgroundVariant.Dots} bgColor="#edf1f5" />
+        <Background variant={BackgroundVariant.Dots} bgColor="#fff" />
         <Controls showFitView showInteractive />
         <ResizablePane />
       </ReactFlow>
