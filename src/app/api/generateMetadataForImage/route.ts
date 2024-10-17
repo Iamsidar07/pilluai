@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ChatMistralAI } from "@langchain/mistralai";
-import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { z } from "zod";
 import { mistral } from "@ai-sdk/mistral";
-import { generateText } from "ai";
 
 export const runtime = "nodejs";
 
 const prompt = `Please analyze the attached content and do not put line breaks and ensure that any other special characters are properly escape:
     title: Create a concise title that includes the type of content and an appropriate emoji. For example:
-        web_app_overview 🌐
-        project_management_tool 📊
 
     description: Include the following elements in your description:
         Overview: Briefly introduce the main theme or purpose of the content.

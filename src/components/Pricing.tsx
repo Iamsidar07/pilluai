@@ -9,8 +9,6 @@ import { useRouter } from "next/navigation";
 import React, { useTransition } from "react";
 import { UserDetails } from "../../typing";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
-import { Skeleton } from "./ui/skeleton";
 import { useUser } from "@clerk/nextjs";
 
 const Pricing = () => {
@@ -18,15 +16,6 @@ const Pricing = () => {
   const router = useRouter();
   const { hasActiveMembership, loading } = useSubscription();
   const [isPending, startTransition] = useTransition();
-  const { data, isLoading } = useQuery({
-    queryKey: ["country"],
-    queryFn: async () => {
-      const res = await fetch("https://ipapi.co/json/");
-      const data = await res.json();
-      return data;
-    },
-  });
-
   const handleUpgrade = () => {
     if (!user) return;
     const userDetails: UserDetails = {
@@ -133,15 +122,9 @@ const Pricing = () => {
             Maximize your productivity with PRO features.
           </p>
           <div className="flex gap-1 items-baseline">
-            {isLoading ? (
-              <Skeleton className="h-6 w-20" />
-            ) : (
-              <span className="text-4xl sm:text-5xl font-bold">
-                {data?.country === "IN" ? "₹3999" : "$47"}
-              </span>
-            )}
-            <span className="text-sm font-semibold text-gray-400">
-              for lifetime!
+            <span>
+              <span className="text-4xl sm:text-5xl font-bold">4.9$</span>/
+              Month
             </span>
           </div>
 

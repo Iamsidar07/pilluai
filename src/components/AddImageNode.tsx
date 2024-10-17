@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import PanelItem from "./panels/PanelItem";
 import { ImageIcon } from "lucide-react";
-import { useKeyPress, useReactFlow } from "@xyflow/react";
+import { useKeyPress } from "@xyflow/react";
 import { nanoid } from "nanoid";
 import { TImageNode } from "./nodes";
 import { usePanel } from "@/context/panel";
@@ -16,7 +16,6 @@ import axios from "axios";
 const AddImageNode = () => {
   const { userId } = useAuth();
   const { addNode, updateNode, nodes } = usePanel();
-  const { fitView } = useReactFlow();
   const isIPressed = useKeyPress("i" || "I");
   const selectImageRef = useRef<HTMLLabelElement | null>(null);
 
@@ -71,7 +70,6 @@ const AddImageNode = () => {
 
     try {
       addNode(newNode);
-      fitView();
       const imageRef = ref(storage, `users/${userId}/files/${nanoid()}`);
       const blob = await file.arrayBuffer();
       const uploadTask = await uploadBytesResumable(imageRef, blob);

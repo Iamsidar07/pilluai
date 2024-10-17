@@ -1,7 +1,7 @@
 "use client";
 import { usePanel } from "@/context/panel";
 import { getNewNodePosition } from "@/lib/utils";
-import { useKeyPress, useReactFlow } from "@xyflow/react";
+import { useKeyPress } from "@xyflow/react";
 import axios from "axios";
 import { nanoid } from "nanoid";
 import {
@@ -26,14 +26,11 @@ import {
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Separator } from "./ui/separator";
-import useUpload from "@/hooks/useUpload";
 import { FileText } from "lucide-react";
 
 const AddPdfNode = () => {
-  const { status } = useUpload();
   const { addNode, nodes, updateNode } = usePanel();
   const isPressed = useKeyPress("p" || "P");
-  const { fitView } = useReactFlow();
   const [isPending, startTransition] = useTransition();
   const [pdfUrl, setPdfUrl] = useState("");
   const [name, setName] = useState("");
@@ -63,7 +60,6 @@ const AddPdfNode = () => {
       };
       setNodeId(newNode.id);
       addNode(newNode);
-      fitView();
       startTransition(async () => {
         try {
           const embeddingResponse = await axios.post(
@@ -88,7 +84,7 @@ const AddPdfNode = () => {
         }
       });
     },
-    [addNode, fitView, updateNode, nodeId],
+    [addNode, updateNode, nodeId],
   );
 
   useEffect(() => {

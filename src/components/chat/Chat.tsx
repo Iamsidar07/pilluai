@@ -29,7 +29,6 @@ const ChatNode = ({ id, selected }: NodeProps) => {
     messages,
     setMessages,
     isLoading,
-    metadata,
   } = useChat({
     onResponse() {
       setIsAIThinking(false);
@@ -94,8 +93,6 @@ const ChatNode = ({ id, selected }: NodeProps) => {
           setChats={setChats}
           setIsAIThinking={setIsAIThinking}
           isAIThinking={isAIThinking}
-          setMessages={setMessages}
-          messages={messages}
         />
       </div>
     </div>

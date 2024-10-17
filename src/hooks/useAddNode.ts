@@ -2,13 +2,11 @@
 import { TTextNode, TChatNode, TWebScrapperNode } from "@/components/nodes";
 import { usePanel } from "@/context/panel";
 import { getNewNodePosition } from "@/lib/utils";
-import { useReactFlow } from "@xyflow/react";
 import { nanoid } from "nanoid";
 import { useCallback, useMemo } from "react";
 
 const useAddNode = () => {
   const { addNode, nodes } = usePanel();
-  const { fitView } = useReactFlow();
   const newNodePosition = useMemo(() => getNewNodePosition(nodes), [nodes]);
 
   const addTextNode = useCallback(() => {
@@ -26,8 +24,7 @@ const useAddNode = () => {
       },
     };
     addNode(newNode);
-    fitView();
-  }, [addNode, fitView]);
+  }, [addNode]);
 
   const addChatNode = useCallback(() => {
     const newNode: TChatNode = {
@@ -41,8 +38,7 @@ const useAddNode = () => {
       },
     };
     addNode(newNode);
-    fitView();
-  }, [addNode, fitView]);
+  }, [addNode]);
 
   const addWebScrapperNode = useCallback(() => {
     const newNode: TWebScrapperNode = {
@@ -60,8 +56,7 @@ const useAddNode = () => {
       },
     };
     addNode(newNode);
-    fitView();
-  }, [addNode, fitView]);
+  }, [addNode]);
 
   return { addTextNode, addWebScrapperNode, addChatNode };
 };

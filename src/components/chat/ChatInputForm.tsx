@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { usePanel } from "@/context/panel";
-import { db } from "@/firebase";
 import { useUser } from "@clerk/nextjs";
-import { ChatRequestOptions, Message } from "ai";
-import { doc, setDoc } from "firebase/firestore";
+import { ChatRequestOptions } from "ai";
 import { ArrowRightIcon, LoaderIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import React, {
@@ -29,8 +27,6 @@ interface Props {
   setChats: React.Dispatch<React.SetStateAction<Chat[]>>;
   setIsAIThinking: React.Dispatch<React.SetStateAction<boolean>>;
   isAIThinking: boolean;
-  setMessages: (messages: Message[]) => void;
-  messages: Message[];
 }
 
 const ChatInputForm = ({
@@ -45,8 +41,6 @@ const ChatInputForm = ({
   setCurrentChat,
   setIsAIThinking,
   isAIThinking,
-  setMessages,
-  messages,
 }: Props) => {
   const { user } = useUser();
   const { nodes, edges } = usePanel();
@@ -79,16 +73,6 @@ const ChatInputForm = ({
         newCurrentChat = { id: nanoid(), title: input, createdAt: new Date() };
         setChats((prevChats) => [newCurrentChat, ...prevChats]);
         setCurrentChat(newCurrentChat);
-        const chatCollectionRef = doc(
-          db,
-          `users/${user?.id}/boards/${boardId}/chatNodes/${nodeId}/chats`,
-          newCurrentChat.id,
-        );
-        await setDoc(chatCollectionRef, {
-          title: input,
-          createdAt: new Date(),
-        });
-        console.log("updated chat title");
       }
       handleSubmit(e, {
         options: {
@@ -111,8 +95,7 @@ const ChatInputForm = ({
       setChats,
       setCurrentChat,
       user?.id,
-      setIsAIThinking,
-      setMessages,
+      setIsAIThinking
     ],
   );
 

@@ -53,6 +53,28 @@ const llm = new ChatMistralAI({
   maxTokens: 1000,
 });
 
+const updateChatTitle = async (
+  userId: string,
+  boardId: string,
+  nodeId: string,
+  currentChatId: string,
+  title: string,
+) => {
+  adminDb
+    .collection("users")
+    .doc(userId)
+    .collection("boards")
+    .doc(boardId)
+    .collection("chatNodes")
+    .doc(nodeId)
+    .collection("chats")
+    .doc(currentChatId)
+    .set({
+      title,
+      createdAt: new Date(),
+    });
+};
+
 const addMessageToDB = async (
   userId: string,
   boardId: string,
@@ -91,6 +113,15 @@ export const POST = async (req: NextRequest) => {
       );
     }
     const question = messages[messages?.length - 1].content;
+    if (!currentChat?.title) {
+      await updateChatTitle(
+        userId,
+        boardId,
+        nodeId,
+        currentChat?.id as string,
+        question,
+      );
+    }
     let rawContext = "";
     let firstKbWithNamespace: AppNode | undefined;
     knowledgeBase?.map((kb) => {

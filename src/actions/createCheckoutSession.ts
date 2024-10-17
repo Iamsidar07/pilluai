@@ -13,7 +13,7 @@ const createCheckoutSession = async (userDetails: UserDetails) => {
     return { success: false, message: "User ID is required" };
   }
   try {
-    let stripeCustomerId = null;
+    let stripeCustomerId: null | string;
     const user = await adminDb.collection("users").doc(userId).get();
     stripeCustomerId = user.data()?.stripeCustomerId;
     if (!stripeCustomerId) {
@@ -40,7 +40,6 @@ const createCheckoutSession = async (userDetails: UserDetails) => {
         },
       ],
       customer: stripeCustomerId,
-      // life time payment
       mode: "subscription",
       success_url: `${getBaseURL()}/boards?upgrade=true`,
       cancel_url: `${getBaseURL()}/pricing`,
