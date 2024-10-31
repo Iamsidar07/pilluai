@@ -16,7 +16,7 @@ const createCustomerPortal = async () => {
     const { data, error } = await getSubscription(user?.subscriptionId?.toString());
     console.log("data: ", data, "error", error, data?.data.links, data?.links.self, data?.data.attributes.urls, data?.data.attributes.first_subscription_item);
 
-    return { success: true, url: data?.data.attributes.urls };
+    return { success: true, urls: data?.data.attributes.urls };
   } catch (e) {
     console.log("Failed to create stripe portal", e);
     return { success: false, message: "Failed to create stripe portal" };

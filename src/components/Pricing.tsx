@@ -26,14 +26,14 @@ const Pricing = () => {
     startTransition(async () => {
       if (hasActiveMembership) {
         // Manage existing subscription
-        const { success, message, url } = await createCustomerPortal();
+        const { success, message, urls } = await createCustomerPortal();
 
         if (!success && message) {
           toast.error(message);
           return;
         }
-        if (!url?.customer_portal) return;
-        return router.push(url.customer_portal);
+        if (!urls?.customer_portal) return;
+        return router.push(urls.customer_portal);
       }
       // Initiate checkout for new subscription
       const { success, message, url } = await createCheckoutSession(userDetails);

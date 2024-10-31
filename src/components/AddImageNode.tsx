@@ -71,7 +71,7 @@ const AddImageNode = () => {
     try {
       addNode(newNode);
       const res = await axios.post("/api/generateMetadataForImage", {
-        url: newNode.base64,
+        url: newNode.data.base64,
       });
       console.log(res.data);
       const imageRef = ref(storage, `users/${userId}/files/${nanoid()}`);
