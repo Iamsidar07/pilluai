@@ -9,6 +9,8 @@ import { useCollection, useDocument } from "react-firebase-hooks/firestore";
 
 function useSubscription() {
   const { user } = useUser();
+  const [subscriptionId, setSubscriptionId] = useState(null)
+  const [credits, setCredits] = useState(0)
   const [hasActiveMembership, setHasActiveMembership] = useState(null);
   const [isOverBoardLimit, setIsOverBoardLimit] = useState(false);
 
@@ -29,6 +31,8 @@ function useSubscription() {
     const data = snapshot.data();
     if (!data) return;
     setHasActiveMembership(data.hasActiveMembership);
+    setSubscriptionId(data?.subscriptionId)
+    setCredits(data?.credits)
   }, [snapshot]);
 
   useEffect(() => {
@@ -45,6 +49,8 @@ function useSubscription() {
     error,
     boardsSnapshotLoading,
     boardsSnapshotError,
+    subscriptionId,
+    credits,
   };
 }
 export default useSubscription;

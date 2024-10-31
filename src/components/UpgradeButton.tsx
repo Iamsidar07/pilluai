@@ -1,6 +1,6 @@
 "use client";
 
-import createStripePortal from "@/actions/createStripePortal";
+// import createSubscriptionManagementURL from "@/actions/createSubscriptionManagementURL";
 import useSubscription from "@/hooks/useSubscription";
 import { Loader2, StarsIcon } from "lucide-react";
 import Link from "next/link";
@@ -9,6 +9,7 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 import { Button, buttonVariants } from "./ui/button";
 import { useUser } from "@clerk/nextjs";
+import createCustomerPortal from "@/actions/createCustomerPortal";
 
 const UpgradeButton = () => {
   const { user } = useUser();
@@ -19,13 +20,13 @@ const UpgradeButton = () => {
   const handleAccount = () => {
     if (!user) return;
     startTransition(async () => {
-      const { success, message, sessionUrl } = await createStripePortal();
+      const { success, message, urls } = await createCustomerPortal();
       if (!success && message) {
         toast.error(message);
         return;
       }
-      if (!sessionUrl) return;
-      router.push(sessionUrl);
+      if (!urls) return;
+      router.push(urls.customer_portal)
     });
   };
 
@@ -64,7 +65,7 @@ const UpgradeButton = () => {
           <span className="font-semibold">PRO</span> Account
         </p>
       )}
-      Upgrade <StarsIcon className="ml-2 h-4 w-4" />
+      <StarsIcon className="ml-2 h-4 w-4" />
     </Button>
   );
 };

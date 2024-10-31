@@ -70,15 +70,15 @@ const AddImageNode = () => {
 
     try {
       addNode(newNode);
+      const res = await axios.post("/api/generateMetadataForImage", {
+        url: newNode.base64,
+      });
+      console.log(res.data);
       const imageRef = ref(storage, `users/${userId}/files/${nanoid()}`);
       const blob = await file.arrayBuffer();
       const uploadTask = await uploadBytesResumable(imageRef, blob);
       const url = await getDownloadURL(uploadTask.ref);
       console.log("from add image node", { url });
-      const res = await axios.post("/api/generateMetadataForImage", {
-        url,
-      });
-      console.log(res.data);
       updateImageNode(newNode.id, {
         url,
         tempUrl: null,
