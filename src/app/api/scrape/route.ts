@@ -11,7 +11,6 @@ export const POST = async (req: NextRequest) => {
   const browser = await puppeteer.launch({
     args: ["--no-sandbox"],
     headless: true,
-    ignoreHTTPSErrors: true,
     executablePath: executablePath(),
   });
   try {
