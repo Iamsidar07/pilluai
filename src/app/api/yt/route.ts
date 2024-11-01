@@ -15,7 +15,6 @@ export const POST = async (req: NextRequest) => {
     const { videoDetails } = await ytdl.getBasicInfo(url);
     const rawTransciption = await YoutubeTranscript.fetchTranscript(url);
     const transcription = rawTransciption.map((t) => t.text).join("\n");
-    console.log({ videoDetails, transcription });
     return NextResponse.json(
       {
         videoDetails,

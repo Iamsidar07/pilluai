@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { usePanel } from "@/context/panel";
 import { useUser } from "@clerk/nextjs";
 import { ChatRequestOptions } from "ai";
-import { ArrowRightIcon, LoaderIcon } from "lucide-react";
+import { ArrowRightIcon, Loader, LoaderIcon, Send } from "lucide-react";
 import { nanoid } from "nanoid";
 import React, {
   ChangeEvent,
@@ -12,12 +12,13 @@ import React, {
   useRef,
 } from "react";
 import { Chat } from "../../../typing";
+import { Textarea } from "../ui/textarea";
 interface Props {
   handleInputChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   input: string;
   handleSubmit: (
     event: { preventDefault: () => void },
-    chatRequestOptions: ChatRequestOptions,
+    chatRequestOptions: ChatRequestOptions
   ) => void;
   isLoading: boolean;
   nodeId: string;
@@ -44,12 +45,12 @@ const ChatInputForm = ({
 }: Props) => {
   const { user } = useUser();
   const { nodes, edges } = usePanel();
-  const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.style.height = "auto";
-      inputRef.current.style.height = `${inputRef.current.offsetHeight}px`;
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"; // Reset height
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Set to scrollHeight
     }
   }, [input]);
 
@@ -59,7 +60,7 @@ const ChatInputForm = ({
       const knowledgeBaseNodeIds = knowledgeEdges.map((edge) => edge.source);
       return nodes.filter((node) => knowledgeBaseNodeIds.includes(node.id));
     },
-    [edges, nodes],
+    [edges, nodes]
   );
 
   const handleSendMessage = useCallback(
@@ -95,37 +96,38 @@ const ChatInputForm = ({
       setChats,
       setCurrentChat,
       user?.id,
-      setIsAIThinking
-    ],
+      setIsAIThinking,
+    ]
   );
 
   return (
-    <div className="pr-1 shadow-sm rounded">
-      <form
-        onSubmit={handleSendMessage}
-        className="flex items-end pr-1 rounded focus-within:shadow-smrelative border"
+    <form
+      onSubmit={handleSendMessage}
+      className="flex items-end gap-1 border rounded-md pb-1 pr-1"
+    >
+      <Textarea
+        ref={textareaRef}
+        value={input}
+        placeholder="Send a message..."
+        onChange={(e) => {
+          handleInputChange(e);
+        }}
+        disabled={isLoading}
+        className="bg-transparent flex-1 h-4 border-none resize-none max-h-[250px] no-scrollbar focus-visible:ring-0 focus-within:ring-0 focus-within:outline-none"
+      />
+      <Button
+        disabled={isLoading || input.trim().length === 0}
+        size="icon"
+        type="submit"
+        className="custom-shadow"
       >
-        <textarea
-          ref={inputRef}
-          className="flex-[0.85] max-h-16 p-2 text-sm outline-none bg-transparent border-none transition-transformpr-4"
-          placeholder="Type your message here..."
-          value={input}
-          onChange={handleInputChange}
-        />
-        <Button
-          disabled={isLoading || input.trim().length === 0}
-          type="submit"
-          size={"icon"}
-          className="rounded-full h-5 w-5 absolute bottom-3 right-2 nowheel"
-        >
-          {isAIThinking ? (
-            <LoaderIcon className="w-4 h-4 animate-spin" />
-          ) : (
-            <ArrowRightIcon className="w-4 h-4" />
-          )}
-        </Button>
-      </form>
-    </div>
+        {isLoading ? (
+          <Loader className="w-4 h-4 animate-spin" />
+        ) : (
+          <Send className="w-4 h-4" />
+        )}
+      </Button>
+    </form>
   );
 };
 

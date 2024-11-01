@@ -40,8 +40,8 @@ export default function Board() {
         elevateNodesOnSelect
         nodesDraggable={true}
         onError={(e, msg) => {
-          console.log(e, msg);
-          toast.error(msg);
+          // console.log(e, msg);
+          // toast.error(msg);
         }}
         connectionRadius={10}
         zoomOnPinch

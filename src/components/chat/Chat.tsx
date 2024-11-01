@@ -72,7 +72,7 @@ const ChatNode = ({ id, selected }: NodeProps) => {
         boardId={params.boardId as string}
         nodeId={id}
       />
-      <div className="w-2/3 pl-2 pb-2 nodrag nowhell cursor-text flex flex-col">
+      <div className="w-2/3 px-2 pb-2 nodrag nowhell cursor-text flex flex-col">
         <MessageList
           currentChat={currentChat}
           messages={messages}
