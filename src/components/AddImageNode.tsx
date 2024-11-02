@@ -16,7 +16,7 @@ import axios from "axios";
 const AddImageNode = () => {
   const { userId } = useAuth();
   const { addNode, updateNode, nodes } = usePanel();
-  const isIPressed = useKeyPress("i" || "I");
+  const isIPressed = useKeyPress("i");
   const selectImageRef = useRef<HTMLLabelElement | null>(null);
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const AddImageNode = () => {
         data,
       });
     },
-    [updateNode],
+    [updateNode]
   );
 
   const handleSelectFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,21 +59,26 @@ const AddImageNode = () => {
     };
 
     const reader = new FileReader();
-    reader.onloadend = () => {
+    reader.onloadend = async () => {
       const base64String = reader.result as string;
       newNode.data.url = base64String;
       updateImageNode(newNode.id, {
         base64: base64String,
       });
+      addNode(newNode);
+      const res = await axios.post("/api/generateMetadataForImage", {
+        url: base64String,
+      });
+      console.log(res.data);
+      updateImageNode(newNode.id, {
+        tempUrl: null,
+        title: res.data.title,
+        text: res.data.description,
+      });
     };
     reader.readAsDataURL(file);
 
     try {
-      addNode(newNode);
-      const res = await axios.post("/api/generateMetadataForImage", {
-        url: newNode.data.base64,
-      });
-      console.log(res.data);
       const imageRef = ref(storage, `users/${userId}/files/${nanoid()}`);
       const blob = await file.arrayBuffer();
       const uploadTask = await uploadBytesResumable(imageRef, blob);
@@ -82,9 +87,7 @@ const AddImageNode = () => {
       updateImageNode(newNode.id, {
         url,
         tempUrl: null,
-        title: res.data.title,
-        text: res.data.description,
-        metadata: `This is a Image. Title: ${res.data.title}, Type: imageNode, URL: ${url}`,
+        metadata: `This is a Image. Title: ${newNode.data.title}, Type: imageNode, URL: ${url}`,
       });
     } catch (error: any) {
       console.log("Something went wrong!", error);
