@@ -13,6 +13,9 @@ import React, {
 } from "react";
 import { Chat } from "../../../typing";
 import { Textarea } from "../ui/textarea";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { db } from "@/firebase";
+import { Model } from "./Chat";
 interface Props {
   handleInputChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   input: string;
@@ -28,6 +31,7 @@ interface Props {
   setChats: React.Dispatch<React.SetStateAction<Chat[]>>;
   setIsAIThinking: React.Dispatch<React.SetStateAction<boolean>>;
   isAIThinking: boolean;
+  model: Model;
 }
 
 const ChatInputForm = ({
@@ -42,6 +46,7 @@ const ChatInputForm = ({
   setCurrentChat,
   setIsAIThinking,
   isAIThinking,
+  model,
 }: Props) => {
   const { user } = useUser();
   const { nodes, edges } = usePanel();
@@ -66,14 +71,24 @@ const ChatInputForm = ({
   const handleSendMessage = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (!input || input.trim().length === 0) return;
+      if (!input || input.trim().length === 0 || !user?.id) return;
       setIsAIThinking(true);
       let newCurrentChat = currentChat as Chat;
-      if (!currentChat?.title) {
+      if (!currentChat) {
         console.log("creating new chat");
         newCurrentChat = { id: nanoid(), title: input, createdAt: new Date() };
+
         setChats((prevChats) => [newCurrentChat, ...prevChats]);
         setCurrentChat(newCurrentChat);
+        const chatDocRef = doc(
+          db,
+          `users/${user.id}/boards/${boardId}/chatNodes/${nodeId}/chats/${newCurrentChat.id}`
+        );
+        await setDoc(chatDocRef, newCurrentChat);
+        console.log("CREATED NEW CHAT");
+      }
+      if (currentChat && !currentChat.title) {
+        setCurrentChat({ ...currentChat, title: input });
       }
       handleSubmit(e, {
         options: {
@@ -82,6 +97,7 @@ const ChatInputForm = ({
             boardId,
             nodeId,
             currentChat: newCurrentChat,
+            model,
           },
         },
       });

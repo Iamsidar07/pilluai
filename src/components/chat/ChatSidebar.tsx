@@ -23,6 +23,7 @@ interface Props {
   currentChat: Chat | null;
   setCurrentChat: React.Dispatch<React.SetStateAction<Chat | null>>;
   setInput: React.Dispatch<React.SetStateAction<string>>;
+  setHasFetchedMessages: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const ChatSidebar = ({
   boardId,
@@ -33,6 +34,7 @@ const ChatSidebar = ({
   setMessages,
   currentChat,
   setCurrentChat,
+  setHasFetchedMessages,
 }: Props) => {
   const { user } = useUser();
   const hasActiveMembership = useSubscription();
@@ -64,9 +66,10 @@ const ChatSidebar = ({
       setChats(newChats);
       if (newChats.length > 0) {
         setCurrentChat(newChats[0]);
+        setHasFetchedMessages(false)
       }
     }
-  }, [chatsSnapshot, setChats, setCurrentChat]);
+  }, [chatsSnapshot, setChats, setCurrentChat, setHasFetchedMessages]);
 
   const handleCreateNewChat = useCallback(async () => {
     if (!hasActiveMembership && chats.length >= maxChatInOneChatNode) {
@@ -74,6 +77,7 @@ const ChatSidebar = ({
       return;
     }
     if (!user || !boardId || !nodeId) return;
+    setHasFetchedMessages(false);
 
     const newChatId = nanoid();
     await setDoc(
@@ -99,6 +103,7 @@ const ChatSidebar = ({
     ]);
     setInput("");
     setMessages([]);
+    console.log("Created new chat:", newChatId);
   }, [
     user,
     boardId,
@@ -141,7 +146,10 @@ const ChatSidebar = ({
                           currentChat?.id === chat.id,
                       }
                     )}
-                    onClick={() => setCurrentChat(chat)}
+                    onClick={() => {
+                      setCurrentChat(chat);
+                      setHasFetchedMessages(false);
+                    }}
                   >
                     {chat.title}
                   </p>

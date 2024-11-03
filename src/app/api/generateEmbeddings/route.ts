@@ -7,42 +7,18 @@ import {
   getLoader,
   index,
   isNamespaceExists,
-  LoaderType,
 } from "@/lib/langchain";
 import ytdl from "ytdl-core";
 
 export const runtime = "nodejs";
 
-async function getNamespaceByUrl(
-  url: string,
-  type: LoaderType,
-): Promise<string | null> {
-  // const res = await index.query({
-  //   filter: `url = ${url}`,
-  //   topK: 1,
-  //   data: "",
-  // });
-  // console.log(res);
-  // youtube
-  // For youtube I have to check by videoid
-  // website
-  // pdf
-  return "";
-}
-
 export const POST = async (req: NextRequest) => {
   try {
     const { url, type } = await req.json();
-    const existingNamespace = await getNamespaceByUrl(url, type);
-    if (existingNamespace) {
-      return NextResponse.json(
-        { namespace: existingNamespace },
-        { status: 200 },
-      );
+    const namespace = type === "youtube" ? ytdl.getVideoID(url) : nanoid();
+    if (await isNamespaceExists(namespace, index)) {
+      return NextResponse.json({ namespace }, { status: 200 });
     }
-    // return NextResponse.json("hello");
-
-    const namespace = nanoid();
     const loader = await getLoader({ url, type });
     const docs = await loader.load();
     const textSplitter = new RecursiveCharacterTextSplitter({
@@ -50,19 +26,12 @@ export const POST = async (req: NextRequest) => {
       chunkSize: 1000,
     });
     const splits = await textSplitter.splitDocuments(docs);
-    let vectorStore: UpstashVectorStore;
-    if (await isNamespaceExists(namespace, index)) {
-      vectorStore = await UpstashVectorStore.fromExistingIndex(embeddings, {
-        index,
-        namespace,
-      });
-    } else {
-      vectorStore = new UpstashVectorStore(embeddings, {
-        namespace,
-        index,
-      });
-    }
+    const vectorStore = new UpstashVectorStore(embeddings, {
+      namespace,
+      index,
+    });
     await vectorStore.addDocuments(splits);
+
     return NextResponse.json({ namespace }, { status: 201 });
   } catch (error: any) {
     console.log("failed embedding...", error);
