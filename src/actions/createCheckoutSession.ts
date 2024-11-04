@@ -25,7 +25,8 @@ const createCheckoutSession = async (userDetails: UserDetails) => {
     const storeId = process.env.LEMONSQUEEZY_STORE_ID as string;
     const variantId = process.env.LEMONSQUEEZY_PRODUCT_VARIANT_ID as string;
     if (!customerId) {
-      const customer = await createCustomer(storeId, {
+      try {
+        const customer = await createCustomer(storeId.toString(), {
         email: userDetails.email,
         name: userDetails.name,
       });
@@ -37,6 +38,10 @@ const createCheckoutSession = async (userDetails: UserDetails) => {
           customerId: customer.data?.data.id || "",
         });
       customerId = customer.data?.data.id || "";
+      } catch (error) {
+        console.log("Failed to create customer", error);
+        return { success: false, message: "Somthing went wrong!" };
+      }
     }
 
     const newCheckout: NewCheckout = {
@@ -60,7 +65,7 @@ const createCheckoutSession = async (userDetails: UserDetails) => {
       },
       expiresAt: null,
       preview: true,
-      testMode: process.env.NODE_ENV === "development",
+      testMode: true,
     };
     const { statusCode, error, data } = await createCheckout(
       storeId,
@@ -68,6 +73,7 @@ const createCheckoutSession = async (userDetails: UserDetails) => {
       newCheckout
     );
     console.log("checkout session", data);
+    if (error) return { success: false, message: error.message };
     return {
       success: true,
       sessionId: data?.data.id,
