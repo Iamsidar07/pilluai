@@ -24,9 +24,8 @@ import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
-import { Chat } from "../../../../typing";
+import { Chat, Model } from "../../../../typing";
 
-type Model = "mistral" | "google-generative-ai";
 
 type RequestBody = {
   messages: Message[];
@@ -63,11 +62,12 @@ const llmConfig = {
   temperature: 0.3,
 };
 
-const getLLM = (name: Model) =>
-  name === "google-generative-ai"
+const getLLM = (model: Model) =>
+  model.id === "google-generative-ai"
     ? new ChatGoogleGenerativeAI({
         model: "gemini-1.5-flash",
         maxOutputTokens: 1024,
+        apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
         ...llmConfig,
       })
     : new ChatMistralAI({
@@ -170,6 +170,7 @@ export const POST = async (req: NextRequest) => {
     const { userId } = auth();
     const { messages, knowledgeBase, boardId, nodeId, currentChat, model } =
       requestBody;
+      console.log("got the model", model.id)
 
     if (!userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });

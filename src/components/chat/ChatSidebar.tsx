@@ -4,7 +4,6 @@ import useSubscription from "@/hooks/useSubscription";
 import { maxChatInOneChatNode } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
-import { Message } from "ai";
 import { collection, doc, orderBy, query, setDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 import { nanoid } from "nanoid";
@@ -13,20 +12,10 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import { IoCreateOutline } from "react-icons/io5";
 import { toast } from "sonner";
 import { Chat } from "../../../typing";
+import { useChatContext } from "@/context/chatContext";
 
-interface Props {
-  boardId: string;
-  nodeId: string;
-  chats: Chat[];
-  setChats: React.Dispatch<React.SetStateAction<Chat[]>>;
-  setMessages: (messages: Message[]) => void;
-  currentChat: Chat | null;
-  setCurrentChat: React.Dispatch<React.SetStateAction<Chat | null>>;
-  setInput: React.Dispatch<React.SetStateAction<string>>;
-  setHasFetchedMessages: React.Dispatch<React.SetStateAction<boolean>>;
-}
-const ChatSidebar = ({
-  boardId,
+const ChatSidebar = () => {
+  const {  boardId,
   nodeId,
   chats,
   setChats,
@@ -35,7 +24,7 @@ const ChatSidebar = ({
   currentChat,
   setCurrentChat,
   setHasFetchedMessages,
-}: Props) => {
+} = useChatContext()
   const { user } = useUser();
   const hasActiveMembership = useSubscription();
   const [chatsSnapshot, loading, error] = useCollection(

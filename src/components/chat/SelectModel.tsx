@@ -1,5 +1,4 @@
 import React from "react";
-import { Model } from "./Chat";
 import {
   Select,
   SelectContent,
@@ -7,6 +6,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useChatContext } from "@/context/chatContext";
+import { Model } from "../../../typing";
+import Image from "next/image";
+import { buttonVariants } from "../ui/button";
 
 const models = [
   {
@@ -19,15 +22,31 @@ const models = [
   },
 ] as Model[];
 
-interface Props {
-  model: Model;
-  setModel: React.Dispatch<React.SetStateAction<Model>>;
-}
-
-const SelectModel = ({ model, setModel }: Props) => {
+const SelectModel = () => {
+  const { model, setModel } = useChatContext();
   return (
-    <Select onValueChange={(id)=>setModel(()=>models.find((m)=>m.id===id) as Model)}>
-      <SelectTrigger className="w-[180px]">
+    <Select
+      onValueChange={(id) =>
+        setModel(() => models.find((m) => m.id === id) as Model)
+      }
+      value={model.id}
+    >
+      <SelectTrigger
+        className={buttonVariants({
+          variant: "secondary",
+          size: "sm",
+          className: "w-fit text-xs mb-1.5 flex items-center gap-1 rounded-md",
+        })}
+      >
+        <div className="w-4 h-4 border rounded-full overflow-hidden">
+          <Image
+            src={`/${model.id}.svg`}
+            alt={model.name}
+            width={100}
+            height={100}
+            className="object-contain"
+          />
+        </div>
         <SelectValue placeholder={model.name} />
       </SelectTrigger>
       <SelectContent>

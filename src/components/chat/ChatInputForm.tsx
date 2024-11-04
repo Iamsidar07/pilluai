@@ -1,40 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { usePanel } from "@/context/panel";
 import { useUser } from "@clerk/nextjs";
-import { ChatRequestOptions } from "ai";
-import { ArrowRightIcon, Loader, LoaderIcon, Send } from "lucide-react";
+import { Loader, Send } from "lucide-react";
 import { nanoid } from "nanoid";
-import React, {
-  ChangeEvent,
+import {
   FormEvent,
   useCallback,
   useEffect,
-  useRef,
+  useRef
 } from "react";
 import { Chat } from "../../../typing";
 import { Textarea } from "../ui/textarea";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase";
-import { Model } from "./Chat";
-interface Props {
-  handleInputChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-  input: string;
-  handleSubmit: (
-    event: { preventDefault: () => void },
-    chatRequestOptions: ChatRequestOptions
-  ) => void;
-  isLoading: boolean;
-  nodeId: string;
-  boardId: string;
-  currentChat: Chat | null;
-  setCurrentChat: React.Dispatch<React.SetStateAction<Chat | null>>;
-  setChats: React.Dispatch<React.SetStateAction<Chat[]>>;
-  setIsAIThinking: React.Dispatch<React.SetStateAction<boolean>>;
-  isAIThinking: boolean;
-  model: Model;
-}
+import { useChatContext } from "@/context/chatContext";
 
-const ChatInputForm = ({
+
+const ChatInputForm = () => {
+  
+  const {
   handleInputChange,
   input,
   handleSubmit,
@@ -45,9 +29,8 @@ const ChatInputForm = ({
   setChats,
   setCurrentChat,
   setIsAIThinking,
-  isAIThinking,
   model,
-}: Props) => {
+} = useChatContext()
   const { user } = useUser();
   const { nodes, edges } = usePanel();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);

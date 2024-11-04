@@ -5,30 +5,20 @@ import { Message } from "ai";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Chat } from "../../../typing";
 import Loader from "../Loader";
+import { useChatContext } from "@/context/chatContext";
 
-interface Props {
-  boardId: string;
-  nodeId: string;
-  messages: Message[];
-  setMessages: (messages: Message[]) => void;
-  currentChat: Chat | null;
-  isAIThinking: boolean;
-  hasFetchedMessages:boolean;
-  setHasFetchedMessages: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-const MessageList = ({
-  boardId,
-  nodeId,
-  messages,
-  setMessages,
-  currentChat,
-  isAIThinking,
-  hasFetchedMessages,
-  setHasFetchedMessages
-}: Props) => {
+const MessageList = () => {
+  const {
+    boardId,
+    nodeId,
+    messages,
+    setMessages,
+    currentChat,
+    isAIThinking,
+    hasFetchedMessages,
+    setHasFetchedMessages,
+  } = useChatContext();
   const { user } = useUser();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [messagesLoading, setMessagesLoading] = useState(false);
@@ -41,7 +31,7 @@ const MessageList = ({
 
   const getMessages = useCallback(async () => {
     try {
-      if(hasFetchedMessages) return;
+      if (hasFetchedMessages) return;
       console.log("fetching new messages");
       setMessagesLoading(true);
       const messagesSnapshot = await getDocs(
@@ -69,11 +59,18 @@ const MessageList = ({
     } finally {
       setMessagesLoading(false);
     }
-  }, [boardId, currentChat?.id, nodeId, setMessages, user?.id, hasFetchedMessages]);
+  }, [
+    boardId,
+    currentChat?.id,
+    nodeId,
+    setMessages,
+    user?.id,
+    hasFetchedMessages,
+  ]);
 
   useEffect(() => {
-    console.log("fetching messages", currentChat?.id)
-      getMessages();
+    console.log("fetching messages", currentChat?.id);
+    getMessages();
   }, [getMessages, currentChat]);
 
   useEffect(() => {
@@ -98,15 +95,6 @@ const MessageList = ({
       ) : (
         messagesMemoized
       )}
-
-      {/* {isAIThinking && (
-        <ShowMessage
-          role="assistant"
-          content="AI is thinking..."
-          id="thinking"
-          createdAt={new Date()}
-        />
-      )} */}
       <div ref={messagesEndRef} />
     </div>
   );
