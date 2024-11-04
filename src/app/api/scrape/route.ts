@@ -16,7 +16,9 @@ export const POST = async (req: NextRequest) => {
     }
     const { userId } = auth().protect();
     const page = await browser.newPage();
-    await page.goto(url);
+    await page.goto(url, {
+      waitUntil: "networkidle",
+    });
     const buffer = await page.screenshot({
       type: "png",
       fullPage: false,
@@ -40,7 +42,7 @@ export const POST = async (req: NextRequest) => {
     );
   } catch (e: any) {
     console.log("failed to scrape website with reason: ", e);
-    return NextResponse.json({ message: "failed to scrape website" }, { status: 500 });
+    return NextResponse.json({ message: e.message }, { status: 500 });
   } finally {
     await browser.close();
   }
