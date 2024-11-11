@@ -8,29 +8,45 @@ import {chromium} from "playwright"
 export const runtime = "nodejs";
 
 export const POST = async (req: NextRequest) => {
-  const browser = await chromium.launch();
+  // Launch browser with optimized settings
+  const browser = await chromium.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+  });
   try {
     const { url } = await req.json();
     if (!url) {
       return NextResponse.json("URL not provided", { status: 400 });
     }
     const { userId } = auth().protect();
+
+    // Create page with optimized settings
     const page = await browser.newPage();
-    await page.goto(url, {
-      waitUntil: "networkidle",
+    await page.setViewportSize({ width: 1280, height: 720 }); // Smaller viewport for faster screenshots
+    
+    // Parallel processing where possible
+    const pagePromise = page.goto(url, {
+      waitUntil: "domcontentloaded", // Faster than networkidle
+      timeout: 10000 // 10 second timeout
     });
-    const buffer = await page.screenshot({
-      type: "png",
-      fullPage: false,
-    });
-    const title = await page.title();
-    const content = await page.evaluate(() => {
-      return document.body.innerText;
-    });
+
     const imageRef = ref(storage, `users/${userId}/files/${nanoid()}`);
+    
+    await pagePromise;
+
+    // Gather data in parallel
+    const [buffer, title, content] = await Promise.all([
+      page.screenshot({
+        type: "png",
+        fullPage: false,
+      }),
+      page.title(),
+      page.evaluate(() => document.body.innerText)
+    ]);
+
+    // Upload and get URL
     const uploadTask = await uploadBytesResumable(imageRef, buffer);
     const imageURL = await getDownloadURL(uploadTask.ref);
-    console.log("scraped website", { title, content, imageURL });
+
     return NextResponse.json(
       {
         success: true,

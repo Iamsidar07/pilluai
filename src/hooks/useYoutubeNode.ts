@@ -13,51 +13,56 @@ const useYoutubeNode = () => {
   const [videoUrl, setVideoUrl] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isValidYoutubeUrl(videoUrl)) {
       toast.error("Invalid video url.");
       return;
     }
-    startTransition(async () => {
-      try {
-        const [videoInfo, embedding] = await Promise.all([
-          axios.post("/api/yt", { url: videoUrl }),
-          axios.post("/api/generateEmbeddings", {
-            url: videoUrl,
-            type: "youtube",
-          }),
-        ]);
-        const node: TYoutubeNode = {
-          id: nanoid(),
-          position: getNewNodePosition(nodes),
+
+    try {
+      const node: TYoutubeNode = {
+        id: nanoid(),
+        position: getNewNodePosition(nodes),
+        type: "youtubeNode",
+        data: {
+          url: videoUrl,
           type: "youtubeNode",
-          data: {
-            url: videoUrl,
-            type: "youtubeNode",
-            namespace: "",
-            title: videoInfo.data.videoDetails.title,
-            text: videoInfo.data.transcription,
-            metadata: `This is an Youtube video. Type: youtubeVideo, Title: ${videoInfo.data.videoDetails.title}, URL: ${videoUrl}`,
-          },
-        };
-        addNode(node);
-        setOpen(false);
-        updateNode({
-          id: node.id,
-          type: "youtubeNode",
-          data: {
-            namespace: embedding.data.namespace,
-          },
-        });
-      } catch (error) {
-        toast.error("Something went wrong.");
-        console.log("Failed to add yt node: ", error);
-      } finally {
-        setOpen(false);
-      }
-    });
+          namespace: "",
+          title: "",
+          text: "",
+          metadata: `This is an Youtube video. Type: youtubeVideo, URL: ${videoUrl}`,
+        },
+      };
+      addNode(node);
+      setOpen(false);
+
+      // Fetch data after node is added for better UX
+      const [videoInfo, embedding] = await Promise.all([
+        axios.post("/api/yt", { url: videoUrl }),
+        axios.post("/api/generateEmbeddings", {
+          url: videoUrl,
+          type: "youtube",
+        }),
+      ]);
+
+      updateNode({
+        id: node.id,
+        type: "youtubeNode",
+        data: {
+          namespace: embedding.data.namespace,
+          title: videoInfo.data.videoDetails.title,
+          text: videoInfo.data.transcription,
+          metadata: `This is an Youtube video. Type: youtubeVideo, Title: ${videoInfo.data.videoDetails.title}, URL: ${videoUrl}`,
+        },
+      });
+    } catch (error) {
+      toast.error("Something went wrong.");
+      console.log("Failed to add yt node: ", error);
+    }
   };
+
   return { handleSubmit, videoUrl, setVideoUrl, open, setOpen, isPending };
 };
+
 export default useYoutubeNode;

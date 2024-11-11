@@ -31,39 +31,54 @@ function useUpload() {
   const handleUpload = useCallback(
     async (file: File, nodeId: string) => {
       if (!file || !user) return;
-      const fileIdToUpload = nanoid();
-      const storageRef = ref(
-        storage,
-        `/users/${user.id}/files/${fileIdToUpload}`,
-      );
-      // limit file size
+
+      // Quick validation checks
       if (!hasActiveMembership && file.size >= freePdfSize * 10 ** 6) {
-        return toast.error(`Reached the ${freePdfSize}MB limit size.`);
+        toast.error(`Reached the ${freePdfSize}MB limit size.`);
+        return;
       }
-      // limit file size
       if (hasActiveMembership && file.size >= proPdfSize * 10 ** 6) {
-        return toast.error(`Reached the ${proPdfSize}MB limit size.`);
+        toast.error(`Reached the ${proPdfSize}MB limit size.`);
+        return;
       }
+
+      // Start upload immediately
+      const fileIdToUpload = nanoid();
+      const storageRef = ref(storage, `/users/${user.id}/files/${fileIdToUpload}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
+
+      // Start embedding generation in parallel with upload
+      let embeddingPromise: Promise<any> | null = null;
+
       uploadTask.on(
         "state_changed",
         (snapshot) => {
-          const progress =
-            Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          const progress = Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           setProgress(progress);
           setStatus(StatusText.UPLOADING);
+          
+          // Start embedding generation when upload is almost complete
+          if (progress > 90 && !embeddingPromise) {
+            embeddingPromise = getDownloadURL(uploadTask.snapshot.ref).then(url =>
+              axios.post("/api/generateEmbeddings", {
+                type: "pdf",
+                url
+              })
+            );
+          }
         },
         (e) => {
           toast.error("Error uploading file");
           console.log(e);
         },
         async () => {
-          // Upload completed successfully
           setStatus(StatusText.UPLOADED);
           const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+          
+          // Update node with file info immediately
           updateNode({
             id: nodeId,
-            type: "pdfNode",
+            type: "pdfNode", 
             data: {
               url: downloadUrl,
               name: file.name,
@@ -71,15 +86,17 @@ function useUpload() {
             },
           });
 
-          setStatus(StatusText.GENERATING);
           try {
-            const embeddingResponse = await axios.post(
+            setStatus(StatusText.GENERATING);
+            // Use the already started embedding generation
+            const embeddingResponse = await (embeddingPromise || axios.post(
               "/api/generateEmbeddings",
               {
                 type: "pdf",
                 url: downloadUrl,
-              },
-            );
+              }
+            ));
+
             updateNode({
               id: nodeId,
               type: "pdfNode",
@@ -91,11 +108,12 @@ function useUpload() {
             console.log(error);
             toast.error("Failed to generate embedding");
           }
-        },
+        }
       );
     },
-    [hasActiveMembership, updateNode, user],
+    [hasActiveMembership, updateNode, user]
   );
+
   return { progress, status, handleUpload };
 }
 

@@ -26,7 +26,6 @@ import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { Chat, Model } from "../../../../typing";
 
-
 type RequestBody = {
   messages: Message[];
   boardId: string;
@@ -52,14 +51,9 @@ Helpful Answer:`;
 
 const vectorStoreCache: Record<string, UpstashVectorStore> = {};
 
-const llm = new ChatMistralAI({
-  model: "mistral-large-latest",
-  maxTokens: 1024,
-});
-
-// I will add more config if I need in future
 const llmConfig = {
   temperature: 0.3,
+  maxTokens: 1024,
 };
 
 const getLLM = (model: Model) =>
@@ -72,7 +66,6 @@ const getLLM = (model: Model) =>
       })
     : new ChatMistralAI({
         model: "mistral-large-latest",
-        maxTokens: 1024,
         ...llmConfig,
       });
 
@@ -124,7 +117,11 @@ const addMessageToDB = async (
     });
 };
 
-const getVectorStore = async (namespace: string, url: string, type: LoaderType) => {
+const getVectorStore = async (
+  namespace: string,
+  url: string,
+  type: LoaderType
+) => {
   if (vectorStoreCache[namespace]) return vectorStoreCache[namespace];
 
   let vectorStore;
@@ -134,12 +131,17 @@ const getVectorStore = async (namespace: string, url: string, type: LoaderType) 
       namespace,
     });
   } else {
-    const loader = await getLoader({ url, type });
+    const [loader, textSplitter] = await Promise.all([
+      getLoader({ url, type }),
+      Promise.resolve(
+        new RecursiveCharacterTextSplitter({
+          chunkOverlap: 200,
+          chunkSize: 1000,
+        })
+      ),
+    ]);
+
     const docs = await loader.load();
-    const textSplitter = new RecursiveCharacterTextSplitter({
-      chunkOverlap: 200,
-      chunkSize: 1000,
-    });
     const splits = await textSplitter.splitDocuments(docs);
     vectorStore = new UpstashVectorStore(embeddings, { namespace, index });
     await vectorStore.addDocuments(splits);
@@ -150,8 +152,8 @@ const getVectorStore = async (namespace: string, url: string, type: LoaderType) 
 
 const createContext = (knowledgeBase: AppNode[]) => {
   let rawContext = "";
-  // First knowledgebase with namespace
   let firstKbWithNamespace: AppNode | null = null;
+
   knowledgeBase.forEach((kb) => {
     // @ts-ignore
     if (kb?.data.namespace && !firstKbWithNamespace) {
@@ -164,84 +166,103 @@ const createContext = (knowledgeBase: AppNode[]) => {
   return { rawContext, firstKbWithNamespace };
 };
 
+const setupChain = async (model: Model) => {
+  const customRagPrompt = PromptTemplate.fromTemplate(customTemplate);
+  return createStuffDocumentsChain({
+    llm: getLLM(model),
+    prompt: customRagPrompt,
+    outputParser: new HttpResponseOutputParser(),
+  });
+};
+
+const handleStreamResponse = async (
+  chain: any,
+  question: string,
+  context: Document[],
+  messages: Message[]
+) => {
+  const constructedMessages = messages.map((message) =>
+    message.role === "user"
+      ? new HumanMessage(message.content)
+      : new AIMessage(message.content)
+  );
+
+  const stream = await chain.stream({
+    question,
+    context,
+    history: constructedMessages,
+  });
+
+  return new StreamingTextResponse(
+    stream.pipeThrough(createStreamDataTransformer())
+  );
+};
+
 export const POST = async (req: NextRequest) => {
   try {
     const requestBody = (await req.json()) as RequestBody;
     const { userId } = auth();
     const { messages, knowledgeBase, boardId, nodeId, currentChat, model } =
       requestBody;
-      console.log("got the model", model.id)
 
     if (!userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     const question = messages[messages.length - 1].content;
-    if (!currentChat?.title) {
-      await updateChatTitle(
+
+    // Parallel operations
+    const [chain, contextData] = await Promise.all([
+      setupChain(model),
+      createContext(knowledgeBase),
+      !currentChat?.title &&
+        updateChatTitle(
+          userId,
+          boardId,
+          nodeId,
+          currentChat?.id as string,
+          question
+        ),
+      addMessageToDB(
         userId,
         boardId,
         nodeId,
         currentChat?.id as string,
+        "user",
         question
-      );
-    }
+      ),
+    ]);
 
-    const { rawContext, firstKbWithNamespace } = createContext(knowledgeBase);
-    const constructedMessages = messages.map((message) =>
-      message.role === "user"
-        ? new HumanMessage(message.content)
-        : new AIMessage(message.content)
-    );
+    const { rawContext, firstKbWithNamespace } = contextData;
 
-    const customRagPrompt = PromptTemplate.fromTemplate(customTemplate);
-    const customRagChain = await createStuffDocumentsChain({
-      llm: getLLM(model),
-      prompt: customRagPrompt,
-      outputParser: new HttpResponseOutputParser(),
-    });
-
-    await addMessageToDB(
-      userId,
-      boardId,
-      nodeId,
-      currentChat?.id as string,
-      "user",
-      question
-    );
     // @ts-ignore
     if (!firstKbWithNamespace || !firstKbWithNamespace?.data?.namespace) {
-      const stream = await customRagChain.stream({
+      return handleStreamResponse(
+        chain,
         question,
-        context: [new Document({ pageContent: rawContext })],
-        history: constructedMessages,
-      });
-
-      return new StreamingTextResponse(
-        stream.pipeThrough(createStreamDataTransformer())
+        [new Document({ pageContent: rawContext })],
+        messages
       );
     }
 
     // @ts-ignore
-    const namespace = firstKbWithNamespace.data.namespace;
     const vectorStore = await getVectorStore(
-      namespace,
-    // @ts-ignore
+      // @ts-ignore
+      firstKbWithNamespace.data.namespace,
+      // @ts-ignore
       firstKbWithNamespace.data.url,
-    // @ts-ignore
+      // @ts-ignore
       firstKbWithNamespace.data.type
     );
+
     const retriever = vectorStore.asRetriever();
+    const retrievedContext = await retriever.invoke(question);
 
-    const context = await retriever.invoke(question);
-    const stream = await customRagChain.stream({
+    return handleStreamResponse(
+      chain,
       question,
-      context: [...context, new Document({ pageContent: rawContext })],
-      history: constructedMessages,
-    });
-
-    return new StreamingTextResponse(
-      stream.pipeThrough(createStreamDataTransformer())
+      [...retrievedContext, new Document({ pageContent: rawContext })],
+      messages
     );
   } catch (error: any) {
     console.error(error);

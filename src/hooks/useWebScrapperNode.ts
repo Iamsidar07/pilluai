@@ -14,7 +14,14 @@ const useWebScrapperNode = (nodeId: string) => {
   const [isPending, startTransition] = useTransition();
 
   const updateWebScrapperNode = useCallback(
-    (data: {}) => {
+    (data: Partial<{
+      url: string;
+      title: string;
+      screenshotUrl: string;
+      text: string;
+      metadata: string;
+      namespace: string;
+    }>) => {
       updateNode({
         id: nodeId,
         type: "webScrapperNode",
@@ -27,34 +34,51 @@ const useWebScrapperNode = (nodeId: string) => {
   const handleAddWebscrapperNode = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (isPending) return;
-      if (!isValidURL(url)) {
-        toast.error("Please enter a valid url");
+      
+      if (isPending) {
+        toast.info("Please wait while processing previous request");
         return;
       }
+
+      if (!isValidURL(url)) {
+        toast.error("Please enter a valid URL");
+        return;
+      }
+
       startTransition(async () => {
         try {
+          // First scrape the website
           const scrapedResponse = await axios.post("/api/scrape", { url });
+          const { title, imageURL: screenshotUrl, content } = scrapedResponse.data;
+
+          // Update node with scraped data first for better UX
           updateWebScrapperNode({
             url,
-            title: scrapedResponse.data.title,
-            screenshotUrl: scrapedResponse.data.imageURL,
-            text: scrapedResponse.data.content,
-            metadata: `This is a Website. Title: ${scrapedResponse.data.title},Type: webScrapperNode, URL: ${url},`,
+            title,
+            screenshotUrl,
+            text: content,
+            metadata: `This is a Website. Title: ${title}, Type: webScrapperNode, URL: ${url}`,
           });
-          const embeddingResponse = await axios.post(
-            "/api/generateEmbeddings",
-            {
-              url,
-              type: "website",
-            },
-          );
+
+          // Then generate embeddings
+          const embeddingResponse = await axios.post("/api/generateEmbeddings", {
+            url,
+            type: "website",
+          });
+
+          // Update with namespace
           updateWebScrapperNode({
             namespace: embeddingResponse.data?.namespace,
           });
-        } catch (error: any) {
-          console.log("error:", error);
-          toast.error("Something went wrong");
+
+          toast.success("Website scraped successfully");
+        } catch (error) {
+          console.error("Failed to scrape website:", error);
+          toast.error(
+            error instanceof Error 
+              ? error.message 
+              : "Failed to scrape website. Please try again."
+          );
         }
       });
     },

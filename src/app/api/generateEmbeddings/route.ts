@@ -16,20 +16,33 @@ export const POST = async (req: NextRequest) => {
   try {
     const { url, type } = await req.json();
     const namespace = type === "youtube" ? ytdl.getVideoID(url) : nanoid();
-    if (await isNamespaceExists(namespace, index)) {
+
+    // Check namespace existence and prepare loader in parallel
+    const [namespaceExists, loader] = await Promise.all([
+      isNamespaceExists(namespace, index),
+      getLoader({ url, type })
+    ]);
+
+    if (namespaceExists) {
       return NextResponse.json({ namespace }, { status: 200 });
     }
-    const loader = await getLoader({ url, type });
-    const docs = await loader.load();
+
+    // Load docs and prepare text splitter in parallel
     const textSplitter = new RecursiveCharacterTextSplitter({
       chunkOverlap: 200,
       chunkSize: 1000,
     });
-    const splits = await textSplitter.splitDocuments(docs);
-    const vectorStore = new UpstashVectorStore(embeddings, {
-      namespace,
-      index,
-    });
+    const docs = await loader.load();
+
+    // Split documents and initialize vector store in parallel
+    const [splits, vectorStore] = await Promise.all([
+      textSplitter.splitDocuments(docs),
+      Promise.resolve(new UpstashVectorStore(embeddings, {
+        namespace,
+        index,
+      }))
+    ]);
+
     await vectorStore.addDocuments(splits);
 
     return NextResponse.json({ namespace }, { status: 201 });

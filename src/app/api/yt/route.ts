@@ -12,9 +12,16 @@ export const POST = async (req: NextRequest) => {
         status: 400,
       });
     }
-    const { videoDetails } = await ytdl.getBasicInfo(url);
-    const rawTransciption = await YoutubeTranscript.fetchTranscript(url);
+
+    // Fetch video details and transcript in parallel
+    const [{ videoDetails }, rawTransciption] = await Promise.all([
+      ytdl.getBasicInfo(url),
+      YoutubeTranscript.fetchTranscript(url)
+    ]);
+
+    // Process transcript
     const transcription = rawTransciption.map((t) => t.text).join("\n");
+
     return NextResponse.json(
       {
         videoDetails,

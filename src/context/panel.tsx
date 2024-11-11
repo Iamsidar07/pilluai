@@ -1,7 +1,6 @@
 "use client";
 import { AppNode } from "@/components/nodes";
 import { db } from "@/firebase";
-import { NODE_LIMITS } from "@/lib/config";
 import { debounce } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import {
@@ -18,7 +17,7 @@ import {
 } from "@xyflow/react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useParams } from "next/navigation";
-import React, { useCallback, useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 interface IPanelContext {
@@ -72,7 +71,6 @@ const debouncedSaveNodes = debounce(
     } catch (e) {
       console.log(e);
       toast.error("Failed to save nodes");
-      return;
     }
   },
   500,
@@ -81,13 +79,12 @@ const debouncedSaveNodes = debounce(
 const debouncedSaveEdges = debounce(
   async (userId: string, boardId: string, edges: Edge[]) => {
     if (!boardId || !edges || edges.length === 0 || !userId) return;
-    const boardRef = doc(db, `users/${userId}/boards`, boardId as string);
+    const boardRef = doc(db, `users/${userId}/boards`, boardId);
     try {
       await updateDoc(boardRef, { edges });
     } catch (e) {
       console.log(e);
       toast.error("Failed to save edges");
-      return;
     }
   },
   500,
@@ -101,83 +98,76 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
 
   useEffect(() => {
-    if (!user || !boardId) return;
-    const getBoard = async (userId: string, boardId: string) => {
+    if (!user?.id || !boardId) return;
+    
+    let isMounted = true;
+    const getBoard = async () => {
       try {
-        const docRef = doc(db, `users/${userId}/boards`, boardId);
+        const docRef = doc(db, `users/${user.id}/boards`, boardId);
         const docSnap = await getDoc(docRef);
         const data = docSnap.data();
-        setNodes(data?.nodes);
-        setEdges(data?.edges);
+        if (isMounted) {
+          setNodes(data?.nodes || []);
+          setEdges(data?.edges || []);
+        }
       } catch (error) {
-        toast.error("Please check your network connection.");
         console.log("error while getting docs: ", error);
+        toast.error("Please check your network connection.");
       }
     };
-    getBoard(user?.id, boardId);
-  }, [user, boardId, setNodes, setEdges]);
+    getBoard();
+    return () => { isMounted = false };
+  }, [user?.id, boardId, setNodes, setEdges]);
 
   const saveEdges = useCallback(
-    // @ts-ignore
-    async (edges) => {
-      console.log("saveEdges");
-      if (!user) return;
+    async (edges: Edge[]) => {
+      if (!user?.id || !edges.length) return;
       try {
-        const boardRef = doc(db, `users/${user?.id}/boards`, boardId as string);
-        updateDoc(boardRef, {
-          edges: edges,
-        });
+        const boardRef = doc(db, `users/${user.id}/boards`, boardId);
+        await updateDoc(boardRef, { edges });
       } catch (e) {
-        toast.error("Please check your network connection.");
         console.log(e);
+        toast.error("Please check your network connection.");
       }
     },
-    [boardId, user],
+    [boardId, user?.id],
   );
 
-  const onConnect: OnConnect = useCallback(
+  const onConnect = useCallback<OnConnect>(
     (connection) => {
-      console.log("onConnect", connection);
       if (!connection.source || !connection.target) return;
-      console.log("Saving...");
+      
       const edge = {
         ...connection,
         animated: true,
         type: "customEdge",
         markerEnd: { type: MarkerType.ArrowClosed },
       };
-      setEdges((edges) => addEdge(edge, edges));
-      const saveEdgesDebounced = debounce(
-        () => saveEdges([...edges, edge]),
-        1000,
-      );
-      saveEdgesDebounced();
+      
+      setEdges(edges => {
+        const newEdges = addEdge(edge, edges);
+        debounce(() => saveEdges(newEdges), 1000)();
+        return newEdges;
+      });
     },
     [saveEdges, setEdges],
   );
 
   const addNode = useCallback(
     (node: AppNode) => {
-      setNodes((nds) => [...nds, node]);
+      setNodes(nds => [...nds, node]);
     },
     [setNodes],
   );
 
   const updateNode = useCallback(
     ({ id, data = {}, type }: { id: string; data: any; type: string }) => {
-      setNodes((nds) =>
-        nds.map((node) => {
-          if (node.id === id && node.type === type) {
-            return {
-              ...node,
-              data: {
-                ...node.data,
-                ...data,
-              },
-            };
-          }
-          return node;
-        }),
+      setNodes(nds => 
+        nds.map(node => 
+          node.id === id && node.type === type
+            ? { ...node, data: { ...node.data, ...data } }
+            : node
+        )
       );
     },
     [setNodes],
@@ -186,40 +176,56 @@ const PanelContextProvider = ({ children }: { children: React.ReactNode }) => {
   const handleNodeChange = useCallback(
     (changes: NodeChange<AppNode>[]) => {
       onNodesChange(changes);
-      debouncedSaveNodes(user?.id as string, boardId, nodes);
+      if (user?.id) {
+        debouncedSaveNodes(user.id, boardId, nodes);
+      }
     },
     [onNodesChange, user?.id, boardId, nodes],
   );
+
   const handleEdgeChange = useCallback(
     (changes: EdgeChange<Edge>[]) => {
       onEdgesChange(changes);
-      debouncedSaveEdges(user?.id as string, boardId, nodes);
+      if (user?.id) {
+        debouncedSaveEdges(user.id, boardId, nodes);
+      }
     },
     [onEdgesChange, user?.id, boardId, nodes],
   );
+
+  const contextValue = useMemo(() => ({
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    onEdgesChange,
+    onNodesChange,
+    onConnect,
+    addNode,
+    updateNode,
+    handleNodeChange,
+    handleEdgeChange,
+  }), [
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    onEdgesChange,
+    onNodesChange,
+    onConnect,
+    addNode,
+    updateNode,
+    handleNodeChange,
+    handleEdgeChange,
+  ]);
+
   return (
-    <PanelContext.Provider
-      value={{
-        nodes,
-        edges,
-        setNodes,
-        setEdges,
-        onEdgesChange,
-        onNodesChange,
-        onConnect,
-        addNode,
-        updateNode,
-        handleNodeChange,
-        handleEdgeChange,
-      }}
-    >
+    <PanelContext.Provider value={contextValue}>
       {children}
     </PanelContext.Provider>
   );
 };
 
-export const usePanel = () => {
-  return useContext(PanelContext);
-};
+export const usePanel = () => useContext(PanelContext);
 
 export default PanelContextProvider;

@@ -3,6 +3,18 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import Provider from "@/components/Provider";
+import localFont from "next/font/local";
+
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  weight: "100 900",
+});
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+  weight: "100 900",
+});
 
 export const metadata: Metadata = {
   title: "PilluAI",
@@ -42,7 +54,7 @@ export default function RootLayout({
   return (
     <Provider>
       <html lang="en" className="light ">
-        <body className={`flex flex-col antialiased`}>
+        <body className={`${geistSans.variable} ${geistMono.variable} flex flex-col antialiased font-[family-name:var(--font-geist-sans)]`}>
           <Navbar />
           <div className="flex-1">{children}</div>
           <Toaster position="top-center" />

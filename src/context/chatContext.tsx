@@ -1,7 +1,7 @@
 import { db } from "@/firebase";
 import { useUser } from "@clerk/nextjs";
 import { NodeProps } from "@xyflow/react";
-import { useChat } from "ai/react";
+import { Message, useChat } from "ai/react";
 import { addDoc, collection } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import React, {
@@ -9,6 +9,7 @@ import React, {
     useContext,
     useEffect,
     useRef,
+    useMemo,
     useState,
 } from "react";
 import { toast } from "sonner";
@@ -60,6 +61,27 @@ const ChatContextProvider = ({ children, nodeProps }: Props) => {
     id: "mistral",
     name: "Mistral AI",
   });
+
+  const chatConfig = useMemo(() => ({
+    async onResponse() {
+      setIsAIThinking(false);
+    },
+    onError() {
+      toast.error("Something went wrong");
+      setIsAIThinking(false);
+    },
+    async onFinish(message: Message) {
+      if (!user || !currentChatRef.current?.id) return;
+      await addDoc(
+        collection(
+          db,
+          `users/${user.id}/boards/${boardId}/chatNodes/${nodeProps.id}/chats/${currentChatRef.current.id}/messages`
+        ),
+        message
+      );
+    },
+  }), [user, boardId, nodeProps.id]);
+
   const {
     handleInputChange,
     input,
@@ -68,56 +90,49 @@ const ChatContextProvider = ({ children, nodeProps }: Props) => {
     messages,
     setMessages,
     isLoading,
-  } = useChat({
-    async onResponse(res) {
-      setIsAIThinking(false);
-      console.log("currentChat", currentChatRef.current);
-    },
-    onError(err) {
-      console.log("error while chat:", err);
-      toast.error("Something went wrong");
-      setIsAIThinking(false);
-    },
-    async onFinish(message) {
-      if (!user) return;
-      console.log("message:", message, currentChatRef.current);
-      await addDoc(
-        collection(
-          db,
-          `users/${user.id}/boards/${boardId}/chatNodes/${nodeProps.id}/chats/${currentChatRef.current?.id}/messages`
-        ),
-        message
-      );
-    },
-  });
+  } = useChat(chatConfig);
+
   useEffect(() => {
     currentChatRef.current = currentChat;
   }, [currentChat]);
 
+  const contextValue = useMemo(() => ({
+    boardId,
+    nodeId: nodeProps.id,
+    chats,
+    setChats,
+    setInput,
+    setMessages,
+    currentChat,
+    setCurrentChat,
+    setHasFetchedMessages,
+    isAIThinking,
+    hasFetchedMessages,
+    messages,
+    setModel,
+    model,
+    handleInputChange,
+    handleSubmit,
+    input,
+    isLoading,
+    setIsAIThinking,
+  }), [
+    boardId,
+    nodeProps.id,
+    chats,
+    currentChat,
+    isAIThinking,
+    hasFetchedMessages,
+    messages,
+    model,
+    handleInputChange,
+    handleSubmit,
+    input,
+    isLoading
+  ]);
+
   return (
-    <ChatContext.Provider
-      value={{
-        boardId,
-        nodeId: nodeProps.id,
-        chats,
-        setChats,
-        setInput,
-        setMessages,
-        currentChat,
-        setCurrentChat,
-        setHasFetchedMessages,
-        isAIThinking,
-        hasFetchedMessages,
-        messages,
-        setModel,
-        model,
-        handleInputChange,
-        handleSubmit,
-        input,
-        isLoading,
-        setIsAIThinking,
-      }}
-    >
+    <ChatContext.Provider value={contextValue}>
       {children}
     </ChatContext.Provider>
   );
