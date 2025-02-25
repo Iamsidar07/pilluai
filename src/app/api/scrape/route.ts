@@ -37,7 +37,7 @@ export const POST = async (req: NextRequest) => {
     const [buffer, title, content] = await Promise.all([
       page.screenshot({
         type: "png",
-        fullPage: false,
+        fullPage: true, // Changed to true to capture full page
       }),
       page.title(),
       page.evaluate(() => document.body.innerText)

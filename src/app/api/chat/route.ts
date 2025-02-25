@@ -25,6 +25,7 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { Chat, Model } from "../../../../typing";
+import axios from "axios";
 
 type RequestBody = {
   messages: Message[];
@@ -38,36 +39,49 @@ type RequestBody = {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const customTemplate = `Use the following pieces of context to answer the question at the end.
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
-Keep the answer as concise as possible.
-Always say "thanks for asking!" at the end of the answer. Use emojis whenever needed.
+const customTemplate = `You are a helpful, knowledgeable assistant with expertise in analyzing and explaining information.
 
+Use the following context to answer the user's question:
 {context}
 
 Question: {question}
+
+Guidelines for your response:
+1. Answer accurately based on the provided context
+2. If the information isn't in the context, acknowledge this clearly rather than guessing
+3. Provide concise but complete answers with relevant details
+4. Use a friendly, conversational tone
+5. Structure complex information with bullet points or numbered lists when appropriate
+6. Include specific examples from the context when relevant
+7. End your response with a brief, friendly closing phrase and an appropriate emoji
+8. If the user asks for code or technical explanations, format them clearly
 
 Helpful Answer:`;
 
 const vectorStoreCache: Record<string, UpstashVectorStore> = {};
 
 const llmConfig = {
-  temperature: 0.3,
-  maxTokens: 1024,
+  temperature: 0,
+  // maxTokens: 1024,
 };
 
-const getLLM = (model: Model) =>
-  model.id === "google-generative-ai"
-    ? new ChatGoogleGenerativeAI({
-        model: "gemini-1.5-flash",
-        maxOutputTokens: 1024,
-        apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-        ...llmConfig,
-      })
-    : new ChatMistralAI({
-        model: "mistral-large-latest",
-        ...llmConfig,
-      });
+const getLLM = (model: Model) => {
+  if (model.id === "google-generative-ai") {
+    // For Google Generative AI, we can include images in the messages
+    return new ChatGoogleGenerativeAI({
+      model: "gemini-1.5-flash",
+      // maxOutputTokens: 1024,
+      apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+      ...llmConfig,
+    });
+  } else {
+    // For Mistral, we don't include images
+    return new ChatMistralAI({
+      model: "mistral-large-latest",
+      ...llmConfig,
+    });
+  }
+};
 
 const updateChatTitle = async (
   userId: string,
@@ -153,6 +167,7 @@ const getVectorStore = async (
 const createContext = (knowledgeBase: AppNode[]) => {
   let rawContext = "";
   let firstKbWithNamespace: AppNode | null = null;
+  let imageUrls: string[] = [];
 
   knowledgeBase.forEach((kb) => {
     // @ts-ignore
@@ -162,8 +177,20 @@ const createContext = (knowledgeBase: AppNode[]) => {
       // @ts-ignore
       rawContext += `${kb.data?.metadata && `metadata: ${kb.data.metadata}`} \n\n context: ${kb.data?.text} \n\n`;
     }
+
+    // Collect image URLs for multimodal input
+    // @ts-ignore
+    if (kb.data?.type === "webScrapperNode" && kb.data?.screenshotUrl) {
+      // @ts-ignore
+      imageUrls.push(kb.data.screenshotUrl);
+    }
+    // @ts-ignore
+    else if (kb.data?.type === "imageNode" && kb.data?.url) {
+      // @ts-ignore
+      imageUrls.push(kb.data.url);
+    }
   });
-  return { rawContext, firstKbWithNamespace };
+  return { rawContext, firstKbWithNamespace, imageUrls };
 };
 
 const setupChain = async (model: Model) => {
@@ -179,13 +206,43 @@ const handleStreamResponse = async (
   chain: any,
   question: string,
   context: Document[],
-  messages: Message[]
+  messages: Message[],
+  model: Model,
+  imageUrls: string[] = []
 ) => {
+  // Create base messages from history
   const constructedMessages = messages.map((message) =>
     message.role === "user"
       ? new HumanMessage(message.content)
       : new AIMessage(message.content)
   );
+
+  // For Google Generative AI with images
+  if (model.id === "google-generative-ai" && imageUrls.length > 0) {
+    // Create a multimodal message with both text and images
+    const lastUserMessage = messages[messages.length - 1];
+
+    // Replace the last user message with one that includes images
+    if (lastUserMessage.role === "user") {
+      const multimodalContent = [
+        {
+          type: "text",
+          text: lastUserMessage.content,
+        },
+        ...imageUrls.map((url) => ({
+          type: "image_url",
+          image_url: {
+            url: url,
+          },
+        })),
+      ];
+
+      // Replace the last message with our multimodal message
+      constructedMessages[constructedMessages.length - 1] = new HumanMessage({
+        content: multimodalContent,
+      });
+    }
+  }
 
   const stream = await chain.stream({
     question,
@@ -204,7 +261,6 @@ export const POST = async (req: NextRequest) => {
     const { userId } = auth();
     const { messages, knowledgeBase, boardId, nodeId, currentChat, model } =
       requestBody;
-
     if (!userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
@@ -212,28 +268,30 @@ export const POST = async (req: NextRequest) => {
     const question = messages[messages.length - 1].content;
 
     // Parallel operations
-    const [chain, contextData] = await Promise.all([
-      setupChain(model),
-      createContext(knowledgeBase),
-      !currentChat?.title &&
-        updateChatTitle(
-          userId,
-          boardId,
-          nodeId,
-          currentChat?.id as string,
-          question
-        ),
-      addMessageToDB(
+    const contextData = createContext(knowledgeBase);
+    const { rawContext, firstKbWithNamespace, imageUrls } = contextData;
+
+    const chain = await setupChain(model);
+
+    // Update chat title and add message to DB
+    if (!currentChat?.title) {
+      await updateChatTitle(
         userId,
         boardId,
         nodeId,
         currentChat?.id as string,
-        "user",
         question
-      ),
-    ]);
+      );
+    }
 
-    const { rawContext, firstKbWithNamespace } = contextData;
+    await addMessageToDB(
+      userId,
+      boardId,
+      nodeId,
+      currentChat?.id as string,
+      "user",
+      question
+    );
 
     // @ts-ignore
     if (!firstKbWithNamespace || !firstKbWithNamespace?.data?.namespace) {
@@ -241,7 +299,9 @@ export const POST = async (req: NextRequest) => {
         chain,
         question,
         [new Document({ pageContent: rawContext })],
-        messages
+        messages,
+        model,
+        imageUrls
       );
     }
 
@@ -262,7 +322,9 @@ export const POST = async (req: NextRequest) => {
       chain,
       question,
       [...retrievedContext, new Document({ pageContent: rawContext })],
-      messages
+      messages,
+      model,
+      imageUrls
     );
   } catch (error: any) {
     console.error(error);
